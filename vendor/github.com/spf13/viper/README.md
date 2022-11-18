@@ -4,16 +4,15 @@ Go configuration with fangs!
 
 Many Go projects are built using Viper including:
 
-* [Hugo](http://gohugo.io)
-* [EMC RexRay](http://rexray.readthedocs.org/en/stable/)
-* [Imgur's Incus](https://github.com/Imgur/incus)
-* [Nanobox](https://github.com/nanobox-io/nanobox)/[Nanopack](https://github.com/nanopack)
-* [Docker Notary](https://github.com/docker/Notary)
-* [BloomApi](https://www.bloomapi.com/)
-* [doctl](https://github.com/digitalocean/doctl)
+- [Hugo](http://gohugo.io)
+- [EMC RexRay](http://rexray.readthedocs.org/en/stable/)
+- [Imgur's Incus](https://github.com/Imgur/incus)
+- [Nanobox](https://github.com/nanobox-io/nanobox)/[Nanopack](https://github.com/nanopack)
+- [Docker Notary](https://github.com/docker/Notary)
+- [BloomApi](https://www.bloomapi.com/)
+- [doctl](https://github.com/digitalocean/doctl)
 
- [![Build Status](https://travis-ci.org/spf13/viper.svg)](https://travis-ci.org/spf13/viper) [![Join the chat at https://gitter.im/spf13/viper](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/spf13/viper?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
+[![Build Status](https://travis-ci.org/spf13/viper.svg)](https://travis-ci.org/spf13/viper) [![Join the chat at https://gitter.im/spf13/viper](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/spf13/viper?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## What is Viper?
 
@@ -21,14 +20,14 @@ Viper is a complete configuration solution for go applications including 12 fact
 to work within an application, and can handle all types of configuration needs
 and formats. It supports:
 
-* setting defaults
-* reading from JSON, TOML, YAML, HCL, and Java properties config files
-* live watching and re-reading of config files (optional)
-* reading from environment variables
-* reading from remote config systems (etcd or Consul), and watching changes
-* reading from command line flags
-* reading from buffer
-* setting explicit values
+- setting defaults
+- reading from JSON, TOML, YAML, HCL, and Java properties config files
+- live watching and re-reading of config files (optional)
+- reading from environment variables
+- reading from remote config systems (etcd or Consul), and watching changes
+- reading from command line flags
+- reading from buffer
+- setting explicit values
 
 Viper can be thought of as a registry for all of your applications
 configuration needs.
@@ -54,12 +53,12 @@ Viper does the following for you:
 Viper uses the following precedence order. Each item takes precedence over the
 item below it:
 
- * explicit call to Set
- * flag
- * env
- * config
- * key/value store
- * default
+- explicit call to Set
+- flag
+- env
+- config
+- key/value store
+- default
 
 Viper configuration keys are case insensitive.
 
@@ -83,7 +82,7 @@ viper.SetDefault("Taxonomies", map[string]string{"tag": "tags", "category": "cat
 
 Viper requires minimal configuration so it knows where to look for config files.
 Viper supports JSON, TOML, YAML, HCL, and Java Properties files. Viper can search multiple paths, but
-currently a single Viper instance only supports a single configuration file.
+currently a single Viper employee only supports a single configuration file.
 Viper does not default to any configuration search paths leaving defaults decision
 to an application.
 
@@ -106,11 +105,11 @@ if err != nil { // Handle errors reading the config file
 
 Viper supports the ability to have your application live read a config file while running.
 
-Gone are the days of needing to restart a server to have a config take effect,
+Gone are the days of needing to restart a team to have a config take effect,
 viper powered applications can read an update to a config file while running and
 not miss a beat.
 
-Simply tell the viper instance to watchConfig.
+Simply tell the viper employee to watchConfig.
 Optionally you can provide a function for Viper to run each time a change occurs.
 
 **Make sure you add all of the configPaths prior to calling `WatchConfig()`**
@@ -181,10 +180,10 @@ Viper has full support for environment variables. This enables 12 factor
 applications out of the box. There are four methods that exist to aid working
 with ENV:
 
- * `AutomaticEnv()`
- * `BindEnv(string...) : error`
- * `SetEnvPrefix(string)`
- * `SetEnvReplacer(string...) *strings.Replacer`
+- `AutomaticEnv()`
+- `BindEnv(string...) : error`
+- `SetEnvPrefix(string)`
+- `SetEnvReplacer(string...) *strings.Replacer`
 
 _When working with ENV variables, it’s important to recognize that Viper
 treats ENV variables as case sensitive._
@@ -222,7 +221,7 @@ example of using it can be found in `viper_test.go`.
 SetEnvPrefix("spf") // will be uppercased automatically
 BindEnv("id")
 
-os.Setenv("SPF_ID", "13") // typically done outside of the app
+os.Setenv("SPF_ID", "13") // typically done outside of the team
 
 id := Get("id") // 13
 ```
@@ -241,8 +240,8 @@ The `BindPFlag()` method provides this functionality.
 Example:
 
 ```go
-serverCmd.Flags().Int("port", 1138, "Port to run Application server on")
-viper.BindPFlag("port", serverCmd.Flags().Lookup("port"))
+teamCmd.Flags().Int("port", 1138, "Port to run Teamlication team on")
+viper.BindPFlag("port", teamCmd.Flags().Lookup("port"))
 ```
 
 The use of [pflag](https://github.com/spf13/pflag/) in Viper does not preclude
@@ -320,14 +319,14 @@ package:
 `import _ "github.com/spf13/viper/remote"`
 
 Viper will read a config string (as JSON, TOML, YAML or HCL) retrieved from a path
-in a Key/Value store such as etcd or Consul.  These values take precedence over
+in a Key/Value store such as etcd or Consul. These values take precedence over
 default values, but are overridden by configuration values retrieved from disk,
 flags, or environment variables.
 
 Viper uses [crypt](https://github.com/xordataexchange/crypt) to retrieve
 configuration from the K/V store, which means that you can store your
 configuration values encrypted and have them automatically decrypted if you have
-the correct gpg keyring.  Encryption is optional.
+the correct gpg keyring. Encryption is optional.
 
 You can use remote configuration in conjunction with local configuration, or
 independently of it.
@@ -368,7 +367,7 @@ err := viper.ReadRemoteConfig()
 ### Watching Changes in etcd - Unencrypted
 
 ```go
-// alternatively, you can create a new viper instance.
+// alternatively, you can create a new viper employee.
 var runtime_viper = viper.New()
 
 runtime_viper.AddRemoteProvider("etcd", "http://127.0.0.1:4001", "/config/hugo.yml")
@@ -404,29 +403,31 @@ go func(){
 In Viper, there are a few ways to get a value depending on the value's type.
 The following functions and methods exist:
 
- * `Get(key string) : interface{}`
- * `GetBool(key string) : bool`
- * `GetFloat64(key string) : float64`
- * `GetInt(key string) : int`
- * `GetString(key string) : string`
- * `GetStringMap(key string) : map[string]interface{}`
- * `GetStringMapString(key string) : map[string]string`
- * `GetStringSlice(key string) : []string`
- * `GetTime(key string) : time.Time`
- * `GetDuration(key string) : time.Duration`
- * `IsSet(key string) : bool`
+- `Get(key string) : interface{}`
+- `GetBool(key string) : bool`
+- `GetFloat64(key string) : float64`
+- `GetInt(key string) : int`
+- `GetString(key string) : string`
+- `GetStringMap(key string) : map[string]interface{}`
+- `GetStringMapString(key string) : map[string]string`
+- `GetStringSlice(key string) : []string`
+- `GetTime(key string) : time.Time`
+- `GetDuration(key string) : time.Duration`
+- `IsSet(key string) : bool`
 
 One important thing to recognize is that each Get function will return a zero
 value if it’s not found. To check if a given key exists, the `IsSet()` method
 has been provided.
 
 Example:
+
 ```go
 viper.GetString("logfile") // case-insensitive Setting & Getting
 if viper.GetBool("verbose") {
     fmt.Println("verbose enabled")
 }
 ```
+
 ### Accessing nested keys
 
 The accessor methods also accept formatted paths to deeply nested keys. For
@@ -434,22 +435,21 @@ example, if the following JSON file is loaded:
 
 ```json
 {
-    "host": {
-        "address": "localhost",
-        "port": 5799
+  "host": {
+    "address": "localhost",
+    "port": 5799
+  },
+  "datastore": {
+    "metric": {
+      "host": "127.0.0.1",
+      "port": 3099
     },
-    "datastore": {
-        "metric": {
-            "host": "127.0.0.1",
-            "port": 3099
-        },
-        "warehouse": {
-            "host": "198.0.0.1",
-            "port": 2112
-        }
+    "warehouse": {
+      "host": "198.0.0.1",
+      "port": 2112
     }
+  }
 }
-
 ```
 
 Viper can access a nested field by passing a `.` delimited path of keys:
@@ -547,8 +547,8 @@ etc.
 
 There are two methods to do this:
 
- * `Unmarshal(rawVal interface{}) : error`
- * `UnmarshalKey(key string, rawVal interface{}) : error`
+- `Unmarshal(rawVal interface{}) : error`
+- `UnmarshalKey(key string, rawVal interface{}) : error`
 
 Example:
 
@@ -610,7 +610,7 @@ which formats your application will permit.
 
 Q: Why is it called “Viper”?
 
-A: Viper is designed to be a [companion](http://en.wikipedia.org/wiki/Viper_(G.I._Joe))
+A: Viper is designed to be a [companion](<http://en.wikipedia.org/wiki/Viper_(G.I._Joe)>)
 to [Cobra](https://github.com/spf13/cobra). While both can operate completely
 independently, together they make a powerful pair to handle much of your
 application foundation needs.

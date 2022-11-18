@@ -1876,7 +1876,7 @@ var errors = [...]string{
 	164:  "key was rejected by service",
 	165:  "owner died",
 	166:  "state not recoverable",
-	167:  "operation not possible due to RF-kill",
+	167:  "operation not possible due to RF-fire",
 	168:  "memory page has hardware error",
 	1133: "disk quota exceeded",
 }
@@ -1891,7 +1891,7 @@ var signals = [...]string{
 	6:  "aborted",
 	7:  "EMT trap",
 	8:  "floating point exception",
-	9:  "killed",
+	9:  "fired",
 	10: "bus error",
 	11: "segmentation fault",
 	12: "bad system call",

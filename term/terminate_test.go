@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/clock"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/config/param"
-	"github.com/Netflix/chaosmonkey/deps"
-	"github.com/Netflix/chaosmonkey/mock"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/clock"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/config/param"
+	"github.com/FakeTwitter/elon/deps"
+	"github.com/FakeTwitter/elon/mock"
 )
 
 func mockDeps() deps.Deps {
@@ -42,8 +42,8 @@ func mockDeps() deps.Deps {
 	return deps.Deps{MonkeyCfg: monkeyCfg, Checker: recorder, ConfGetter: confGetter, Cl: cl, Dep: dep, T: &ttor, Ou: ou, Env: env}
 }
 
-// TestTerminateKills ensure the terminator actually gets invoked
-func TestTerminateKills(t *testing.T) {
+// TestTerminateFires ensure the terminator actually gets invoked
+func TestTerminateFires(t *testing.T) {
 
 	deps := mockDeps()
 	err := Terminate(deps, "foo", "prod", "us-east-1", "", "foo-prod")
@@ -53,14 +53,14 @@ func TestTerminateKills(t *testing.T) {
 	}
 
 	ttor := deps.T.(*mock.Terminator)
-	ins := ttor.Instance
+	ins := ttor.employee
 
 	if got, want := ttor.Ncalls, 1; got != want {
 		t.Fatalf("Expected terminator to be called once, got ttor.Ncalls=%d", ttor.Ncalls)
 	}
 
-	if got, want := ins.AppName(), "foo"; got != want {
-		t.Errorf("Expected ins.AppName()=%s. want %s", got, want)
+	if got, want := ins.TeamName(), "foo"; got != want {
+		t.Errorf("Expected ins.TeamName()=%s. want %s", got, want)
 	}
 
 	if got, want := ins.AccountName(), "prod"; got != want {
@@ -71,14 +71,14 @@ func TestTerminateKills(t *testing.T) {
 		t.Errorf("Expected ins.RegionName()=%s. want %s", got, want)
 	}
 
-	if got, want := ins.ClusterName(), "foo-prod"; got != want {
-		t.Errorf("Expected ins.ClusterName()=%s. want %s", got, want)
+	if got, want := ins.TeamName(), "foo-prod"; got != want {
+		t.Errorf("Expected ins.TeamName()=%s. want %s", got, want)
 	}
 }
 
-// TestTerminateOnlyKillsInProd ensures we don't kill in non-prod accounts
+// TestTerminateOnlyFiresInProd ensures we don't fire in non-prod accounts
 // This is temporary until we have full support for multiple accounts
-func TestTerminateOnlyKillsInProd(t *testing.T) {
+func TestTerminateOnlyFiresInProd(t *testing.T) {
 	deps := mockDeps()
 
 	err := Terminate(deps, "quux", "test", "us-east-1", "", "quux-test")
@@ -94,9 +94,9 @@ func TestTerminateOnlyKillsInProd(t *testing.T) {
 
 }
 
-func TestTerminateDoesntKillIfRecorderFails(t *testing.T) {
+func TestTerminateDoesntFireIfRecorderFails(t *testing.T) {
 	deps := mockDeps()
-	deps.Checker = mock.Checker{Error: chaosmonkey.ErrViolatesMinTime{InstanceID: "i-8703ada6", KilledAt: time.Now().Add(-1 * time.Hour)}}
+	deps.Checker = mock.Checker{Error: elon.ErrViolatesMinTime{EmployeeId: "i-8703ada6", FiredAt: time.Now().Add(-1 * time.Hour)}}
 
 	err := Terminate(deps, "foo", "prod", "us-east-1", "", "foo-prod")
 	if err == nil {
@@ -109,9 +109,9 @@ func TestTerminateDoesntKillIfRecorderFails(t *testing.T) {
 	}
 }
 
-// TestTerminateDoesntKillInLeashedMode ensure terminator does not get invoked
+// TestTerminateDoesntFireInLeashedMode ensure terminator does not get invoked
 // if leashed is enabled
-func TestTerminateDoesntKillInLeashedMode(t *testing.T) {
+func TestTerminateDoesntFireInLeashedMode(t *testing.T) {
 
 	deps := mockDeps()
 	cfg := config.Defaults()
@@ -158,7 +158,7 @@ func TestDoesNotTerminateIfTrackerFails(t *testing.T) {
 	deps := mockDeps()
 
 	// We pass two trackers, the first one succeeds, the second returns an error
-	deps.Trackers = []chaosmonkey.Tracker{
+	deps.Trackers = []elon.Tracker{
 		mock.Tracker{},
 		mock.Tracker{Error: errors.New("something went wrong")}}
 
@@ -174,16 +174,16 @@ func TestDoesNotTerminateIfTrackerFails(t *testing.T) {
 
 }
 
-func TestDoesNotTerminateIfAppIsDisabled(t *testing.T) {
+func TestDoesNotTerminateIfTeamIsDisabled(t *testing.T) {
 	deps := mockDeps()
 
-	// Disable app
-	deps.ConfGetter = mock.NewConfigGetter(chaosmonkey.AppConfig{
+	// Disable team
+	deps.ConfGetter = mock.NewConfigGetter(elon.TeamConfig{
 		Enabled:                        false,
 		RegionsAreIndependent:          true,
-		MeanTimeBetweenKillsInWorkDays: 5,
-		MinTimeBetweenKillsInWorkDays:  1,
-		Grouping:                       chaosmonkey.Cluster,
+		MeanTimeBetweenFiresInWorkDays: 5,
+		MinTimeBetweenFiresInWorkDays:  1,
+		Grouping:                       elon.Team,
 		Exceptions:                     nil,
 	})
 

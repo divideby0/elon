@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,25 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
-Chaos Monkey randomly terminates instances.
-*/
-package main
+package elon_test
 
 import (
-	"github.com/Netflix/chaosmonkey/command"
+	"testing"
 
-	// These are anonymous imported so that the related Get* methods (e.g.,
-	// GetDecryptor) are picked up.
-
-	_ "github.com/Netflix/chaosmonkey/constrainer"
-	_ "github.com/Netflix/chaosmonkey/decryptor"
-	_ "github.com/Netflix/chaosmonkey/env"
-	_ "github.com/Netflix/chaosmonkey/errorcounter"
-	_ "github.com/Netflix/chaosmonkey/outage"
-	_ "github.com/Netflix/chaosmonkey/tracker"
+	"github.com/FakeTwitter/elon"
 )
 
-func main() {
-	command.Execute()
+func TestExceptionMatches(t *testing.T) {
+	ex := elon.Exception{Account: "test", Stack: "*", Detail: "*", Region: "*"}
+
+	if !ex.Matches("test", "cl", "app-cl-test", "us-east-1") {
+		t.Error("Expected exception match")
+	}
 }

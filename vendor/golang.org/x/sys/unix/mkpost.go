@@ -53,7 +53,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Append this command to the header to show where the new file
+	// Teamend this command to the header to show where the new file
 	// came from.
 	re := regexp.MustCompile("(cgo -godefs [a-zA-Z0-9_]+\\.go.*)")
 	b = re.ReplaceAll(b, []byte("$1 | go run mkpost.go"))

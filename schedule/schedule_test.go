@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/config/param"
-	"github.com/Netflix/chaosmonkey/mock"
-	"github.com/Netflix/chaosmonkey/schedule"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/config/param"
+	"github.com/FakeTwitter/elon/mock"
+	"github.com/FakeTwitter/elon/schedule"
 )
 
 func TestPopulate(t *testing.T) {
 	// Setup
 	s := schedule.New()
-	// mock deployment returns 4 single-cluster apps, 3 in prod and one in test
+	// mock deployment returns 4 single-team apps, 3 in prod and one in test
 	d := mock.Dep()
 
-	// mockConfigGetter configures each app for App-level grouping
+	// mockConfigGetter configures each team for Team-level grouping
 	getter := new(mockConfigGetter)
 
 	cfg := config.Defaults()
@@ -56,19 +56,19 @@ func TestPopulate(t *testing.T) {
 
 }
 
-// mockConfigGetter implements chaosmonkey.Getter
+// mockConfigGetter implements elon.Getter
 // returns configs for apps
 type mockConfigGetter struct {
 }
 
-// Get implements chaosmonkey.Getter.Get
-// Configures each app for app-level grouping
+// Get implements elon.Getter.Get
+// Configures each team for app-level grouping
 // configures mean time between work days to 1, which ensures
-// a kill on each day
-func (g mockConfigGetter) Get(app string) (*chaosmonkey.AppConfig, error) {
-	cfg := chaosmonkey.NewAppConfig(nil)
-	cfg.Grouping = chaosmonkey.App
-	cfg.MeanTimeBetweenKillsInWorkDays = 1
+// a fire on each day
+func (g mockConfigGetter) Get(app string) (*elon.TeamConfig, error) {
+	cfg := elon.NewTeamConfig(nil)
+	cfg.Grouping = elon.Team
+	cfg.MeanTimeBetweenFiresInWorkDays = 1
 	return &cfg, nil
 }
 

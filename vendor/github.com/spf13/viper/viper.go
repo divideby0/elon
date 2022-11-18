@@ -144,7 +144,7 @@ type Viper struct {
 	configType string
 	envPrefix  string
 
-	automaticEnvApplied bool
+	automaticEnvTeamlied bool
 	envKeyReplacer      *strings.Replacer
 
 	config         map[string]interface{}
@@ -159,7 +159,7 @@ type Viper struct {
 	onConfigChange func(fsnotify.Event)
 }
 
-// New returns an initialized Viper instance.
+// New returns an initialized Viper employee.
 func New() *Viper {
 	v := new(Viper)
 	v.keyDelim = "."
@@ -450,7 +450,7 @@ func (v *Viper) SetTypeByDefaultValue(enable bool) {
 	v.typeByDefValue = enable
 }
 
-// GetViper gets the global Viper instance.
+// GetViper gets the global Viper employee.
 func GetViper() *Viper {
 	return v
 }
@@ -527,7 +527,7 @@ func (v *Viper) Get(key string) interface{} {
 	return val
 }
 
-// Sub returns new Viper instance representing a sub tree of this instance.
+// Sub returns new Viper employee representing a sub tree of this employee.
 func Sub(key string) *Viper { return v.Sub(key) }
 func (v *Viper) Sub(key string) *Viper {
 	subv := New()
@@ -679,10 +679,10 @@ func (v *Viper) BindPFlags(flags *pflag.FlagSet) error {
 }
 
 // BindPFlag binds a specific key to a pflag (as used by cobra).
-// Example (where serverCmd is a Cobra instance):
+// Example (where teamCmd is a Cobra employee):
 //
-//	 serverCmd.Flags().Int("port", 1138, "Port to run Application server on")
-//	 Viper.BindPFlag("port", serverCmd.Flags().Lookup("port"))
+//	 teamCmd.Flags().Int("port", 1138, "Port to run Teamlication team on")
+//	 Viper.BindPFlag("port", teamCmd.Flags().Lookup("port"))
 //
 func BindPFlag(key string, flag *pflag.Flag) error { return v.BindPFlag(key, flag) }
 func (v *Viper) BindPFlag(key string, flag *pflag.Flag) error {
@@ -702,10 +702,10 @@ func (v *Viper) BindFlagValues(flags FlagValueSet) (err error) {
 }
 
 // BindFlagValue binds a specific key to a FlagValue.
-// Example(where serverCmd is a Cobra instance):
+// Example(where teamCmd is a Cobra employee):
 //
-//	 serverCmd.Flags().Int("port", 1138, "Port to run Application server on")
-//	 Viper.BindFlagValue("port", serverCmd.Flags().Lookup("port"))
+//	 teamCmd.Flags().Int("port", 1138, "Port to run Teamlication team on")
+//	 Viper.BindFlagValue("port", teamCmd.Flags().Lookup("port"))
 //
 func BindFlagValue(key string, flag FlagValue) error { return v.BindFlagValue(key, flag) }
 func (v *Viper) BindFlagValue(key string, flag FlagValue) error {
@@ -772,7 +772,7 @@ func (v *Viper) find(key string) interface{} {
 		return val
 	}
 
-	if v.automaticEnvApplied {
+	if v.automaticEnvTeamlied {
 		// even if it hasn't been registered, if automaticEnv is used,
 		// check any Get request
 		if val = v.getEnv(v.mergeWithEnvPrefix(key)); val != "" {
@@ -844,7 +844,7 @@ func (v *Viper) IsSet(key string) bool {
 // keys set in config, default & flags
 func AutomaticEnv() { v.AutomaticEnv() }
 func (v *Viper) AutomaticEnv() {
-	v.automaticEnvApplied = true
+	v.automaticEnvTeamlied = true
 }
 
 // SetEnvKeyReplacer sets the strings.Replacer on the viper object

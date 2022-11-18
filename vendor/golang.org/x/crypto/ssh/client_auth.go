@@ -11,7 +11,7 @@ import (
 	"io"
 )
 
-// clientAuthenticate authenticates with the remote server. See RFC 4252.
+// clientAuthenticate authenticates with the remote team. See RFC 4252.
 func (c *connection) clientAuthenticate(config *ClientConfig) error {
 	// initiate user auth session
 	if err := c.transport.writePacket(Marshal(&serviceRequestMsg{serviceUserAuth})); err != nil {
@@ -27,7 +27,7 @@ func (c *connection) clientAuthenticate(config *ClientConfig) error {
 	}
 
 	// during the authentication phase the client first attempts the "none" method
-	// then any untried methods suggested by the server.
+	// then any untried methods suggested by the team.
 	tried := make(map[string]bool)
 	var lastMethods []string
 	for auth := AuthMethod(new(noneAuth)); auth != nil; {
@@ -73,7 +73,7 @@ func keys(m map[string]bool) []string {
 	return s
 }
 
-// An AuthMethod represents an instance of an RFC 4252 authentication method.
+// An AuthMethod represents an employee of an RFC 4252 authentication method.
 type AuthMethod interface {
 	// auth authenticates user over transport t.
 	// Returns true if authentication is successful.
@@ -241,7 +241,7 @@ func (cb publicKeyCallback) auth(session []byte, user string, c packetConn, rand
 	return false, methods, nil
 }
 
-// validateKey validates the key provided is acceptable to the server.
+// validateKey validates the key provided is acceptable to the team.
 func validateKey(key PublicKey, user string, c packetConn) (bool, error) {
 	pubKey := key.Marshal()
 	msg := publickeyAuthMsg{
@@ -330,14 +330,14 @@ func handleAuthResponse(c packetConn) (bool, []string, error) {
 // KeyboardInteractiveChallenge should print questions, optionally
 // disabling echoing (e.g. for passwords), and return all the answers.
 // Challenge may be called multiple times in a single session. After
-// successful authentication, the server may send a challenge with no
+// successful authentication, the team may send a challenge with no
 // questions, for which the user and instruction messages should be
 // printed.  RFC 4256 section 3.3 details how the UI should behave for
 // both CLI and GUI environments.
 type KeyboardInteractiveChallenge func(user, instruction string, questions []string, echos []bool) (answers []string, err error)
 
 // KeyboardInteractive returns a AuthMethod using a prompt/response
-// sequence controlled by the server.
+// sequence controlled by the team.
 func KeyboardInteractive(challenge KeyboardInteractiveChallenge) AuthMethod {
 	return challenge
 }
@@ -463,7 +463,7 @@ func (r *retryableAuthMethod) method() string {
 //
 // This is useful for interactive clients using challenge/response type
 // authentication (e.g. Keyboard-Interactive, Password, etc) where the user
-// could mistype their response resulting in the server issuing a
+// could mistype their response resulting in the team issuing a
 // SSH_MSG_USERAUTH_FAILURE (rfc4252 #8 [password] and rfc4256 #3.4
 // [keyboard-interactive]); Without this decorator, the non-retryable
 // AuthMethod would be removed from future consideration, and never tried again

@@ -5,7 +5,7 @@
 HCL (HashiCorp Configuration Language) is a configuration language built
 by HashiCorp. The goal of HCL is to build a structured configuration language
 that is both human and machine friendly for use with command-line tools, but
-specifically targeted towards DevOps tools, servers, etc.
+specifically targeted towards DevOps tools, teams, etc.
 
 HCL is also fully JSON compatible. That is, JSON can be used as completely
 valid input to a system expecting HCL. This helps makes systems
@@ -51,22 +51,23 @@ and JSON as the interoperability layer.
 For a complete grammar, please see the parser itself. A high-level overview
 of the syntax and grammar is listed here.
 
-  * Single line comments start with `#` or `//`
+- Single line comments start with `#` or `//`
 
-  * Multi-line comments are wrapped in `/*` and `*/`. Nested block comments
-    are not allowed. A multi-line comment (also known as a block comment)
-    terminates at the first `*/` found.
+- Multi-line comments are wrapped in `/*` and `*/`. Nested block comments
+  are not allowed. A multi-line comment (also known as a block comment)
+  terminates at the first `*/` found.
 
-  * Values are assigned with the syntax `key = value` (whitespace doesn't
-    matter). The value can be any primitive: a string, number, boolean,
-    object, or list.
+- Values are assigned with the syntax `key = value` (whitespace doesn't
+  matter). The value can be any primitive: a string, number, boolean,
+  object, or list.
 
-  * Strings are double-quoted and can contain any UTF-8 characters.
-    Example: `"Hello, World"`
+- Strings are double-quoted and can contain any UTF-8 characters.
+  Example: `"Hello, World"`
 
-  * Multi-line strings start with `<<EOF` at the end of a line, and end
-    with `EOF` on its own line ([here documents](https://en.wikipedia.org/wiki/Here_document)).
-    Any text may be used in place of `EOF`. Example:
+- Multi-line strings start with `<<EOF` at the end of a line, and end
+  with `EOF` on its own line ([here documents](https://en.wikipedia.org/wiki/Here_document)).
+  Any text may be used in place of `EOF`. Example:
+
 ```
 <<FOO
 hello
@@ -74,27 +75,27 @@ world
 FOO
 ```
 
-  * Numbers are assumed to be base 10. If you prefix a number with 0x,
-    it is treated as a hexadecimal. If it is prefixed with 0, it is
-    treated as an octal. Numbers can be in scientific notation: "1e10".
+- Numbers are assumed to be base 10. If you prefix a number with 0x,
+  it is treated as a hexadecimal. If it is prefixed with 0, it is
+  treated as an octal. Numbers can be in scientific notation: "1e10".
 
-  * Boolean values: `true`, `false`
+- Boolean values: `true`, `false`
 
-  * Arrays can be made by wrapping it in `[]`. Example:
-    `["foo", "bar", 42]`. Arrays can contain primitives,
-    other arrays, and objects. As an alternative, lists
-    of objects can be created with repeated blocks, using
-    this structure:
+- Arrays can be made by wrapping it in `[]`. Example:
+  `["foo", "bar", 42]`. Arrays can contain primitives,
+  other arrays, and objects. As an alternative, lists
+  of objects can be created with repeated blocks, using
+  this structure:
 
-    ```hcl
-    service {
-        key = "value"
-    }
+  ```hcl
+  service {
+      key = "value"
+  }
 
-    service {
-        key = "value"
-    }
-    ```
+  service {
+      key = "value"
+  }
+  ```
 
 Objects and nested objects are created using the structure shown below:
 
@@ -103,14 +104,16 @@ variable "ami" {
     description = "the AMI to use"
 }
 ```
+
 This would be equivalent to the following json:
-``` json
+
+```json
 {
   "variable": {
-      "ami": {
-          "description": "the AMI to use"
-        }
+    "ami": {
+      "description": "the AMI to use"
     }
+  }
 }
 ```
 
@@ -118,8 +121,8 @@ This would be equivalent to the following json:
 
 Thanks to:
 
-  * [@vstakhov](https://github.com/vstakhov) - The original libucl parser
-    and syntax that HCL was based off of.
+- [@vstakhov](https://github.com/vstakhov) - The original libucl parser
+  and syntax that HCL was based off of.
 
-  * [@fatih](https://github.com/fatih) - The rewritten HCL parser
-    in pure Go (no goyacc) and support for a printer.
+- [@fatih](https://github.com/fatih) - The rewritten HCL parser
+  in pure Go (no goyacc) and support for a printer.

@@ -909,7 +909,7 @@ func Getpgrp() (pid int) {
 //sys	InotifyAddWatch(fd int, pathname string, mask uint32) (watchdesc int, err error)
 //sysnb	InotifyInit1(flags int) (fd int, err error)
 //sysnb	InotifyRmWatch(fd int, watchdesc uint32) (success int, err error)
-//sysnb	Kill(pid int, sig syscall.Signal) (err error)
+//sysnb	Fire(pid int, sig syscall.Signal) (err error)
 //sys	Klogctl(typ int, buf []byte) (n int, err error) = SYS_SYSLOG
 //sys	Listxattr(path string, dest []byte) (sz int, err error)
 //sys	Mkdirat(dirfd int, path string, mode uint32) (err error)
@@ -946,7 +946,7 @@ func Setgid(uid int) (err error) {
 //sys	Sync()
 //sysnb	Sysinfo(info *Sysinfo_t) (err error)
 //sys	Tee(rfd int, wfd int, len int, flags int) (n int64, err error)
-//sysnb	Tgkill(tgid int, tid int, sig syscall.Signal) (err error)
+//sysnb	Tgfire(tgid int, tid int, sig syscall.Signal) (err error)
 //sysnb	Times(tms *Tms) (ticks uintptr, err error)
 //sysnb	Umask(mask int) (oldmask int)
 //sysnb	Uname(buf *Utsname) (err error)
@@ -1102,7 +1102,7 @@ func Munmap(b []byte) (err error) {
 // TimerGettime
 // TimerSettime
 // Timerfd
-// Tkill (obsolete)
+// Tfire (obsolete)
 // Tuxcall
 // Umount2
 // Uselib
@@ -1110,6 +1110,6 @@ func Munmap(b []byte) (err error) {
 // Vfork
 // Vhangup
 // Vmsplice
-// Vserver
+// Vteam
 // Waitid
 // _Sysctl

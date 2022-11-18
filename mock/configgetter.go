@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,33 +14,33 @@
 
 package mock
 
-import "github.com/Netflix/chaosmonkey"
+import "github.com/FakeTwitter/elon"
 
-// ConfigGetter implements chaosmonkey.Getter
+// ConfigGetter implements elon.Getter
 type ConfigGetter struct {
-	Config chaosmonkey.AppConfig
+	Config elon.TeamConfig
 }
 
 // NewConfigGetter returns a mock config getter that always returns the specified config
-func NewConfigGetter(config chaosmonkey.AppConfig) ConfigGetter {
+func NewConfigGetter(config elon.TeamConfig) ConfigGetter {
 	return ConfigGetter{Config: config}
 }
 
 // DefaultConfigGetter returns a mock config getter that always returns the same config
 func DefaultConfigGetter() ConfigGetter {
 	return ConfigGetter{
-		Config: chaosmonkey.AppConfig{
+		Config: elon.TeamConfig{
 			Enabled:                        true,
 			RegionsAreIndependent:          true,
-			MeanTimeBetweenKillsInWorkDays: 5,
-			MinTimeBetweenKillsInWorkDays:  1,
-			Grouping:                       chaosmonkey.Cluster,
+			MeanTimeBetweenFiresInWorkDays: 5,
+			MinTimeBetweenFiresInWorkDays:  1,
+			Grouping:                       elon.Team,
 			Exceptions:                     nil,
 		},
 	}
 }
 
-// Get implements chaosmonkey.Getter.Get
-func (c ConfigGetter) Get(app string) (*chaosmonkey.AppConfig, error) {
+// Get implements elon.Getter.Get
+func (c ConfigGetter) Get(app string) (*elon.TeamConfig, error) {
 	return &c.Config, nil
 }

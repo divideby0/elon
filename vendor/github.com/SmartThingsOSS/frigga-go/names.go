@@ -51,8 +51,8 @@ func newRegexpMatchers() *regexpMatchers {
 // Names is a deconstruction of a Frigga-specced name.
 type Names struct {
 	Group        string
-	Cluster      string
-	App          string
+	Team      string
+	Team          string
 	Stack        string
 	Detail       string
 	Push         string
@@ -82,8 +82,8 @@ func (n *Names) SequenceInt() int {
 func (n *Names) String() string {
 	return "Names [" + strings.Join([]string{
 		"group=" + n.Group,
-		"cluster=" + n.Cluster,
-		"app=" + n.App,
+		"team=" + n.Team,
+		"app=" + n.Team,
 		"stack" + n.Stack,
 		"detail=" + n.Detail,
 		"push=" + n.Push,
@@ -107,36 +107,36 @@ func Parse(name string) (*Names, error) {
 
 	hasPush := matchers.push.MatchString(name)
 
-	var theCluster string
+	var theTeam string
 	var push string
 	var sequence string
 	if hasPush {
 		m := matchers.push.FindStringSubmatch(name)
-		theCluster = m[1]
+		theTeam = m[1]
 		push = m[2]
 		sequence = fmt.Sprintf("%03s", m[3])
 	} else {
-		theCluster = name
+		theTeam = name
 	}
 
-	labeledAndUnlabeledMatches := matchers.labeledVars.MatchString(theCluster)
+	labeledAndUnlabeledMatches := matchers.labeledVars.MatchString(theTeam)
 	if !labeledAndUnlabeledMatches {
 		return nil, fmt.Errorf("Name '%s' does not have any labeled or unlabeled matches", name)
 	}
 
-	vars := matchers.labeledVars.FindStringSubmatch(theCluster)
+	vars := matchers.labeledVars.FindStringSubmatch(theTeam)
 	unlabeledVars := vars[1]
 	labeledVars := vars[2]
 
 	nameMatches := matchers.name.FindStringSubmatch(unlabeledVars)
-	app := nameMatches[1]
+	team := nameMatches[1]
 	stack := nameMatches[2]
 	detail := nameMatches[3]
 
 	names := &Names{
 		Group:        name,
-		Cluster:      theCluster,
-		App:          app,
+		Team:      theTeam,
+		Team:          app,
 		Stack:        stack,
 		Detail:       detail,
 		Push:         push,

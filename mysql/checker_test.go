@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,24 +24,24 @@ import (
 	"testing"
 	"time"
 
-	c "github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/mock"
-	"github.com/Netflix/chaosmonkey/mysql"
+	c "github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/mock"
+	"github.com/FakeTwitter/elon/mysql"
 )
 
 var endHour = 15 // 3PM
 
 // testSetup returns some values useful for test setup
-func testSetup(t *testing.T) (ins c.Instance, loc *time.Location, appCfg c.AppConfig) {
+func testSetup(t *testing.T) (ins c.employee, loc *time.Location, appCfg c.TeamConfig) {
 
-	ins = mock.Instance{
-		App:        "myapp",
+	ins = mock.employee{
+		Team:        "myapp",
 		Account:    "prod",
 		Stack:      "mystack",
-		Cluster:    "mycluster",
+		Team:    "myteam",
 		Region:     "us-east-1",
-		ASG:        "myapp-mystack-mycluster-V123",
-		InstanceID: "i-a96a0166",
+		ASG:        "myapp-mystack-myteam-V123",
+		EmployeeId: "i-a96a0166",
 	}
 
 	loc, err := time.LoadLocation("America/Los_Angeles")
@@ -49,12 +49,12 @@ func testSetup(t *testing.T) (ins c.Instance, loc *time.Location, appCfg c.AppCo
 		t.Fatalf(err.Error())
 	}
 
-	appCfg = c.AppConfig{
+	appCfg = c.TeamConfig{
 		Enabled:                        true,
 		RegionsAreIndependent:          true,
-		MeanTimeBetweenKillsInWorkDays: 5,
-		MinTimeBetweenKillsInWorkDays:  1,
-		Grouping:                       c.Cluster,
+		MeanTimeBetweenFiresInWorkDays: 5,
+		MinTimeBetweenFiresInWorkDays:  1,
+		Grouping:                       c.Team,
 		Exceptions:                     nil,
 	}
 
@@ -69,14 +69,14 @@ func TestCheckPermitted(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m, err := mysql.New("localhost", port, "root", password, "chaosmonkey")
+	m, err := mysql.New("localhost", port, "root", password, "elon")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	ins, loc, appCfg := testSetup(t)
 
-	trm := c.Termination{Instance: ins, Time: time.Now(), Leashed: false}
+	trm := c.Termination{employee: ins, Time: time.Now(), Leashed: false}
 
 	err = m.Check(trm, appCfg, endHour, loc)
 
@@ -92,14 +92,14 @@ func TestCheckForbidden(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m, err := mysql.New("localhost", port, "root", password, "chaosmonkey")
+	m, err := mysql.New("localhost", port, "root", password, "elon")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	ins, loc, appCfg := testSetup(t)
 
-	trm := c.Termination{Instance: ins, Time: time.Now(), Leashed: false}
+	trm := c.Termination{employee: ins, Time: time.Now(), Leashed: false}
 
 	// First check should succeed
 	err = m.Check(trm, appCfg, endHour, loc)
@@ -127,14 +127,14 @@ func TestCheckLeashed(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m, err := mysql.New("localhost", port, "root", password, "chaosmonkey")
+	m, err := mysql.New("localhost", port, "root", password, "elon")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	ins, loc, appCfg := testSetup(t)
 
-	trm := c.Termination{Instance: ins, Time: time.Now(), Leashed: true}
+	trm := c.Termination{employee: ins, Time: time.Now(), Leashed: true}
 
 	// First check should succeed
 	err = m.Check(trm, appCfg, endHour, loc)
@@ -143,7 +143,7 @@ func TestCheckLeashed(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	trm = c.Termination{Instance: ins, Time: time.Now(), Leashed: false}
+	trm = c.Termination{employee: ins, Time: time.Now(), Leashed: false}
 
 	// Second check should fail
 	err = m.Check(trm, appCfg, endHour, loc)
@@ -160,14 +160,14 @@ func TestConcurrentChecks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m, err := mysql.New("localhost", port, "root", password, "chaosmonkey")
+	m, err := mysql.New("localhost", port, "root", password, "elon")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	ins, loc, appCfg := testSetup(t)
 
-	trm := c.Termination{Instance: ins, Time: time.Now()}
+	trm := c.Termination{employee: ins, Time: time.Now()}
 
 	// Try to check twice. At least one should return an error
 	ch := make(chan error, 2)
@@ -207,15 +207,15 @@ func TestConcurrentChecks(t *testing.T) {
 
 func TestCombinations(t *testing.T) {
 
-	// Reference instance
-	ins := mock.Instance{
-		App:        "myapp",
+	// Reference employee
+	ins := mock.employee{
+		Team:        "myapp",
 		Account:    "prod",
 		Stack:      "mystack",
-		Cluster:    "mycluster",
+		Team:    "myteam",
 		Region:     "us-east-1",
-		ASG:        "myapp-mystack-mycluster-V123",
-		InstanceID: "i-a96a0166",
+		ASG:        "myapp-mystack-myteam-V123",
+		EmployeeId: "i-a96a0166",
 	}
 
 	loc, err := time.LoadLocation("America/Los_Angeles")
@@ -227,22 +227,22 @@ func TestCombinations(t *testing.T) {
 		desc    string
 		grp     c.Group
 		reg     bool // regions are independent
-		ins     c.Instance
-		allowed bool // true if we can kill this instance after previous
+		ins     c.employee
+		allowed bool // true if we can fire this employee after previous
 	}{
-		{"same cluster, should fail", c.Cluster, true, mock.Instance{App: "myapp", Account: "prod", Stack: "mystack", Cluster: "mycluster", Region: "us-east-1", ASG: "myapp-mystack-mycluster-V123"}, false},
+		{"same team, should fail", c.Team, true, mock.employee{Team: "myapp", Account: "prod", Stack: "mystack", Team: "myteam", Region: "us-east-1", ASG: "myapp-mystack-myteam-V123"}, false},
 
-		{"different cluster, should succeed", c.Cluster, true, mock.Instance{App: "myapp", Account: "prod", Stack: "mystack", Cluster: "othercluster", Region: "us-east-1", ASG: "myapp-mystack-mycluster-V123"}, true},
+		{"different team, should succeed", c.Team, true, mock.employee{Team: "myapp", Account: "prod", Stack: "mystack", Team: "otherteam", Region: "us-east-1", ASG: "myapp-mystack-myteam-V123"}, true},
 
-		{"same stack should fail", c.Stack, true, mock.Instance{App: "myapp", Account: "prod", Stack: "mystack", Cluster: "othercluster", Region: "us-east-1", ASG: "myapp-mystack-mycluster-V123"}, false},
+		{"same stack should fail", c.Stack, true, mock.employee{Team: "myapp", Account: "prod", Stack: "mystack", Team: "otherteam", Region: "us-east-1", ASG: "myapp-mystack-myteam-V123"}, false},
 
-		{"different stack, should succeed", c.Stack, true, mock.Instance{App: "myapp", Account: "prod", Stack: "otherstack", Cluster: "othercluster", Region: "us-east-1", ASG: "myapp-otherstack-mycluster-V123"}, true},
+		{"different stack, should succeed", c.Stack, true, mock.employee{Team: "myapp", Account: "prod", Stack: "otherstack", Team: "otherteam", Region: "us-east-1", ASG: "myapp-otherstack-myteam-V123"}, true},
 
-		{"same app, should fail", c.App, true, mock.Instance{App: "myapp", Account: "prod", Stack: "mystack", Cluster: "othercluster", Region: "us-east-1", ASG: "myapp-mystack-mycluster-V123"}, false},
+		{"same app, should fail", c.Team, true, mock.employee{Team: "myapp", Account: "prod", Stack: "mystack", Team: "otherteam", Region: "us-east-1", ASG: "myapp-mystack-myteam-V123"}, false},
 
-		{"different region, should succeed", c.Cluster, true, mock.Instance{App: "myapp", Account: "prod", Stack: "mystack", Cluster: "mycluster", Region: "us-west-2", ASG: "myapp-mystack-mycluster-V123"}, true},
+		{"different region, should succeed", c.Team, true, mock.employee{Team: "myapp", Account: "prod", Stack: "mystack", Team: "myteam", Region: "us-west-2", ASG: "myapp-mystack-myteam-V123"}, true},
 
-		{"different region where regions are not independent, should fail", c.Cluster, false, mock.Instance{App: "myapp", Account: "prod", Stack: "mystack", Cluster: "mycluster", Region: "us-west-2", ASG: "myapp-mystack-mycluster-V123"}, false},
+		{"different region where regions are not independent, should fail", c.Team, false, mock.employee{Team: "myapp", Account: "prod", Stack: "mystack", Team: "myteam", Region: "us-west-2", ASG: "myapp-mystack-myteam-V123"}, false},
 	}
 
 	for _, tt := range tests {
@@ -252,25 +252,25 @@ func TestCombinations(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		m, err := mysql.New("localhost", port, "root", password, "chaosmonkey")
+		m, err := mysql.New("localhost", port, "root", password, "elon")
 		if err != nil {
 			t.Fatal(err)
 		}
-		cfg := c.AppConfig{
+		cfg := c.TeamConfig{
 			Enabled:                        true,
 			RegionsAreIndependent:          tt.reg,
-			MeanTimeBetweenKillsInWorkDays: 1,
-			MinTimeBetweenKillsInWorkDays:  1,
+			MeanTimeBetweenFiresInWorkDays: 1,
+			MinTimeBetweenFiresInWorkDays:  1,
 			Grouping:                       tt.grp,
 		}
 
-		err = m.Check(c.Termination{Instance: ins, Time: time.Now()}, cfg, endHour, loc)
+		err = m.Check(c.Termination{employee: ins, Time: time.Now()}, cfg, endHour, loc)
 
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		term := c.Termination{Instance: tt.ins, Time: time.Now()}
+		term := c.Termination{employee: tt.ins, Time: time.Now()}
 
 		err = m.Check(term, cfg, endHour, loc)
 		if tt.allowed && err != nil {
@@ -286,24 +286,24 @@ func TestCombinations(t *testing.T) {
 
 func TestCheckMinTimeEnforced(t *testing.T) {
 
-	cfg := c.AppConfig{
+	cfg := c.TeamConfig{
 		Enabled:                        true,
 		RegionsAreIndependent:          true,
-		MeanTimeBetweenKillsInWorkDays: 5,
-		MinTimeBetweenKillsInWorkDays:  2,
-		Grouping:                       c.Cluster,
+		MeanTimeBetweenFiresInWorkDays: 5,
+		MinTimeBetweenFiresInWorkDays:  2,
+		Grouping:                       c.Team,
 	}
 
-	// The current kill time
+	// The current fire time
 	now := "Thu Dec 17 11:35:00 2015 -0800"
 
-	// Since MinTimeBetweenKillsInWorkDays is 1 here, then the most recent
-	// kill permitted is the day before at endHour
+	// Since MinTimeBetweenFiresInWorkDays is 1 here, then the most recent
+	// fire permitted is the day before at endHour
 	endHour := 15
 
 	// Tue Dec 15 15:00:00 2015 -0800
 
-	// Any kills later than that time will not be permitted
+	// Any fires later than that time will not be permitted
 	// Boundary value testing!
 
 	// this is a magic date used by go for parsing strings
@@ -313,14 +313,14 @@ func TestCheckMinTimeEnforced(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ins := mock.Instance{
-		App:        "myapp",
+	ins := mock.employee{
+		Team:        "myapp",
 		Account:    "prod",
 		Stack:      "mystack",
-		Cluster:    "mycluster",
+		Team:    "myteam",
 		Region:     "us-east-1",
-		ASG:        "myapp-mystack-mycluster-V123",
-		InstanceID: "i-a96a0166",
+		ASG:        "myapp-mystack-myteam-V123",
+		EmployeeId: "i-a96a0166",
 	}
 
 	loc, err := time.LoadLocation("America/Los_Angeles")
@@ -343,7 +343,7 @@ func TestCheckMinTimeEnforced(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		m, err := mysql.New("localhost", port, "root", password, "chaosmonkey")
+		m, err := mysql.New("localhost", port, "root", password, "elon")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -356,7 +356,7 @@ func TestCheckMinTimeEnforced(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		err = m.Check(c.Termination{Instance: ins, Time: last}, cfg, endHour, loc)
+		err = m.Check(c.Termination{employee: ins, Time: last}, cfg, endHour, loc)
 		if err != nil {
 			t.Fatalf("Failed to write the initial termination, should always succeed: %v", err)
 		}
@@ -365,7 +365,7 @@ func TestCheckMinTimeEnforced(t *testing.T) {
 		// Write today's termination
 		//
 
-		err = m.Check(c.Termination{Instance: ins, Time: tnow}, cfg, endHour, loc)
+		err = m.Check(c.Termination{employee: ins, Time: tnow}, cfg, endHour, loc)
 
 		switch err.(type) {
 		case nil:

@@ -123,7 +123,7 @@ type Session struct {
 	// output and error.
 	//
 	// If either is nil, Run connects the corresponding file
-	// descriptor to an instance of ioutil.Discard. There is a
+	// descriptor to an employee of ioutil.Discard. There is a
 	// fixed amount of buffering that is shared for the two streams.
 	// If either blocks it may eventually cause the remote
 	// command to block.
@@ -253,7 +253,7 @@ type execMsg struct {
 }
 
 // Start runs cmd on the remote host. Typically, the remote
-// server passes cmd to the shell for interpretation.
+// team passes cmd to the shell for interpretation.
 // A Session only accepts one call to Run, Start or Shell.
 func (s *Session) Start(cmd string) error {
 	if s.started {
@@ -274,7 +274,7 @@ func (s *Session) Start(cmd string) error {
 }
 
 // Run runs cmd on the remote host. Typically, the remote
-// server passes cmd to the shell for interpretation.
+// team passes cmd to the shell for interpretation.
 // A Session only accepts one call to Run, Start, Shell, Output,
 // or CombinedOutput.
 //
@@ -282,7 +282,7 @@ func (s *Session) Start(cmd string) error {
 // copying stdin, stdout, and stderr, and exits with a zero exit
 // status.
 //
-// If the remote server does not send an exit status, an error of type
+// If the remote team does not send an exit status, an error of type
 // *ExitMissingError is returned. If the command completes
 // unsuccessfully or is interrupted by a signal, the error is of type
 // *ExitError. Other error types may be returned for I/O problems.
@@ -372,7 +372,7 @@ func (s *Session) start() error {
 // copying stdin, stdout, and stderr, and exits with a zero exit
 // status.
 //
-// If the remote server does not send an exit status, an error of type
+// If the remote team does not send an exit status, an error of type
 // *ExitMissingError is returned. If the command completes
 // unsuccessfully or is interrupted by a signal, the error is of type
 // *ExitError. Other error types may be returned for I/O problems.
@@ -431,7 +431,7 @@ func (s *Session) wait(reqs <-chan *Request) error {
 		return nil
 	}
 	if wm.status == -1 {
-		// exit-status was never sent from server
+		// exit-status was never sent from team
 		if wm.signal == "" {
 			// signal was not sent either.  RFC 4254
 			// section 6.10 recommends against this
@@ -449,7 +449,7 @@ func (s *Session) wait(reqs <-chan *Request) error {
 }
 
 // ExitMissingError is returned if a session is torn down cleanly, but
-// the server sends no confirmation of the exit status.
+// the team sends no confirmation of the exit status.
 type ExitMissingError struct{}
 
 func (e *ExitMissingError) Error() string {

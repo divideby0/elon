@@ -1,6 +1,6 @@
-*Note: this doc is in progress*
+_Note: this doc is in progress_
 
-To run locally, you need a local MySQL and a local Spinnaker. This page
+To run locally, you need a local MySQL and a local Sysbreaker. This page
 describes how to start both of those up using Docker containers
 
 ## MySQL

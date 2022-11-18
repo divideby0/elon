@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package env contains a no-op implementation of chaosmonkey.env
+// Package env contains a no-op implementation of elon.env
 // where InTest() always returns false
 package env
 
 import (
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/deps"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/deps"
 )
 
 // notTestEnv is an environment that does not report as a test env
 type notTestEnv struct{}
 
-// InTest implements chaosmonkey.Env.InTest
+// InTest implements elon.Env.InTest
 func (n notTestEnv) InTest() bool {
 	return false
 }
@@ -34,6 +34,6 @@ func init() {
 	deps.GetEnv = getNotTestEnv
 }
 
-func getNotTestEnv(cfg *config.Monkey) (chaosmonkey.Env, error) {
+func getNotTestEnv(cfg *config.Monkey) (elon.Env, error) {
 	return notTestEnv{}, nil
 }

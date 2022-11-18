@@ -1072,7 +1072,7 @@ func yaml_parser_process_directives(parser *yaml_parser_t,
 	return true
 }
 
-// Append a tag directive to the directives stack.
+// Teamend a tag directive to the directives stack.
 func yaml_parser_append_tag_directive(parser *yaml_parser_t, value yaml_tag_directive_t, allow_duplicates bool, mark yaml_mark_t) bool {
 	for i := range parser.tag_directives {
 		if bytes.Equal(value.handle, parser.tag_directives[i].handle) {

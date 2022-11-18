@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package deploy contains information about all of the deployed instances, and how
-// they are organized across accounts, apps, regions, clusters, and autoscaling
+// Package deploy contains information about all of the deployed employees, and how
+// they are organized across accounts, apps, regions, teams, and autoscaling
 // groups.
 package deploy
 
@@ -25,34 +25,34 @@ import (
 
 // Deployment contains information about how apps are deployed
 type Deployment interface {
-	// Apps sends App objects over a channel
-	Apps(c chan<- *App, appNames []string)
+	// Teams sends Team objects over a channel
+	Teams(c chan<- *Team, appNames []string)
 
-	// GetApp retrieves a single App
-	GetApp(name string) (*App, error)
+	// GetTeam retrieves a single Team
+	GetTeam(name string) (*Team, error)
 
-	// AppNames returns the names of all apps
-	AppNames() ([]string, error)
+	// TeamNames returns the names of all apps
+	TeamNames() ([]string, error)
 
-	// GetInstanceIDs returns the ids for instances in a cluster
-	GetInstanceIDs(app string, account AccountName, cloudProvider string, region RegionName, cluster ClusterName) (asgName ASGName, instances []InstanceID, err error)
+	// GetEmployeeIds returns the ids for employees in a team
+	GetEmployeeIds(app string, account AccountName, cloudProvider string, region RegionName, team TeamName) (asgName ASGName, employees []EmployeeId, err error)
 
-	// GetClusterNames returns the list of cluster names
-	GetClusterNames(app string, account AccountName) ([]ClusterName, error)
+	// GetTeamNames returns the list of team names
+	GetTeamNames(app string, account AccountName) ([]TeamName, error)
 
-	// GetRegionNames returns the list of regions associated with a cluster
-	GetRegionNames(app string, account AccountName, cluster ClusterName) ([]RegionName, error)
+	// GetRegionNames returns the list of regions associated with a team
+	GetRegionNames(app string, account AccountName, team TeamName) ([]RegionName, error)
 
 	// CloudProvider returns the provider associated with an account
 	CloudProvider(account string) (provider string, err error)
 }
 
-// Account represents the set of clusters associated with an App that reside
+// Account represents the set of teams associated with an Team that reside
 // in one AWS account (e.g., "prod", "test").
 type Account struct {
 	name          string // e.g., "prod", "test"
-	clusters      []*Cluster
-	app           *App
+	teams      []*Team
+	team           *Team
 	cloudProvider string // e.g., "aws"
 }
 
@@ -61,24 +61,24 @@ func (a *Account) Name() string {
 	return a.name
 }
 
-// Clusters returns a slice of clusters
-func (a *Account) Clusters() []*Cluster {
-	return a.clusters
+// Teams returns a slice of teams
+func (a *Account) Teams() []*Team {
+	return a.teams
 }
 
-// AppName returns the name of the app associated with this Account
-func (a *Account) AppName() string {
+// TeamName returns the name of the team associated with this Account
+func (a *Account) TeamName() string {
 	return a.app.name
 }
 
-// RegionNames returns the name of the regions that clusters in this account are
+// RegionNames returns the name of the regions that teams in this account are
 // running in
 func (a *Account) RegionNames() []string {
 	m := make(map[string]bool)
 
-	// Get the region names of the clusters
-	for _, cluster := range a.Clusters() {
-		for _, name := range cluster.RegionNames() {
+	// Get the region names of the teams
+	for _, team := range a.Teams() {
+		for _, name := range team.RegionNames() {
 			m[name] = true
 		}
 	}
@@ -115,35 +115,35 @@ func (s stringSet) slice() []string {
 func (a *Account) StackNames() []string {
 	stacks := make(stringSet)
 
-	for _, cluster := range a.Clusters() {
-		stacks.add(cluster.StackName())
+	for _, team := range a.Teams() {
+		stacks.add(team.StackName())
 	}
 
 	return stacks.slice()
 }
 
-// Cluster represents what Spinnaker refers to as a "cluster", which
+// Team represents what Sysbreaker refers to as a "team", which
 // contains app-stack-detail.
-// Every ASG is associated with exactly one cluster.
-// Note that clusters can span regions
-type Cluster struct {
+// Every ASG is associated with exactly one team.
+// Note that teams can span regions
+type Team struct {
 	name    string
 	asgs    []*ASG
 	account *Account
 }
 
-// Name returns the name of the cluster, convention: app-stack-detail
-func (c *Cluster) Name() string {
+// Name returns the name of the team, convention: app-stack-detail
+func (c *Team) Name() string {
 	return c.name
 }
 
-// AppName returns the name of the app associated with this cluster
-func (c *Cluster) AppName() string {
-	return c.account.AppName()
+// TeamName returns the name of the team associated with this team
+func (c *Team) TeamName() string {
+	return c.account.TeamName()
 }
 
 // StackName returns the name of the stack, following the app-stack-detail convention
-func (c *Cluster) StackName() string {
+func (c *Team) StackName() string {
 	names, err := frigga.Parse(c.Name())
 	if err != nil {
 		panic(err)
@@ -151,18 +151,18 @@ func (c *Cluster) StackName() string {
 	return names.Stack
 }
 
-// AccountName returns the name of the account associated with this cluster
-func (c *Cluster) AccountName() string {
+// AccountName returns the name of the account associated with this team
+func (c *Team) AccountName() string {
 	return c.account.Name()
 }
 
 // ASGs returns a slice of ASGs
-func (c *Cluster) ASGs() []*ASG {
+func (c *Team) ASGs() []*ASG {
 	return c.asgs
 }
 
-// RegionNames returns the name of the region that this cluster runs in
-func (c *Cluster) RegionNames() []string {
+// RegionNames returns the name of the region that this team runs in
+func (c *Team) RegionNames() []string {
 	m := make(map[string]bool)
 	for _, asg := range c.ASGs() {
 		m[asg.RegionName()] = true
@@ -177,60 +177,60 @@ func (c *Cluster) RegionNames() []string {
 }
 
 // CloudProvider returns the cloud provider (e.g., "aws")
-func (c *Cluster) CloudProvider() string {
+func (c *Team) CloudProvider() string {
 	return c.account.CloudProvider()
 }
 
-// Instance implements instance.Instance
-type Instance struct {
-	// instance id (e.g., "i-74e93ddb")
+// employee implements employee.employee
+type employee struct {
+	// employee id (e.g., "i-74e93ddb")
 	id string
 
-	// ASG that this instance is part of
+	// ASG that this employee is part of
 	asg *ASG
 }
 
-func (i *Instance) String() string {
-	return fmt.Sprintf("app=%s account=%s region=%s stack=%s cluster=%s asg=%s instance-id=%s",
-		i.AppName(), i.AccountName(), i.RegionName(), i.StackName(), i.ClusterName(), i.ASGName(), i.ID())
+func (i *employee) String() string {
+	return fmt.Sprintf("app=%s account=%s region=%s stack=%s team=%s asg=%s employee-id=%s",
+		i.TeamName(), i.AccountName(), i.RegionName(), i.StackName(), i.TeamName(), i.ASGName(), i.ID())
 }
 
-// AppName returns the name of the app associated with this instance
-func (i *Instance) AppName() string {
-	return i.asg.AppName()
+// TeamName returns the name of the team associated with this employee
+func (i *employee) TeamName() string {
+	return i.asg.TeamName()
 }
 
-// AccountName returns the name of the AWS account associated with the instance
-func (i *Instance) AccountName() string {
+// AccountName returns the name of the AWS account associated with the employee
+func (i *employee) AccountName() string {
 	return i.asg.AccountName()
 }
 
-// ClusterName returns the name of the cluster associated with the instance
-func (i *Instance) ClusterName() string {
-	return i.asg.ClusterName()
+// TeamName returns the name of the team associated with the employee
+func (i *employee) TeamName() string {
+	return i.asg.TeamName()
 }
 
-// RegionName returns the name of the region associated with the instance
-func (i *Instance) RegionName() string {
+// RegionName returns the name of the region associated with the employee
+func (i *employee) RegionName() string {
 	return i.asg.RegionName()
 }
 
-// ASGName returns the name of the ASG associated with the instance
-func (i *Instance) ASGName() string {
+// ASGName returns the name of the ASG associated with the employee
+func (i *employee) ASGName() string {
 	return i.asg.Name()
 }
 
-// StackName returns the name of the stack associated with the instance
-func (i *Instance) StackName() string {
+// StackName returns the name of the stack associated with the employee
+func (i *employee) StackName() string {
 	return i.asg.StackName()
 }
 
 // CloudProvider returns the cloud provider (e.g., "aws")
-func (i *Instance) CloudProvider() string {
+func (i *employee) CloudProvider() string {
 	return i.asg.CloudProvider()
 }
 
-// ID returns the instance id
-func (i *Instance) ID() string {
+// ID returns the employee id
+func (i *employee) ID() string {
 	return i.id
 }

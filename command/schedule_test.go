@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/config/param"
-	"github.com/Netflix/chaosmonkey/grp"
-	"github.com/Netflix/chaosmonkey/schedule"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/config/param"
+	"github.com/FakeTwitter/elon/grp"
+	"github.com/FakeTwitter/elon/schedule"
 )
 
-// addToSchedule schedules instanceId for termination at timeString
+// addToSchedule schedules EmployeeId for termination at timeString
 // where timeString is  formatted in RFC3339 format
-func addToSchedule(t *testing.T, sched *schedule.Schedule, timeString string, group grp.InstanceGroup) {
+func addToSchedule(t *testing.T, sched *schedule.Schedule, timeString string, group grp.employeeGroup) {
 	tm, err := time.Parse(time.RFC3339, timeString)
 	if err != nil {
 		t.Fatal("Could not parse time string:", tm, err.Error())
@@ -36,8 +36,8 @@ func addToSchedule(t *testing.T, sched *schedule.Schedule, timeString string, gr
 	sched.Add(tm, group)
 }
 
-func newClusterGroup(app, account, cluster, region string) grp.InstanceGroup {
-	return grp.New(app, account, region, "", cluster)
+func newTeamGroup(app, account, team, region string) grp.employeeGroup {
+	return grp.New(app, account, region, "", team)
 }
 
 func TestRegisterWithCron(t *testing.T) {
@@ -61,10 +61,10 @@ func TestRegisterWithCron(t *testing.T) {
 	sched := schedule.New()
 
 	// Thu Oct 1, 2015 10:15 AM PDT -> 17:15 UTC (7 hours)
-	addToSchedule(t, sched, "2015-10-01T10:15:00-07:00", newClusterGroup("abc", "prod", "abc-prod", "us-east-1"))
+	addToSchedule(t, sched, "2015-10-01T10:15:00-07:00", newTeamGroup("abc", "prod", "abc-prod", "us-east-1"))
 
 	// Thu Oct 1, 2015 11:23 AM PDT -> 18:23 UTC (7 hours)
-	addToSchedule(t, sched, "2015-10-01T11:23:00-07:00", newClusterGroup("abc", "prod", "abc-prod", "us-west-2"))
+	addToSchedule(t, sched, "2015-10-01T11:23:00-07:00", newTeamGroup("abc", "prod", "abc-prod", "us-west-2"))
 
 	// code under test
 	err = registerWithCron(sched, config)
@@ -81,8 +81,8 @@ func TestRegisterWithCron(t *testing.T) {
 	}
 
 	actual := string(dat)
-	expected := `15 17 1 10 4 root /apps/chaosmonkey/chaosmonkey-terminate.sh abc prod --cluster=abc-prod --region=us-east-1
-23 18 1 10 4 root /apps/chaosmonkey/chaosmonkey-terminate.sh abc prod --cluster=abc-prod --region=us-west-2
+	expected := `15 17 1 10 4 root /apps/elon/elon-terminate.sh abc prod --team=abc-prod --region=us-east-1
+23 18 1 10 4 root /apps/elon/elon-terminate.sh abc prod --team=abc-prod --region=us-west-2
 `
 	if actual != expected {
 		t.Errorf("\nExpected:\n%s\nActual:\n%s", expected, actual)
@@ -110,10 +110,10 @@ func TestCronOutputInSortedOrder(t *testing.T) {
 	schedule := schedule.New()
 
 	// Thu Oct 1, 2015 11:23 AM PDT -> 18:23 UTC (7 hours)
-	addToSchedule(t, schedule, "2015-10-01T11:23:00-07:00", newClusterGroup("abc", "prod", "abc-prod", "us-east-1"))
+	addToSchedule(t, schedule, "2015-10-01T11:23:00-07:00", newTeamGroup("abc", "prod", "abc-prod", "us-east-1"))
 
 	// Thu Oct 1, 2015 10:15 AM PDT -> 17:15 UTC (7 hours)
-	addToSchedule(t, schedule, "2015-10-01T10:15:00-07:00", newClusterGroup("abc", "prod", "abc-prod", "us-west-2"))
+	addToSchedule(t, schedule, "2015-10-01T10:15:00-07:00", newTeamGroup("abc", "prod", "abc-prod", "us-west-2"))
 
 	// code under test
 	err = registerWithCron(schedule, config)
@@ -130,8 +130,8 @@ func TestCronOutputInSortedOrder(t *testing.T) {
 	}
 
 	actual := string(dat)
-	expected := `15 17 1 10 4 root /apps/chaosmonkey/chaosmonkey-terminate.sh abc prod --cluster=abc-prod --region=us-west-2
-23 18 1 10 4 root /apps/chaosmonkey/chaosmonkey-terminate.sh abc prod --cluster=abc-prod --region=us-east-1
+	expected := `15 17 1 10 4 root /apps/elon/elon-terminate.sh abc prod --team=abc-prod --region=us-west-2
+23 18 1 10 4 root /apps/elon/elon-terminate.sh abc prod --team=abc-prod --region=us-east-1
 `
 	if actual != expected {
 		t.Errorf("\nExpected:\n%s\nActual:\n%s", expected, actual)

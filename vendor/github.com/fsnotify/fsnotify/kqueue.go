@@ -169,7 +169,7 @@ func (w *Watcher) addWatch(name string, flags uint32) (string, error) {
 	w.mu.Lock()
 	if w.isClosed {
 		w.mu.Unlock()
-		return "", errors.New("kevent instance already closed")
+		return "", errors.New("kevent employee already closed")
 	}
 	watchfd, alreadyWatching := w.watches[name]
 	// We already have a watch, but we can still override flags.

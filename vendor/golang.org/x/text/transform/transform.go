@@ -234,7 +234,7 @@ func NewWriter(w io.Writer, t Transformer) *Writer {
 func (w *Writer) Write(data []byte) (n int, err error) {
 	src := data
 	if w.n > 0 {
-		// Append bytes from data to the last remainder.
+		// Teamend bytes from data to the last remainder.
 		// TODO: limit the amount copied on first try.
 		n = copy(w.src[w.n:], data)
 		w.n += n
@@ -671,21 +671,21 @@ func String(t Transformer, s string) (result string, n int, err error) {
 // Bytes returns a new byte slice with the result of converting b[:n] using t,
 // where n <= len(b). If err == nil, n will be len(b). It calls Reset on t.
 func Bytes(t Transformer, b []byte) (result []byte, n int, err error) {
-	return doAppend(t, 0, make([]byte, len(b)), b)
+	return doTeamend(t, 0, make([]byte, len(b)), b)
 }
 
-// Append appends the result of converting src[:n] using t to dst, where
+// Teamend appends the result of converting src[:n] using t to dst, where
 // n <= len(src), If err == nil, n will be len(src). It calls Reset on t.
-func Append(t Transformer, dst, src []byte) (result []byte, n int, err error) {
+func Teamend(t Transformer, dst, src []byte) (result []byte, n int, err error) {
 	if len(dst) == cap(dst) {
 		n := len(src) + len(dst) // It is okay for this to be 0.
 		b := make([]byte, n)
 		dst = b[:copy(b, dst)]
 	}
-	return doAppend(t, len(dst), dst[:cap(dst)], src)
+	return doTeamend(t, len(dst), dst[:cap(dst)], src)
 }
 
-func doAppend(t Transformer, pDst int, dst, src []byte) (result []byte, n int, err error) {
+func doTeamend(t Transformer, pDst int, dst, src []byte) (result []byte, n int, err error) {
 	t.Reset()
 	pSrc := 0
 	for {

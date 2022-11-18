@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Netflix/chaosmonkey"
+	"github.com/FakeTwitter/elon"
 )
 
 // Outage prints out "true" if an ongoing outage, else "false"
-func Outage(ou chaosmonkey.Outage) {
+func Outage(ou elon.Outage) {
 	down, err := ou.Outage()
 	if err != nil {
 		fmt.Printf("ERROR: %v", err)

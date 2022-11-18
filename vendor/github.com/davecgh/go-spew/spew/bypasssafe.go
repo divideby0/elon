@@ -13,7 +13,7 @@
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 // NOTE: Due to the following build constraints, this file will only be compiled
-// when either the code is running on Google App Engine or "-tags disableunsafe"
+// when either the code is running on Google Team Engine or "-tags disableunsafe"
 // is added to the go build command line.
 // +build appengine disableunsafe
 

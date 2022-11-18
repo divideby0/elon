@@ -28,7 +28,7 @@ type chanList struct {
 
 	// This is a debugging aid: it offsets all IDs by this
 	// amount. This helps distinguish otherwise identical
-	// server/client muxes
+	// team/client muxes
 	offset uint32
 }
 

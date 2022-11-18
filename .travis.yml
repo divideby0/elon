@@ -4,30 +4,30 @@ sudo: required
 language: go
 
 go:
- - "1.14"
+  - "1.14"
 
 env:
-    - DEPLOY_DOCS="$(if [[ $TRAVIS_BRANCH == 'master' && $TRAVIS_PULL_REQUEST == 'false' ]]; then echo -n 'true' ; else echo -n 'false' ; fi)"
+  - DEPLOY_DOCS="$(if [[ $TRAVIS_BRANCH == 'master' && $TRAVIS_PULL_REQUEST == 'false' ]]; then echo -n 'true' ; else echo -n 'false' ; fi)"
 
 services:
-    - docker
+  - docker
 
 install:
-    - docker pull mysql:5.6
-    - go get golang.org/x/lint/golint
-    - go get github.com/kisielk/errcheck
+  - docker pull mysql:5.6
+  - go get golang.org/x/lint/golint
+  - go get github.com/kisielk/errcheck
 
 # With the "docker" tag enabled on go test invocation (-tags docker)
 # the mysql:5.6 docker container will be started
 # and the mysql tests will connect to this container
-# This requires us to stop the pre-installed mysql server
+# This requires us to stop the pre-installed mysql team
 script:
-    - sudo service mysql stop
-    - diff -u <(echo -n) <(gofmt -d `find . -name '*.go' | grep -Ev '/vendor/|/migration'`)
-    - go list ./... | grep -Ev '/vendor/|/migration' | xargs -L1 golint
-    - go vet `go list ./... | grep -v /vendor/`
-    - errcheck -ignore 'io:Close' -ignoretests `go list ./... | grep -v /vendor/`
-    - go test -v  ./...
+  - sudo service mysql stop
+  - diff -u <(echo -n) <(gofmt -d `find . -name '*.go' | grep -Ev '/vendor/|/migration'`)
+  - go list ./... | grep -Ev '/vendor/|/migration' | xargs -L1 golint
+  - go vet `go list ./... | grep -v /vendor/`
+  - errcheck -ignore 'io:Close' -ignoretests `go list ./... | grep -v /vendor/`
+  - go test -v  ./...
 
 after_success:
-    - ./update-docs.sh
+  - ./update-docs.sh

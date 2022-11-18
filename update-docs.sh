@@ -21,4 +21,4 @@ ssh-add docKey
 
 # Push up to gh-pages
 # --force is required otherwise it will fail to push up
-venv/bin/mkdocs gh-deploy --remote-name git@github.com:Netflix/chaosmonkey.git --force
+venv/bin/mkdocs gh-deploy --remote-name git@github.com:FakeTwitter/elon.git --force

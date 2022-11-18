@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,15 +15,15 @@
 package decryptor
 
 import (
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/deps"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/deps"
 	"github.com/pkg/errors"
 )
 
 type nullDecryptor struct{}
 
-// Decrypt implements chaosmonkey.Decryptor.Decrypt
+// Decrypt implements elon.Decryptor.Decrypt
 // This is a no-op implementation that simply returns the plaintext
 func (n nullDecryptor) Decrypt(ciphertext string) (string, error) {
 	return ciphertext, nil
@@ -33,7 +33,7 @@ func init() {
 	deps.GetDecryptor = getNullDecryptor
 }
 
-func getNullDecryptor(cfg *config.Monkey) (chaosmonkey.Decryptor, error) {
+func getNullDecryptor(cfg *config.Monkey) (elon.Decryptor, error) {
 	kind := cfg.Decryptor()
 	if kind != "" {
 		return nil, errors.Errorf("unsupported decryptor: %s", kind)

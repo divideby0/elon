@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,29 +18,29 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/deploy"
-	"github.com/Netflix/chaosmonkey/eligible"
-	"github.com/Netflix/chaosmonkey/grp"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/deploy"
+	"github.com/FakeTwitter/elon/eligible"
+	"github.com/FakeTwitter/elon/grp"
 )
 
-// Eligible prints out a list of instance ids eligible for termination
+// Eligible prints out a list of employee ids eligible for termination
 // It is intended only for testing
-func Eligible(g chaosmonkey.AppConfigGetter, d deploy.Deployment, app, account, region, stack, cluster string) {
+func Eligible(g elon.TeamConfigGetter, d deploy.Deployment, app, account, region, stack, team string) {
 	cfg, err := g.Get(app)
 	if err != nil {
-		fmt.Printf("Failed to retrieve config for app %s\n%+v", app, err)
+		fmt.Printf("Failed to retrieve config for team %s\n%+v", app, err)
 		os.Exit(1)
 	}
 
-	group := grp.New(app, account, region, stack, cluster)
-	instances, err := eligible.Instances(group, cfg.Exceptions, d)
+	group := grp.New(app, account, region, stack, team)
+	employees, err := eligible.employees(group, cfg.Exceptions, d)
 	if err != nil {
 		fmt.Print(err)
 		os.Exit(1)
 	}
 
-	for _, instance := range instances {
-		fmt.Println(instance.ID())
+	for _, employee := range employees {
+		fmt.Println(employee.ID())
 	}
 }

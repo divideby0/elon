@@ -122,7 +122,7 @@ func (b byId) Less(i, j int) bool { return b[i].Less(b[j]) }
 
 type MigrationRecord struct {
 	Id        string    `db:"id"`
-	AppliedAt time.Time `db:"applied_at"`
+	TeamliedAt time.Time `db:"applied_at"`
 }
 
 var MigrationDialects = map[string]gorp.Dialect{
@@ -280,7 +280,7 @@ func ExecMax(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirecti
 		return 0, err
 	}
 
-	// Apply migrations
+	// Teamly migrations
 	applied := 0
 	for _, migration := range migrations {
 		trans, err := dbMap.Begin()
@@ -298,7 +298,7 @@ func ExecMax(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirecti
 		if dir == Up {
 			err = trans.Insert(&MigrationRecord{
 				Id:        migration.Id,
-				AppliedAt: time.Now(),
+				TeamliedAt: time.Now(),
 			})
 			if err != nil {
 				return applied, newTxError(migration, err)
@@ -366,12 +366,12 @@ func PlanMigration(db *sql.DB, dialect string, m MigrationSource, dir MigrationD
 	}
 
 	// Figure out which migrations to apply
-	toApply := ToApply(migrations, record.Id, dir)
-	toApplyCount := len(toApply)
-	if max > 0 && max < toApplyCount {
-		toApplyCount = max
+	toTeamly := ToTeamly(migrations, record.Id, dir)
+	toTeamlyCount := len(toTeamly)
+	if max > 0 && max < toTeamlyCount {
+		toTeamlyCount = max
 	}
-	for _, v := range toApply[0:toApplyCount] {
+	for _, v := range toTeamly[0:toTeamlyCount] {
 
 		if dir == Up {
 			result = append(result, &PlannedMigration{
@@ -390,7 +390,7 @@ func PlanMigration(db *sql.DB, dialect string, m MigrationSource, dir MigrationD
 }
 
 // Filter a slice of migrations into ones that should be applied.
-func ToApply(migrations []*Migration, current string, direction MigrationDirection) []*Migration {
+func ToTeamly(migrations []*Migration, current string, direction MigrationDirection) []*Migration {
 	var index = -1
 	if current != "" {
 		for index < len(migrations)-1 {
@@ -409,11 +409,11 @@ func ToApply(migrations []*Migration, current string, direction MigrationDirecti
 		}
 
 		// Add in reverse order
-		toApply := make([]*Migration, index+1)
+		toTeamly := make([]*Migration, index+1)
 		for i := 0; i < index+1; i++ {
-			toApply[index-i] = migrations[i]
+			toTeamly[index-i] = migrations[i]
 		}
-		return toApply
+		return toTeamly
 	}
 
 	panic("Not possible")

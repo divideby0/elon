@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package grp holds the InstanceGroup interface
+// Package grp holds the employeeGroup interface
 package grp
 
 import (
@@ -23,25 +23,25 @@ import (
 	"log"
 )
 
-// New generates an InstanceGroup.
-// region, stack, and cluster may be empty strings, in which case
-// the group is cross-region, cross-stack, or cross-cluster
-// Note that stack and cluster are mutually exclusive, can specify one
+// New generates an employeeGroup.
+// region, stack, and team may be empty strings, in which case
+// the group is cross-region, cross-stack, or cross-team
+// Note that stack and team are mutually exclusive, can specify one
 // but not both
-func New(app, account, region, stack, cluster string) InstanceGroup {
+func New(app, account, region, stack, team string) employeeGroup {
 	return group{
 		app:     app,
 		account: account,
 		region:  region,
 		stack:   stack,
-		cluster: cluster,
+		team: team,
 	}
 }
 
-// InstanceGroup represents a group of instances
-type InstanceGroup interface {
-	// App returns the name of the app
-	App() string
+// employeeGroup represents a group of employees
+type employeeGroup interface {
+	// Team returns the name of the team
+	Team() string
 
 	// Account returns the name of the account
 	Account() string
@@ -54,21 +54,21 @@ type InstanceGroup interface {
 	// If the group is cross-stack, the boolean will be false
 	Stack() (name string, ok bool)
 
-	// Cluster returns (cluster name, cluster present)
-	// If the group is cross-cluster, the boolean will be false
-	Cluster() (name string, ok bool)
+	// Team returns (team name, team present)
+	// If the group is cross-team, the boolean will be false
+	Team() (name string, ok bool)
 
 	// String outputs a stringified rep
 	String() string
 }
 
-// Equal returns true if g1 and g2 represent the same group of instances
-func Equal(g1, g2 InstanceGroup) bool {
+// Equal returns true if g1 and g2 represent the same group of employees
+func Equal(g1, g2 employeeGroup) bool {
 	if g1 == g2 {
 		return true
 	}
 
-	if g1.App() != g2.App() {
+	if g1.Team() != g2.Team() {
 		return false
 	}
 
@@ -97,8 +97,8 @@ func Equal(g1, g2 InstanceGroup) bool {
 		return false
 	}
 
-	c1, ok1 := g1.Cluster()
-	c2, ok2 := g2.Cluster()
+	c1, ok1 := g1.Team()
+	c2, ok2 := g2.Team()
 
 	if ok1 != ok2 {
 		return false
@@ -111,14 +111,14 @@ func Equal(g1, g2 InstanceGroup) bool {
 	return true
 }
 
-// String outputs a string representation of InstanceGroup suitable for logging
-func String(group InstanceGroup) string {
+// String outputs a string representation of employeeGroup suitable for logging
+func String(group employeeGroup) string {
 	var buffer bytes.Buffer
 	writeString := func(s string) {
 		_, _ = buffer.WriteString(s)
 	}
 	writeString("app=")
-	writeString(group.App())
+	writeString(group.Team())
 	writeString(" account=")
 	writeString(group.Account())
 	region, ok := group.Region()
@@ -131,52 +131,52 @@ func String(group InstanceGroup) string {
 		writeString(" stack=")
 		writeString(stack)
 	}
-	cluster, ok := group.Cluster()
+	team, ok := group.Team()
 	if ok {
-		writeString(" cluster=")
-		writeString(cluster)
+		writeString(" team=")
+		writeString(team)
 	}
 
 	return buffer.String()
 }
 
 type group struct {
-	app, account, region, stack, cluster string
+	app, account, region, stack, team string
 }
 
 func (g group) String() string {
-	return fmt.Sprintf("InstanceGroup{app=%s account=%s region=%s stack=%s cluster=%s}", g.app, g.account, g.region, g.stack, g.cluster)
+	return fmt.Sprintf("employeeGroup{app=%s account=%s region=%s stack=%s team=%s}", g.app, g.account, g.region, g.stack, g.team)
 }
 
 func (g group) MarshalJSON() ([]byte, error) {
 	var s = struct {
-		App     string `json:"app"`
+		Team     string `json:"app"`
 		Account string `json:"account"`
 		Region  string `json:"region,omitempty"`
 		Stack   string `json:"stack,omitempty"`
-		Cluster string `json:"cluster,omitempty"`
+		Team string `json:"team,omitempty"`
 	}{
-		App:     g.app,
+		Team:     g.app,
 		Account: g.account,
 		Region:  g.region,
 		Stack:   g.stack,
-		Cluster: g.cluster,
+		Team: g.team,
 	}
 
 	return json.Marshal(s)
 }
 
-// App implements InstanceGroup.App
-func (g group) App() string {
+// Team implements employeeGroup.Team
+func (g group) Team() string {
 	return g.app
 }
 
-// Account implements InstanceGroup.Account
+// Account implements employeeGroup.Account
 func (g group) Account() string {
 	return g.account
 }
 
-// Region implements InstanceGroup.Region
+// Region implements employeeGroup.Region
 func (g group) Region() (string, bool) {
 	if g.region == "" {
 		return "", false
@@ -184,7 +184,7 @@ func (g group) Region() (string, bool) {
 	return g.region, true
 }
 
-// Stack implements InstanceGroup.Stack
+// Stack implements employeeGroup.Stack
 func (g group) Stack() (string, bool) {
 	if g.stack == "" {
 		return "", false
@@ -192,45 +192,45 @@ func (g group) Stack() (string, bool) {
 	return g.stack, true
 }
 
-// Cluster implements InstanceGroup.Cluster
-func (g group) Cluster() (string, bool) {
-	if g.cluster == "" {
+// Team implements employeeGroup.Team
+func (g group) Team() (string, bool) {
+	if g.team == "" {
 		return "", false
 	}
-	return g.cluster, true
+	return g.team, true
 }
 
 // AnyRegion is true if the group matches any region
-func AnyRegion(g InstanceGroup) bool {
+func AnyRegion(g employeeGroup) bool {
 	_, specific := g.Region()
 	return !specific
 }
 
 // AnyStack is true if the group matches any stack
-func AnyStack(g InstanceGroup) bool {
+func AnyStack(g employeeGroup) bool {
 	_, specific := g.Stack()
 	return !specific
 }
 
-// AnyCluster is true if the group matches any cluster
-func AnyCluster(g InstanceGroup) bool {
-	_, specific := g.Cluster()
+// AnyTeam is true if the group matches any team
+func AnyTeam(g employeeGroup) bool {
+	_, specific := g.Team()
 	return !specific
 }
 
-// Contains returns true if the (account, region, cluster) is within the instance group
-func Contains(g InstanceGroup, account, region, cluster string) bool {
-	names, err := frigga.Parse(cluster)
+// Contains returns true if the (account, region, team) is within the employee group
+func Contains(g employeeGroup, account, region, team string) bool {
+	names, err := frigga.Parse(team)
 	if err != nil {
-		log.Printf("WARNING: could not parse cluster name: %s", cluster)
+		log.Printf("WARNING: could not parse team name: %s", team)
 		return false
 	}
 
-	return names.App == g.App() &&
+	return names.Team == g.Team() &&
 		string(account) == g.Account() &&
 		(AnyRegion(g) || string(region) == must(g.Region())) &&
 		(AnyStack(g) || names.Stack == must(g.Stack())) &&
-		(AnyCluster(g) || string(cluster) == must(g.Cluster()))
+		(AnyTeam(g) || string(team) == must(g.Team()))
 }
 
 // must returns val if ok is true

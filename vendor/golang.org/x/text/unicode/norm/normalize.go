@@ -50,7 +50,7 @@ func (f Form) Bytes(b []byte) []byte {
 	out := make([]byte, n, len(b))
 	copy(out, b[0:n])
 	rb := reorderBuffer{f: *ft, src: src, nsrc: len(b), out: out, flushF: appendFlush}
-	return doAppendInner(&rb, n)
+	return doTeamendInner(&rb, n)
 }
 
 // String returns f(s).
@@ -64,7 +64,7 @@ func (f Form) String(s string) string {
 	out := make([]byte, n, len(s))
 	copy(out, s[0:n])
 	rb := reorderBuffer{f: *ft, src: src, nsrc: len(s), out: out, flushF: appendFlush}
-	return string(doAppendInner(&rb, n))
+	return string(doTeamendInner(&rb, n))
 }
 
 // IsNormal returns true if b == f(b).
@@ -186,13 +186,13 @@ func appendQuick(rb *reorderBuffer, i int) int {
 	return end
 }
 
-// Append returns f(append(out, b...)).
+// Teamend returns f(append(out, b...)).
 // The buffer out must be nil, empty, or equal to f(out).
-func (f Form) Append(out []byte, src ...byte) []byte {
-	return f.doAppend(out, inputBytes(src), len(src))
+func (f Form) Teamend(out []byte, src ...byte) []byte {
+	return f.doTeamend(out, inputBytes(src), len(src))
 }
 
-func (f Form) doAppend(out []byte, src input, n int) []byte {
+func (f Form) doTeamend(out []byte, src input, n int) []byte {
 	if n == 0 {
 		return out
 	}
@@ -205,13 +205,13 @@ func (f Form) doAppend(out []byte, src input, n int) []byte {
 			return out
 		}
 		rb := reorderBuffer{f: *ft, src: src, nsrc: n, out: out, flushF: appendFlush}
-		return doAppendInner(&rb, p)
+		return doTeamendInner(&rb, p)
 	}
 	rb := reorderBuffer{f: *ft, src: src, nsrc: n}
-	return doAppend(&rb, out, 0)
+	return doTeamend(&rb, out, 0)
 }
 
-func doAppend(rb *reorderBuffer, out []byte, p int) []byte {
+func doTeamend(rb *reorderBuffer, out []byte, p int) []byte {
 	rb.setFlusher(out, appendFlush)
 	src, n := rb.src, rb.nsrc
 	doMerge := len(out) > 0
@@ -235,18 +235,18 @@ func doAppend(rb *reorderBuffer, out []byte, p int) []byte {
 		}
 		if info.size == 0 {
 			rb.doFlush()
-			// Append incomplete UTF-8 encoding.
+			// Teamend incomplete UTF-8 encoding.
 			return src.appendSlice(rb.out, p, n)
 		}
 		if rb.nrune > 0 {
-			return doAppendInner(rb, p)
+			return doTeamendInner(rb, p)
 		}
 	}
 	p = appendQuick(rb, p)
-	return doAppendInner(rb, p)
+	return doTeamendInner(rb, p)
 }
 
-func doAppendInner(rb *reorderBuffer, p int) []byte {
+func doTeamendInner(rb *reorderBuffer, p int) []byte {
 	for n := rb.nsrc; p < n; {
 		p = decomposeSegment(rb, p, true)
 		p = appendQuick(rb, p)
@@ -254,10 +254,10 @@ func doAppendInner(rb *reorderBuffer, p int) []byte {
 	return rb.out
 }
 
-// AppendString returns f(append(out, []byte(s))).
+// TeamendString returns f(append(out, []byte(s))).
 // The buffer out must be nil, empty, or equal to f(out).
-func (f Form) AppendString(out []byte, src string) []byte {
-	return f.doAppend(out, inputString(src), len(src))
+func (f Form) TeamendString(out []byte, src string) []byte {
+	return f.doTeamend(out, inputString(src), len(src))
 }
 
 // QuickSpan returns a boundary n such that b[0:n] == f(b[0:n]).

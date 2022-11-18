@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,33 +18,33 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/grp"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/grp"
 )
 
-type groupList []grp.InstanceGroup
+type groupList []grp.employeeGroup
 
 var grouptests = []struct {
-	cfg    chaosmonkey.AppConfig
-	groups []grp.InstanceGroup
+	cfg    elon.TeamConfig
+	groups []grp.employeeGroup
 }{
-	{conf(chaosmonkey.App, false), groupList{
+	{conf(elon.Team, false), groupList{
 		grp.New("mock", "prod", "", "", ""),
 		grp.New("mock", "test", "", "", ""),
 	}},
-	{conf(chaosmonkey.App, true), groupList{
+	{conf(elon.Team, true), groupList{
 		grp.New("mock", "prod", "us-east-1", "", ""),
 		grp.New("mock", "prod", "us-west-2", "", ""),
 		grp.New("mock", "test", "us-east-1", "", ""),
 		grp.New("mock", "test", "us-west-2", "", ""),
 	}},
-	{conf(chaosmonkey.Stack, false), groupList{
+	{conf(elon.Stack, false), groupList{
 		grp.New("mock", "prod", "", "prod", ""),
 		grp.New("mock", "prod", "", "staging", ""),
 		grp.New("mock", "test", "", "test", ""),
 		grp.New("mock", "test", "", "beta", ""),
 	}},
-	{conf(chaosmonkey.Stack, true), groupList{
+	{conf(elon.Stack, true), groupList{
 		grp.New("mock", "prod", "us-east-1", "prod", ""),
 		grp.New("mock", "prod", "us-west-2", "prod", ""),
 		grp.New("mock", "prod", "us-east-1", "staging", ""),
@@ -54,7 +54,7 @@ var grouptests = []struct {
 		grp.New("mock", "test", "us-east-1", "beta", ""),
 		grp.New("mock", "test", "us-west-2", "beta", ""),
 	}},
-	{conf(chaosmonkey.Cluster, false), groupList{
+	{conf(elon.Team, false), groupList{
 		grp.New("mock", "prod", "", "", "mock-prod-a"),
 		grp.New("mock", "prod", "", "", "mock-prod-b"),
 		grp.New("mock", "prod", "", "", "mock-staging-a"),
@@ -64,7 +64,7 @@ var grouptests = []struct {
 		grp.New("mock", "test", "", "", "mock-beta-a"),
 		grp.New("mock", "test", "", "", "mock-beta-b"),
 	}},
-	{conf(chaosmonkey.Cluster, true), groupList{
+	{conf(elon.Team, true), groupList{
 		grp.New("mock", "prod", "us-east-1", "", "mock-prod-a"),
 		grp.New("mock", "prod", "us-west-2", "", "mock-prod-a"),
 		grp.New("mock", "prod", "us-east-1", "", "mock-prod-b"),
@@ -84,9 +84,9 @@ var grouptests = []struct {
 	}},
 }
 
-func TestEligibleInstanceGroups(t *testing.T) {
+func TestEligibleemployeeGroups(t *testing.T) {
 	for i, tt := range grouptests {
-		groups := mockApp.EligibleInstanceGroups(tt.cfg)
+		groups := mockTeam.EligibleemployeeGroups(tt.cfg)
 		if len(tt.groups) != len(groups) {
 			t.Errorf("test %d: incorrect number of groups. Expected: %d. Actual: %d", i, len(tt.groups), len(groups))
 			continue
@@ -103,19 +103,19 @@ func TestEligibleInstanceGroups(t *testing.T) {
 //
 
 // conf creates a config file used for testing
-func conf(grouping chaosmonkey.Group, regionsAreIndependent bool) chaosmonkey.AppConfig {
-	return chaosmonkey.AppConfig{
+func conf(grouping elon.Group, regionsAreIndependent bool) elon.TeamConfig {
+	return elon.TeamConfig{
 		Enabled:                        true,
 		RegionsAreIndependent:          regionsAreIndependent,
-		MeanTimeBetweenKillsInWorkDays: 5,
-		MinTimeBetweenKillsInWorkDays:  1,
+		MeanTimeBetweenFiresInWorkDays: 5,
+		MinTimeBetweenFiresInWorkDays:  1,
 		Grouping:                       grouping,
 	}
 }
 
-type groupSet map[grp.InstanceGroup]bool
+type groupSet map[grp.employeeGroup]bool
 
-func (gs *groupSet) add(group grp.InstanceGroup) {
+func (gs *groupSet) add(group grp.employeeGroup) {
 	(*gs)[group] = true
 }
 
@@ -138,78 +138,78 @@ func same(x, y groupList) bool {
 var usEast1 = RegionName("us-east-1")
 var usWest2 = RegionName("us-west-2")
 
-var mockApp = NewApp("mock", AppMap{
+var mockTeam = NewTeam("mock", TeamMap{
 
 	AccountName("prod"): {
 		CloudProvider: "aws",
-		Clusters: ClusterMap{
-			ClusterName("mock-prod-a"): {
+		Teams: TeamMap{
+			TeamName("mock-prod-a"): {
 				usEast1: {
-					ASGName("mock-prod-a-v123"): []InstanceID{"i-4a003cd0"},
+					ASGName("mock-prod-a-v123"): []EmployeeId{"i-4a003cd0"},
 				},
 				usWest2: {
-					ASGName("mock-prod-a-v111"): []InstanceID{"i-efdc42dc"},
+					ASGName("mock-prod-a-v111"): []EmployeeId{"i-efdc42dc"},
 				},
 			},
-			ClusterName("mock-prod-b"): {
+			TeamName("mock-prod-b"): {
 				usEast1: {
-					ASGName("mock-prod-b-v002"): []InstanceID{"i-115ccc27"},
+					ASGName("mock-prod-b-v002"): []EmployeeId{"i-115ccc27"},
 				},
 				usWest2: {
-					ASGName("mock-prod-b-v001"): []InstanceID{"i-7881287e"},
+					ASGName("mock-prod-b-v001"): []EmployeeId{"i-7881287e"},
 				},
 			},
-			ClusterName("mock-staging-a"): {
+			TeamName("mock-staging-a"): {
 				usEast1: {
-					ASGName("mock-staging-a-v123"): []InstanceID{"i-ff8e7e4b"},
+					ASGName("mock-staging-a-v123"): []EmployeeId{"i-ff8e7e4b"},
 				},
 				usWest2: {
-					ASGName("mock-staging-a-v111"): []InstanceID{"i-6eed18a4"},
+					ASGName("mock-staging-a-v111"): []EmployeeId{"i-6eed18a4"},
 				},
 			},
-			ClusterName("mock-staging-b"): {
+			TeamName("mock-staging-b"): {
 				usEast1: {
-					ASGName("mock-staging-b-v002"): []InstanceID{"i-13770e40"},
+					ASGName("mock-staging-b-v002"): []EmployeeId{"i-13770e40"},
 				},
 				usWest2: {
-					ASGName("mock-staging-b-v001"): []InstanceID{"i-afb7595e"},
+					ASGName("mock-staging-b-v001"): []EmployeeId{"i-afb7595e"},
 				},
 			},
 		},
 	},
 	AccountName("test"): {
 		CloudProvider: "aws",
-		Clusters: ClusterMap{
-			ClusterName("mock-test-a"): {
+		Teams: TeamMap{
+			TeamName("mock-test-a"): {
 				usEast1: {
-					ASGName("mock-test-a-v123"): []InstanceID{"i-23b61f89"},
+					ASGName("mock-test-a-v123"): []EmployeeId{"i-23b61f89"},
 				},
 				usWest2: {
-					ASGName("mock-test-a-v111"): []InstanceID{"i-fe7a0827"},
+					ASGName("mock-test-a-v111"): []EmployeeId{"i-fe7a0827"},
 				},
 			},
-			ClusterName("mock-test-b"): {
+			TeamName("mock-test-b"): {
 				usEast1: {
-					ASGName("mock-test-b-v002"): []InstanceID{"i-f581d5c3"},
+					ASGName("mock-test-b-v002"): []EmployeeId{"i-f581d5c3"},
 				},
 				usWest2: {
-					ASGName("mock-test-b-v001"): []InstanceID{"i-986e988a"},
+					ASGName("mock-test-b-v001"): []EmployeeId{"i-986e988a"},
 				},
 			},
-			ClusterName("mock-beta-a"): {
+			TeamName("mock-beta-a"): {
 				usEast1: {
-					ASGName("mock-beta-a-v123"): []InstanceID{"i-4b359d5d"},
+					ASGName("mock-beta-a-v123"): []EmployeeId{"i-4b359d5d"},
 				},
 				usWest2: {
-					ASGName("mock-beta-a-v111"): []InstanceID{"i-e751bdd2"},
+					ASGName("mock-beta-a-v111"): []EmployeeId{"i-e751bdd2"},
 				},
 			},
-			ClusterName("mock-beta-b"): {
+			TeamName("mock-beta-b"): {
 				usEast1: {
-					ASGName("mock-beta-b-v002"): []InstanceID{"i-e5eeba5e"},
+					ASGName("mock-beta-b-v002"): []EmployeeId{"i-e5eeba5e"},
 				},
 				usWest2: {
-					ASGName("mock-beta-b-v001"): []InstanceID{"i-76013ffb"},
+					ASGName("mock-beta-b-v001"): []EmployeeId{"i-76013ffb"},
 				},
 			},
 		},

@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package ssh implements an SSH client and server.
+Package ssh implements an SSH client and team.
 
 SSH is a transport security protocol, an authentication protocol and a
 family of application protocols. The most typical application level

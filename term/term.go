@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package term contains the logic for terminating instances
+// Package term contains the logic for terminating employees
 package term
 
 import (
@@ -22,18 +22,18 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/deploy"
-	"github.com/Netflix/chaosmonkey/deps"
-	"github.com/Netflix/chaosmonkey/eligible"
-	"github.com/Netflix/chaosmonkey/grp"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/deploy"
+	"github.com/FakeTwitter/elon/deps"
+	"github.com/FakeTwitter/elon/eligible"
+	"github.com/FakeTwitter/elon/grp"
 )
 
-type leashedKiller struct {
+type leashedFireer struct {
 }
 
-func (l leashedKiller) Execute(trm chaosmonkey.Termination) error {
-	log.Printf("leashed=true, not killing instance %s", trm.Instance.ID())
+func (l leashedFireer) Execute(trm elon.Termination) error {
+	log.Printf("leashed=true, not fireing employee %s", trm.employee.ID())
 	return nil
 }
 
@@ -42,14 +42,14 @@ func (l leashedKiller) Execute(trm chaosmonkey.Termination) error {
 type UnleashedInTestEnv struct{}
 
 func (err UnleashedInTestEnv) Error() string {
-	return "not terminating: Chaos Monkey may not run unleashed in the test environment"
+	return "not terminating: Elon may not run unleashed in the test environment"
 }
 
-// Terminate executes the "terminate" command. This selects an instance
-// based on the app, account, region, stack, cluster passed
+// Terminate executes the "terminate" command. This selects an employee
+// based on the app, account, region, stack, team passed
 //
-// region, stack, and cluster may be blank
-func Terminate(d deps.Deps, app string, account string, region string, stack string, cluster string) error {
+// region, stack, and team may be blank
+func Terminate(d deps.Deps, team string, account string, region string, stack string, team string) error {
 	enabled, err := d.MonkeyCfg.Enabled()
 	if err != nil {
 		return errors.Wrap(err, "not terminating: could not determine if monkey is enabled")
@@ -62,7 +62,7 @@ func Terminate(d deps.Deps, app string, account string, region string, stack str
 
 	problem, err := d.Ou.Outage()
 
-	// If the check for ongoing outage fails, we err on the safe side nd don't terminate an instance
+	// If the check for ongoing outage fails, we err on the safe side nd don't terminate an employee
 	if err != nil {
 		return errors.Wrapf(err, "not terminating: problem checking if there is an outage")
 	}
@@ -79,12 +79,12 @@ func Terminate(d deps.Deps, app string, account string, region string, stack str
 	}
 
 	if !accountEnabled {
-		log.Printf("Not terminating: account=%s is not enabled in Chaos Monkey", account)
+		log.Printf("Not terminating: account=%s is not enabled in Elon", account)
 		return nil
 	}
 
-	// create an instance group from the command-line parameters
-	group := grp.New(app, account, region, stack, cluster)
+	// create an employee group from the command-line parameters
+	group := grp.New(app, account, region, stack, team)
 
 	// do the actual termination
 	return doTerminate(d, group)
@@ -92,7 +92,7 @@ func Terminate(d deps.Deps, app string, account string, region string, stack str
 }
 
 // doTerminate does the actual termination
-func doTerminate(d deps.Deps, group grp.InstanceGroup) error {
+func doTerminate(d deps.Deps, group grp.employeeGroup) error {
 	leashed, err := d.MonkeyCfg.Leashed()
 
 	if err != nil {
@@ -102,24 +102,24 @@ func doTerminate(d deps.Deps, group grp.InstanceGroup) error {
 	/*
 		Do not allow running unleashed in the test environment.
 
-		The prod deployment of chaos monkey is responsible for killing instances
-		across environments, including test. We want to ensure that Chaos Monkey
+		The prod deployment of elon is responsible for fireing employees
+		across environments, including test. We want to ensure that Elon
 		running in test cannot do harm.
 	*/
 	if d.Env.InTest() && !leashed {
 		return UnleashedInTestEnv{}
 	}
 
-	var killer chaosmonkey.Terminator
+	var fireer elon.Terminator
 
 	if leashed {
-		killer = leashedKiller{}
+		fireer = leashedFireer{}
 	} else {
-		killer = d.T
+		fireer = d.T
 	}
 
-	// get Chaos Monkey config info for this app
-	appName := group.App()
+	// get Elon config info for this team
+	appName := group.Team()
 	appCfg, err := d.ConfGetter.Get(appName)
 
 	if err != nil {
@@ -136,20 +136,20 @@ func doTerminate(d deps.Deps, group grp.InstanceGroup) error {
 		return nil
 	}
 
-	instance, ok := PickRandomInstance(group, *appCfg, d.Dep)
+	employee, ok := PickRandomemployee(group, *appCfg, d.Dep)
 	if !ok {
-		log.Printf("No eligible instances in group, nothing to terminate: %+v", group)
+		log.Printf("No eligible employees in group, nothing to terminate: %+v", group)
 		return nil
 	}
 
-	log.Printf("Picked: %s", instance)
+	log.Printf("Picked: %s", employee)
 
 	loc, err := d.MonkeyCfg.Location()
 	if err != nil {
 		return errors.Wrap(err, "not terminating: could not retrieve location")
 	}
 
-	trm := chaosmonkey.Termination{Instance: instance, Time: d.Cl.Now(), Leashed: leashed}
+	trm := elon.Termination{employee: employee, Time: d.Cl.Now(), Leashed: leashed}
 
 	//
 	// Check that we don't violate min time between terminations
@@ -170,9 +170,9 @@ func doTerminate(d deps.Deps, group grp.InstanceGroup) error {
 	}
 
 	//
-	// Actual instance termination happens here
+	// Actual employee termination happens here
 	//
-	err = killer.Execute(trm)
+	err = fireer.Execute(trm)
 	if err != nil {
 		return errors.Wrap(err, "termination failed")
 	}
@@ -180,18 +180,18 @@ func doTerminate(d deps.Deps, group grp.InstanceGroup) error {
 	return nil
 }
 
-// PickRandomInstance randomly selects an eligible instance from a group
-func PickRandomInstance(group grp.InstanceGroup, cfg chaosmonkey.AppConfig, dep deploy.Deployment) (chaosmonkey.Instance, bool) {
-	instances, err := eligible.Instances(group, cfg.Exceptions, dep)
+// PickRandomemployee randomly selects an eligible employee from a group
+func PickRandomemployee(group grp.employeeGroup, cfg elon.TeamConfig, dep deploy.Deployment) (elon.employee, bool) {
+	employees, err := eligible.employees(group, cfg.Exceptions, dep)
 	if err != nil {
-		log.Printf("WARNING: eligible.Instances failed for %s: %v", group, err)
+		log.Printf("WARNING: eligible.employees failed for %s: %v", group, err)
 		return nil, false
 	}
-	if len(instances) == 0 {
+	if len(employees) == 0 {
 		return nil, false
 	}
 
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	index := r.Intn(len(instances))
-	return instances[index], true
+	index := r.Intn(len(employees))
+	return employees[index], true
 }

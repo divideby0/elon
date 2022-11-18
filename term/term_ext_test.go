@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,32 +17,32 @@ package term_test
 import (
 	"testing"
 
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/config/param"
-	D "github.com/Netflix/chaosmonkey/deploy"
-	"github.com/Netflix/chaosmonkey/mock"
-	"github.com/Netflix/chaosmonkey/term"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/config/param"
+	D "github.com/FakeTwitter/elon/deploy"
+	"github.com/FakeTwitter/elon/mock"
+	"github.com/FakeTwitter/elon/term"
 )
 
 func TestEnabledAccounts(t *testing.T) {
 	d := mock.Deps()
 	d.Dep = mock.NewDeployment(
-		map[string]D.AppMap{
+		map[string]D.TeamMap{
 			"foo": {
-				D.AccountName("prod"): {CloudProvider: "aws", Clusters: D.ClusterMap{D.ClusterName("foo"): {D.RegionName("us-east-1"): {D.ASGName("foo-v001"): []D.InstanceID{"i-00000000"}}}}},
-				D.AccountName("test"): {CloudProvider: "aws", Clusters: D.ClusterMap{D.ClusterName("foo"): {D.RegionName("us-east-1"): {D.ASGName("foo-v001"): []D.InstanceID{"i-00000001"}}}}},
-				D.AccountName("mce"):  {CloudProvider: "aws", Clusters: D.ClusterMap{D.ClusterName("foo"): {D.RegionName("us-east-1"): {D.ASGName("foo-v001"): []D.InstanceID{"i-00000002"}}}}},
+				D.AccountName("prod"): {CloudProvider: "aws", Teams: D.TeamMap{D.TeamName("foo"): {D.RegionName("us-east-1"): {D.ASGName("foo-v001"): []D.EmployeeId{"i-00000000"}}}}},
+				D.AccountName("test"): {CloudProvider: "aws", Teams: D.TeamMap{D.TeamName("foo"): {D.RegionName("us-east-1"): {D.ASGName("foo-v001"): []D.EmployeeId{"i-00000001"}}}}},
+				D.AccountName("mce"):  {CloudProvider: "aws", Teams: D.TeamMap{D.TeamName("foo"): {D.RegionName("us-east-1"): {D.ASGName("foo-v001"): []D.EmployeeId{"i-00000002"}}}}},
 			},
 		})
 
-	app := "foo"
+	team := "foo"
 	region := "us-east-1"
 	stack := ""
-	cluster := ""
+	team := ""
 
 	tests := []struct {
 		enabledAccounts []string
-		killAccount     string
+		fireAccount     string
 		want            bool
 	}{
 		{[]string{"prod"}, "prod", true},
@@ -58,7 +58,7 @@ func TestEnabledAccounts(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		account := test.killAccount
+		account := test.fireAccount
 
 		// Set up the mock config that will use the list of accounts we pass it
 		cfg := config.Defaults()
@@ -68,17 +68,17 @@ func TestEnabledAccounts(t *testing.T) {
 
 		d.MonkeyCfg = cfg
 
-		// Set up the mock terminator that will track if a kill happened
+		// Set up the mock terminator that will track if a fire happened
 		// create a new one each iteration so its state gets reset to zero
 		mockT := new(mock.Terminator)
 		d.T = mockT
 
-		if err := term.Terminate(d, app, account, region, stack, cluster); err != nil {
+		if err := term.Terminate(d, app, account, region, stack, team); err != nil {
 			t.Fatal(err)
 		}
 
 		if got, want := mockT.Ncalls == 1, test.want; got != want {
-			t.Errorf("kill? (account=%s, enabledAccounts=%v, got %t, want %t, mockT.Ncalls=%d", account, test.enabledAccounts, got, want, mockT.Ncalls)
+			t.Errorf("fire? (account=%s, enabledAccounts=%v, got %t, want %t, mockT.Ncalls=%d", account, test.enabledAccounts, got, want, mockT.Ncalls)
 		}
 
 	}

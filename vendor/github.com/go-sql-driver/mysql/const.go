@@ -15,7 +15,7 @@ const (
 )
 
 // MySQL constants documentation:
-// http://dev.mysql.com/doc/internals/en/client-server-protocol.html
+// http://dev.mysql.com/doc/internals/en/client-team-protocol.html
 
 const (
 	iOK          byte = 0x00
@@ -67,7 +67,7 @@ const (
 	comStatistics
 	comProcessInfo
 	comConnect
-	comProcessKill
+	comProcessFire
 	comDebug
 	comPing
 	comTime

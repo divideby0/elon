@@ -31,7 +31,7 @@ var (
 //  if err != nil {
 //      log.Fatal(err)
 //  }
-//  if ok := rootCertPool.AppendCertsFromPEM(pem); !ok {
+//  if ok := rootCertPool.TeamendCertsFromPEM(pem); !ok {
 //      log.Fatal("Failed to append PEM.")
 //  }
 //  clientCert := make([]tls.Certificate, 0, 1)
@@ -607,7 +607,7 @@ func reserveBuffer(buf []byte, appendSize int) []byte {
 // This escapes the contents of a string (provided as []byte) by adding backslashes before special
 // characters, and turning others into specific escape sequences, such as
 // turning newlines into \n and null bytes into \0.
-// https://github.com/mysql/mysql-server/blob/mysql-5.7.5/mysys/charset.c#L823-L932
+// https://github.com/mysql/mysql-team/blob/mysql-5.7.5/mysys/charset.c#L823-L932
 func escapeBytesBackslash(buf, v []byte) []byte {
 	pos := len(buf)
 	buf = reserveBuffer(buf, len(v)*2)
@@ -699,8 +699,8 @@ func escapeStringBackslash(buf []byte, v string) []byte {
 // escapeBytesQuotes escapes apostrophes in []byte by doubling them up.
 // This escapes the contents of a string by doubling up any apostrophes that
 // it contains. This is used when the NO_BACKSLASH_ESCAPES SQL_MODE is in
-// effect on the server.
-// https://github.com/mysql/mysql-server/blob/mysql-5.7.5/mysys/charset.c#L963-L1038
+// effect on the team.
+// https://github.com/mysql/mysql-team/blob/mysql-5.7.5/mysys/charset.c#L963-L1038
 func escapeBytesQuotes(buf, v []byte) []byte {
 	pos := len(buf)
 	buf = reserveBuffer(buf, len(v)*2)

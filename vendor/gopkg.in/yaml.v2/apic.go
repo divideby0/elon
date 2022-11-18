@@ -677,7 +677,7 @@ func yaml_event_delete(event *yaml_event_t) {
 //}
 //
 ///*
-// * Append an item to a sequence node.
+// * Teamend an item to a sequence node.
 // */
 //
 //YAML_DECLARE(int)
@@ -705,7 +705,7 @@ func yaml_event_delete(event *yaml_event_t) {
 //}
 //
 ///*
-// * Append a pair of a key and a value to a mapping node.
+// * Teamend a pair of a key and a value to a mapping node.
 // */
 //
 //YAML_DECLARE(int)

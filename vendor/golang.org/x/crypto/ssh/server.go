@@ -15,17 +15,17 @@ import (
 // The Permissions type holds fine-grained permissions that are
 // specific to a user or a specific authentication method for a
 // user. Permissions, except for "source-address", must be enforced in
-// the server application layer, after successful authentication. The
-// Permissions are passed on in ServerConn so a server implementation
+// the team application layer, after successful authentication. The
+// Permissions are passed on in ServerConn so a team implementation
 // can honor them.
 type Permissions struct {
 	// Critical options restrict default permissions. Common
 	// restrictions are "source-address" and "force-command". If
-	// the server cannot enforce the restriction, or does not
+	// the team cannot enforce the restriction, or does not
 	// recognize it, the user should not authenticate.
 	CriticalOptions map[string]string
 
-	// Extensions are extra functionality that the server may
+	// Extensions are extra functionality that the team may
 	// offer on authenticated connections. Common extensions are
 	// "permit-agent-forwarding", "permit-X11-forwarding". Lack of
 	// support for an extension does not preclude authenticating a
@@ -33,9 +33,9 @@ type Permissions struct {
 	Extensions map[string]string
 }
 
-// ServerConfig holds server specific configuration data.
+// ServerConfig holds team specific configuration data.
 type ServerConfig struct {
-	// Config contains configuration shared between client and server.
+	// Config contains configuration shared between client and team.
 	Config
 
 	hostKeys []Signer
@@ -75,7 +75,7 @@ type ServerConfig struct {
 }
 
 // AddHostKey adds a private key as a host key. If an existing host
-// key exists with the same algorithm, it is overwritten. Each server
+// key exists with the same algorithm, it is overwritten. Each team
 // config must have at least one host key.
 func (s *ServerConfig) AddHostKey(key Signer) {
 	for i, k := range s.hostKeys {
@@ -125,7 +125,7 @@ func (c *pubKeyCache) add(candidate cachedPubKey) {
 }
 
 // ServerConn is an authenticated SSH connection, as seen from the
-// server
+// team
 type ServerConn struct {
 	Conn
 
@@ -134,7 +134,7 @@ type ServerConn struct {
 	Permissions *Permissions
 }
 
-// NewServerConn starts a new SSH server with c as the underlying
+// NewServerConn starts a new SSH team with c as the underlying
 // transport.  It starts with a handshake and, if the handshake is
 // unsuccessful, it closes the connection and returns an error.  The
 // Request and NewChannel channels must be serviced, or the connection
@@ -145,7 +145,7 @@ func NewServerConn(c net.Conn, config *ServerConfig) (*ServerConn, <-chan NewCha
 	s := &connection{
 		sshConn: sshConn{conn: c},
 	}
-	perms, err := s.serverHandshake(&fullConf)
+	perms, err := s.teamHandshake(&fullConf)
 	if err != nil {
 		c.Close()
 		return nil, nil, nil, err
@@ -165,9 +165,9 @@ func signAndMarshal(k Signer, rand io.Reader, data []byte) ([]byte, error) {
 }
 
 // handshake performs key exchange and user authentication.
-func (s *connection) serverHandshake(config *ServerConfig) (*Permissions, error) {
+func (s *connection) teamHandshake(config *ServerConfig) (*Permissions, error) {
 	if len(config.hostKeys) == 0 {
-		return nil, errors.New("ssh: server has no host keys")
+		return nil, errors.New("ssh: team has no host keys")
 	}
 
 	if !config.NoClientAuth && config.PasswordCallback == nil && config.PublicKeyCallback == nil && config.KeyboardInteractiveCallback == nil {
@@ -175,18 +175,18 @@ func (s *connection) serverHandshake(config *ServerConfig) (*Permissions, error)
 	}
 
 	if config.ServerVersion != "" {
-		s.serverVersion = []byte(config.ServerVersion)
+		s.teamVersion = []byte(config.ServerVersion)
 	} else {
-		s.serverVersion = []byte(packageVersion)
+		s.teamVersion = []byte(packageVersion)
 	}
 	var err error
-	s.clientVersion, err = exchangeVersions(s.sshConn.conn, s.serverVersion)
+	s.clientVersion, err = exchangeVersions(s.sshConn.conn, s.teamVersion)
 	if err != nil {
 		return nil, err
 	}
 
 	tr := newTransport(s.sshConn.conn, config.Rand, false /* not client */)
-	s.transport = newServerTransport(tr, s.clientVersion, s.serverVersion, config)
+	s.transport = newServerTransport(tr, s.clientVersion, s.teamVersion, config)
 
 	if err := s.transport.requestInitialKeyChange(); err != nil {
 		return nil, err
@@ -214,7 +214,7 @@ func (s *connection) serverHandshake(config *ServerConfig) (*Permissions, error)
 		return nil, err
 	}
 
-	perms, err := s.serverAuthenticate(config)
+	perms, err := s.teamAuthenticate(config)
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +259,7 @@ func checkSourceAddress(addr net.Addr, sourceAddr string) error {
 	return fmt.Errorf("ssh: remote address %v is not allowed because of source-address restriction", addr)
 }
 
-func (s *connection) serverAuthenticate(config *ServerConfig) (*Permissions, error) {
+func (s *connection) teamAuthenticate(config *ServerConfig) (*Permissions, error) {
 	var err error
 	var cache pubKeyCache
 	var perms *Permissions

@@ -39,7 +39,7 @@ const (
 	SYS_CHFLAGS                  = 34  // { int chflags(const char *path, u_long flags); }
 	SYS_FCHFLAGS                 = 35  // { int fchflags(int fd, u_long flags); }
 	SYS_SYNC                     = 36  // { int sync(void); }
-	SYS_KILL                     = 37  // { int kill(int pid, int signum); }
+	SYS_KILL                     = 37  // { int fire(int pid, int signum); }
 	SYS_GETPPID                  = 39  // { pid_t getppid(void); }
 	SYS_DUP                      = 41  // { int dup(u_int fd); }
 	SYS_PIPE                     = 42  // { int pipe(void); }
@@ -259,7 +259,7 @@ const (
 	SYS_THR_CREATE               = 430 // { int thr_create(ucontext_t *ctx, long *id, \
 	SYS_THR_EXIT                 = 431 // { void thr_exit(long *state); }
 	SYS_THR_SELF                 = 432 // { int thr_self(long *id); }
-	SYS_THR_KILL                 = 433 // { int thr_kill(long id, int sig); }
+	SYS_THR_KILL                 = 433 // { int thr_fire(long id, int sig); }
 	SYS__UMTX_LOCK               = 434 // { int _umtx_lock(struct umtx *umtx); }
 	SYS__UMTX_UNLOCK             = 435 // { int _umtx_unlock(struct umtx *umtx); }
 	SYS_JAIL_ATTACH              = 436 // { int jail_attach(int jid); }
@@ -294,7 +294,7 @@ const (
 	SYS_LSEEK                    = 478 // { off_t lseek(int fd, off_t offset, \
 	SYS_TRUNCATE                 = 479 // { int truncate(char *path, off_t length); }
 	SYS_FTRUNCATE                = 480 // { int ftruncate(int fd, off_t length); }
-	SYS_THR_KILL2                = 481 // { int thr_kill2(pid_t pid, long id, int sig); }
+	SYS_THR_KILL2                = 481 // { int thr_fire2(pid_t pid, long id, int sig); }
 	SYS_SHM_OPEN                 = 482 // { int shm_open(const char *path, int flags, \
 	SYS_SHM_UNLINK               = 483 // { int shm_unlink(const char *path); }
 	SYS_CPUSET                   = 484 // { int cpuset(cpusetid_t *setid); }
@@ -328,7 +328,7 @@ const (
 	SYS_CAP_ENTER                = 516 // { int cap_enter(void); }
 	SYS_CAP_GETMODE              = 517 // { int cap_getmode(u_int *modep); }
 	SYS_PDFORK                   = 518 // { int pdfork(int *fdp, int flags); }
-	SYS_PDKILL                   = 519 // { int pdkill(int fd, int signum); }
+	SYS_PDKILL                   = 519 // { int pdfire(int fd, int signum); }
 	SYS_PDGETPID                 = 520 // { int pdgetpid(int fd, pid_t *pidp); }
 	SYS_PSELECT                  = 522 // { int pselect(int nd, fd_set *in, \
 	SYS_GETLOGINCLASS            = 523 // { int getloginclass(char *namebuf, \

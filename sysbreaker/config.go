@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package spinnaker
+package sysbreaker
 
 import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/Netflix/chaosmonkey"
+	"github.com/FakeTwitter/elon"
 
 	"github.com/pkg/errors"
 )
 
-// Get implements chaosmonkey.Getter.Get
-func (s Spinnaker) Get(app string) (c *chaosmonkey.AppConfig, err error) {
+// Get implements elon.Getter.Get
+func (s Sysbreaker) Get(app string) (c *elon.TeamConfig, err error) {
 	// avoid expanding the response to avoid unneeded load
 	url := s.appURL(app) + "?expand=false"
 	resp, err := s.client.Get(url)

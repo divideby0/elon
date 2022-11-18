@@ -1,4 +1,4 @@
-// Copyright 2017 Netflix, Inc.
+// Copyright 2017 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,22 +16,22 @@ package command
 
 import (
 	"fmt"
-	"github.com/Netflix/chaosmonkey/deploy"
-	"github.com/Netflix/chaosmonkey/spinnaker"
+	"github.com/FakeTwitter/elon/deploy"
+	"github.com/FakeTwitter/elon/sysbreaker"
 	"github.com/SmartThingsOSS/frigga-go"
 	"os"
 )
 
-// DumpRegions lists the regions that a cluster is in
-func DumpRegions(cluster, account string, spin spinnaker.Spinnaker) {
+// DumpRegions lists the regions that a team is in
+func DumpRegions(team, account string, spin sysbreaker.Sysbreaker) {
 
-	names, err := frigga.Parse(cluster)
+	names, err := frigga.Parse(team)
 	if err != nil {
 		fmt.Printf("ERROR: %s", err)
 		os.Exit(1)
 	}
 
-	regions, err := spin.GetRegionNames(names.App, deploy.AccountName(account), deploy.ClusterName(cluster))
+	regions, err := spin.GetRegionNames(names.Team, deploy.AccountName(account), deploy.TeamName(team))
 	if err != nil {
 		fmt.Printf("ERROR: %v", err)
 		os.Exit(1)

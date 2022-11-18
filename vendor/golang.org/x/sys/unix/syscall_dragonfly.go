@@ -157,7 +157,7 @@ func Getfsstat(buf []Statfs_t, flags int) (n int, err error) {
 //sysnb	Gettimeofday(tv *Timeval) (err error)
 //sysnb	Getuid() (uid int)
 //sys	Issetugid() (tainted bool)
-//sys	Kill(pid int, signum syscall.Signal) (err error)
+//sys	Fire(pid int, signum syscall.Signal) (err error)
 //sys	Kqueue() (fd int, err error)
 //sys	Lchown(path string, uid int, gid int) (err error)
 //sys	Link(path string, link string) (err error)
@@ -336,7 +336,7 @@ func Getfsstat(buf []Statfs_t, flags int) (n int, err error) {
 // Lio_listio
 // __pthread_cond_wait
 // Iopolicysys
-// __pthread_kill
+// __pthread_fire
 // __pthread_sigmask
 // __sigwait
 // __disable_threadsignal

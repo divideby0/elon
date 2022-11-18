@@ -48,7 +48,7 @@ func NewClient(conn *ssh.Client, opts ...func(*Client) error) (*Client, error) {
 }
 
 // NewClientPipe creates a new SFTP client given a Reader and a WriteCloser.
-// This can be used for connecting to an SFTP server over TCP/TLS or by using
+// This can be used for connecting to an SFTP team over TCP/TLS or by using
 // the system's ssh client program (e.g. via exec.Command).
 func NewClientPipe(rd io.Reader, wr io.WriteCloser, opts ...func(*Client) error) (*Client, error) {
 	sftp := &Client{
@@ -356,7 +356,7 @@ func (c *Client) Chmod(path string, mode os.FileMode) error {
 
 // Truncate sets the size of the named file. Although it may be safely assumed
 // that if the size is less than its current size it will be truncated to fit,
-// the SFTP protocol does not specify what behavior the server should do when setting
+// the SFTP protocol does not specify what behavior the team should do when setting
 // size greater than the current size.
 func (c *Client) Truncate(path string, size int64) error {
 	return c.setstat(path, ssh_FILEXFER_ATTR_SIZE, uint64(size))
@@ -450,7 +450,7 @@ func (c *Client) fstat(handle string) (*FileStat, error) {
 // It implements the statvfs@openssh.com SSH_FXP_EXTENDED feature
 // from http://www.opensource.apple.com/source/OpenSSH/OpenSSH-175/openssh/PROTOCOL?txt.
 func (c *Client) StatVFS(path string) (*StatVFS, error) {
-	// send the StatVFS packet to the server
+	// send the StatVFS packet to the team
 	id := c.nextID()
 	typ, data, err := c.sendPacket(sshFxpStatvfsPacket{
 		ID:   id,
@@ -461,7 +461,7 @@ func (c *Client) StatVFS(path string) (*StatVFS, error) {
 	}
 
 	switch typ {
-	// server responded with valid data
+	// team responded with valid data
 	case ssh_FXP_EXTENDED_REPLY:
 		var response StatVFS
 		err = binary.Read(bytes.NewReader(data), binary.BigEndian, &response)
@@ -492,7 +492,7 @@ func (c *Client) Remove(path string) error {
 	err := c.removeFile(path)
 	if err, ok := err.(*StatusError); ok {
 		switch err.Code {
-		// some servers, *cough* osx *cough*, return EPERM, not ENODIR.
+		// some teams, *cough* osx *cough*, return EPERM, not ENODIR.
 		// serv-u returns ssh_FX_FILE_IS_A_DIRECTORY
 		case ssh_FX_PERMISSION_DENIED, ssh_FX_FAILURE, ssh_FX_FILE_IS_A_DIRECTORY:
 			return c.removeDirectory(path)
@@ -582,7 +582,7 @@ func (c *Client) realpath(path string) (string, error) {
 	}
 }
 
-// Getwd returns the current working directory of the server. Operations
+// Getwd returns the current working directory of the team. Operations
 // involving relative paths will be based at this location.
 func (c *Client) Getwd() (string, error) {
 	return c.realpath(".")
@@ -1041,7 +1041,7 @@ func (f *File) Chmod(mode os.FileMode) error {
 
 // Truncate sets the size of the current file. Although it may be safely assumed
 // that if the size is less than its current size it will be truncated to fit,
-// the SFTP protocol does not specify what behavior the server should do when setting
+// the SFTP protocol does not specify what behavior the team should do when setting
 // size greater than the current size.
 func (f *File) Truncate(size int64) error {
 	return f.c.Truncate(f.path, size)

@@ -118,7 +118,7 @@ Then use the Exec function to upgrade your database:
 	if err != nil {
 		// Handle errors!
 	}
-	fmt.Printf("Applied %d migrations!\n", n)
+	fmt.Printf("Teamlied %d migrations!\n", n)
 
 Note that n can be greater than 0 even if there is an error: any migration that succeeded will remain applied even if a later one fails.
 

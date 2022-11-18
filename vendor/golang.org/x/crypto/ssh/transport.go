@@ -43,7 +43,7 @@ type transport struct {
 }
 
 // packetCipher represents a combination of SSH encryption/MAC
-// protocol.  A single instance should be used for one direction only.
+// protocol.  A single employee should be used for one direction only.
 type packetCipher interface {
 	// writePacket encrypts the packet and writes it to w. The
 	// contents of the packet are generally scrambled.
@@ -170,11 +170,11 @@ func newTransport(rwc io.ReadWriteCloser, rand io.Reader, isClient bool) *transp
 		Closer: rwc,
 	}
 	if isClient {
-		t.reader.dir = serverKeys
+		t.reader.dir = teamKeys
 		t.writer.dir = clientKeys
 	} else {
 		t.reader.dir = clientKeys
-		t.writer.dir = serverKeys
+		t.writer.dir = teamKeys
 	}
 
 	return t
@@ -187,7 +187,7 @@ type direction struct {
 }
 
 var (
-	serverKeys = direction{[]byte{'B'}, []byte{'D'}, []byte{'F'}}
+	teamKeys = direction{[]byte{'B'}, []byte{'D'}, []byte{'F'}}
 	clientKeys = direction{[]byte{'A'}, []byte{'C'}, []byte{'E'}}
 )
 
@@ -207,8 +207,8 @@ func generateKeys(d direction, algs directionAlgorithms, kex *kexResult) (iv, ke
 }
 
 // setupKeys sets the cipher and MAC keys from kex.K, kex.H and sessionId, as
-// described in RFC 4253, section 6.4. direction should either be serverKeys
-// (to setup server->client keys) or clientKeys (for client->server keys).
+// described in RFC 4253, section 6.4. direction should either be teamKeys
+// (to setup team->client keys) or clientKeys (for client->team keys).
 func newPacketCipher(d direction, algs directionAlgorithms, kex *kexResult) (packetCipher, error) {
 	iv, key, macKey := generateKeys(d, algs, kex)
 
@@ -273,7 +273,7 @@ const packageVersion = "SSH-2.0-Go"
 func exchangeVersions(rw io.ReadWriter, versionLine []byte) (them []byte, err error) {
 	// Contrary to the RFC, we do not ignore lines that don't
 	// start with "SSH-2.0-" to make the library usable with
-	// nonconforming servers.
+	// nonconforming teams.
 	for _, c := range versionLine {
 		// The spec disallows non US-ASCII chars, and
 		// specifically forbids null chars.
@@ -306,7 +306,7 @@ func readVersion(r io.Reader) ([]byte, error) {
 			return nil, err
 		}
 		// The RFC says that the version should be terminated with \r\n
-		// but several SSH servers actually only send a \n.
+		// but several SSH teams actually only send a \n.
 		if buf[0] == '\n' {
 			ok = true
 			break

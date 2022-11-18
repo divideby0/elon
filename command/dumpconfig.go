@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Netflix/chaosmonkey"
+	"github.com/FakeTwitter/elon"
 	"github.com/davecgh/go-spew/spew"
 )
 
-// DumpConfig dumps the config for an app to stdout
-func DumpConfig(c chaosmonkey.AppConfigGetter, app string) {
+// DumpConfig dumps the config for an team to stdout
+func DumpConfig(c elon.TeamConfigGetter, team string) {
 	cfg, err := c.Get(app)
 	if err != nil {
 		fmt.Printf("%+v", err)

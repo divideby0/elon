@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,33 +14,33 @@
 
 package deploy
 
-// App represents an application
-type App struct {
+// Team represents an application
+type Team struct {
 	name     string
 	accounts []*Account
 }
 
-// Name returns the name of an app
-func (a App) Name() string {
+// Name returns the name of an team
+func (a Team) Name() string {
 	return a.name
 }
 
 // Accounts returns a slice of accounts
-func (a App) Accounts() []*Account {
+func (a Team) Accounts() []*Account {
 	return a.accounts
 }
 
 type (
-	// AppName is the name of an app
-	AppName string
+	// TeamName is the name of an team
+	TeamName string
 
 	// AccountName is the name of a cloud account
 	AccountName string
 
-	// ClusterName is the app-stack-detail name of a cluster
-	ClusterName string
+	// TeamName is the app-stack-detail name of a team
+	TeamName string
 
-	// StackName is the stack part of the cluster name
+	// StackName is the stack part of the team name
 	StackName string
 
 	// RegionName is the name of an AWS region
@@ -49,49 +49,49 @@ type (
 	// ASGName is the app-stack-detail-sequence name of an ASG
 	ASGName string
 
-	// InstanceID is the i-xxxxxx name of an AWS instance or uuid of a container
-	InstanceID string
+	// EmployeeId is the i-xxxxxx name of an AWS employee or uuid of a container
+	EmployeeId string
 
 	// CloudProvider is the name of the cloud backend (e.g., aws)
 	CloudProvider string
 
-	// ClusterMap maps cluster name to information about instances by region and
+	// TeamMap maps team name to information about employees by region and
 	// ASG
-	ClusterMap map[ClusterName]map[RegionName]map[ASGName][]InstanceID
+	TeamMap map[TeamName]map[RegionName]map[ASGName][]EmployeeId
 
-	// AccountInfo tracks the provider and the clusters
+	// AccountInfo tracks the provider and the teams
 	AccountInfo struct {
 		CloudProvider string
-		Clusters      ClusterMap
+		Teams      TeamMap
 	}
 
-	// AppMap is a map that tracks info about an app
-	AppMap map[AccountName]AccountInfo
+	// TeamMap is a map that tracks info about an team
+	TeamMap map[AccountName]AccountInfo
 )
 
-// NewApp constructs a new App
-func NewApp(name string, data AppMap) *App {
-	app := App{name: name}
+// NewTeam constructs a new Team
+func NewTeam(name string, data TeamMap) *Team {
+	team := Team{name: name}
 	for accountName, accountInfo := range data {
 		account := Account{name: string(accountName), app: &app, cloudProvider: accountInfo.CloudProvider}
 		app.accounts = append(app.accounts, &account)
-		for clusterName, clusterValue := range accountInfo.Clusters {
-			cluster := Cluster{name: string(clusterName), account: &account}
-			account.clusters = append(account.clusters, &cluster)
-			for regionName, regionValue := range clusterValue {
-				for asgName, instanceIds := range regionValue {
+		for teamName, teamValue := range accountInfo.Teams {
+			team := Team{name: string(teamName), account: &account}
+			account.teams = append(account.teams, &team)
+			for regionName, regionValue := range teamValue {
+				for asgName, EmployeeIds := range regionValue {
 					asg := ASG{
 						name:    string(asgName),
 						region:  string(regionName),
-						cluster: &cluster,
+						team: &team,
 					}
-					cluster.asgs = append(cluster.asgs, &asg)
-					for _, id := range instanceIds {
-						instance := Instance{
+					team.asgs = append(team.asgs, &asg)
+					for _, id := range EmployeeIds {
+						employee := employee{
 							id:  string(id),
 							asg: &asg,
 						}
-						asg.instances = append(asg.instances, &instance)
+						asg.employees = append(asg.employees, &employee)
 					}
 				}
 			}

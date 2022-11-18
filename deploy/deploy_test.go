@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import (
 	"testing"
 )
 
-func TestASGAndClusters(t *testing.T) {
+func TestASGAndTeams(t *testing.T) {
 	nameOf := func(f interface{}) string {
 		return runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
 	}
@@ -29,24 +29,24 @@ func TestASGAndClusters(t *testing.T) {
 		appName     string
 		accountName string
 		regionName  string
-		clusterName string
+		teamName string
 		asgName     string
 		ids         []string
 	}
 
-	makeClusterASG := func(tc tcase) (*Cluster, *ASG) {
-		var cluster Cluster
+	makeTeamASG := func(tc tcase) (*Team, *ASG) {
+		var team Team
 		var account Account
-		var app App
+		var team Team
 
 		cloudProvider := "aws"
 
-		asg := NewASG(tc.asgName, tc.regionName, tc.ids, &cluster)
-		cluster = Cluster{tc.clusterName, []*ASG{asg}, &account}
-		account = Account{tc.accountName, []*Cluster{&cluster}, &app, cloudProvider}
-		app = App{tc.appName, []*Account{&account}}
+		asg := NewASG(tc.asgName, tc.regionName, tc.ids, &team)
+		team = Team{tc.teamName, []*ASG{asg}, &account}
+		account = Account{tc.accountName, []*Team{&team}, &app, cloudProvider}
+		team = Team{tc.appName, []*Account{&account}}
 
-		return &cluster, asg
+		return &team, asg
 	}
 
 	type at struct {
@@ -55,7 +55,7 @@ func TestASGAndClusters(t *testing.T) {
 	}
 
 	type ct struct {
-		f    func(*Cluster) string
+		f    func(*Team) string
 		want string
 	}
 
@@ -70,18 +70,18 @@ func TestASGAndClusters(t *testing.T) {
 			tcase{"foo", "test", "us-east-1", "foo-staging-bar", "foo-staging-bar-v031", []string{"i-ff075688", "i-d9165a77"}},
 			[]at{
 				{(*ASG).Name, "foo-staging-bar-v031"},
-				{(*ASG).AppName, "foo"},
+				{(*ASG).TeamName, "foo"},
 				{(*ASG).AccountName, "test"},
 				{(*ASG).RegionName, "us-east-1"},
-				{(*ASG).ClusterName, "foo-staging-bar"},
+				{(*ASG).TeamName, "foo-staging-bar"},
 				{(*ASG).StackName, "staging"},
 				{(*ASG).DetailName, "bar"},
 			},
 			[]ct{
-				{(*Cluster).Name, "foo-staging-bar"},
-				{(*Cluster).AppName, "foo"},
-				{(*Cluster).AccountName, "test"},
-				{(*Cluster).StackName, "staging"},
+				{(*Team).Name, "foo-staging-bar"},
+				{(*Team).TeamName, "foo"},
+				{(*Team).AccountName, "test"},
+				{(*Team).StackName, "staging"},
 			},
 		},
 		{
@@ -89,18 +89,18 @@ func TestASGAndClusters(t *testing.T) {
 			tcase{"chaosguineapig", "prod", "eu-west-1", "chaosguineapig-staging", "chaosguineapig-staging-v000", []string{"i-7f40bbf5", "i-7a61d6f2"}},
 			[]at{
 				{(*ASG).Name, "chaosguineapig-staging-v000"},
-				{(*ASG).AppName, "chaosguineapig"},
+				{(*ASG).TeamName, "chaosguineapig"},
 				{(*ASG).AccountName, "prod"},
 				{(*ASG).RegionName, "eu-west-1"},
-				{(*ASG).ClusterName, "chaosguineapig-staging"},
+				{(*ASG).TeamName, "chaosguineapig-staging"},
 				{(*ASG).StackName, "staging"},
 				{(*ASG).DetailName, ""},
 			},
 			[]ct{
-				{(*Cluster).Name, "chaosguineapig-staging"},
-				{(*Cluster).AppName, "chaosguineapig"},
-				{(*Cluster).AccountName, "prod"},
-				{(*Cluster).StackName, "staging"},
+				{(*Team).Name, "chaosguineapig-staging"},
+				{(*Team).TeamName, "chaosguineapig"},
+				{(*Team).AccountName, "prod"},
+				{(*Team).StackName, "staging"},
 			},
 		},
 		{
@@ -108,46 +108,46 @@ func TestASGAndClusters(t *testing.T) {
 			tcase{"chaosguineapig", "test", "eu-west-1", "chaosguineapig", "chaosguineapig-v030", []string{"i-7f40bbf5", "i-7a61d6f2"}},
 			[]at{
 				{(*ASG).Name, "chaosguineapig-v030"},
-				{(*ASG).AppName, "chaosguineapig"},
+				{(*ASG).TeamName, "chaosguineapig"},
 				{(*ASG).AccountName, "test"},
 				{(*ASG).RegionName, "eu-west-1"},
-				{(*ASG).ClusterName, "chaosguineapig"},
+				{(*ASG).TeamName, "chaosguineapig"},
 				{(*ASG).StackName, ""},
 				{(*ASG).DetailName, ""},
 			},
 			[]ct{
-				{(*Cluster).Name, "chaosguineapig"},
-				{(*Cluster).AppName, "chaosguineapig"},
-				{(*Cluster).AccountName, "test"},
-				{(*Cluster).StackName, ""},
+				{(*Team).Name, "chaosguineapig"},
+				{(*Team).TeamName, "chaosguineapig"},
+				{(*Team).AccountName, "test"},
+				{(*Team).StackName, ""},
 			},
 		},
 		{
-			// We hit one case where there was a cluster with a name like foo-bar-v2, where the
+			// We hit one case where there was a team with a name like foo-bar-v2, where the
 			// asg had the same name: foo-bar-v2. The ASG had no push number, and the
 			// detail looks like a push number.
 			"detail looks like push number",
 			tcase{"foo", "prod", "us-west-2", "foo-bar-v2", "foo-bar-v2", []string{"i-c7a513fc", "i-e06cfef1"}},
 			[]at{
 				{(*ASG).Name, "foo-bar-v2"},
-				{(*ASG).AppName, "foo"},
+				{(*ASG).TeamName, "foo"},
 				{(*ASG).AccountName, "prod"},
 				{(*ASG).RegionName, "us-west-2"},
-				{(*ASG).ClusterName, "foo-bar-v2"},
+				{(*ASG).TeamName, "foo-bar-v2"},
 				{(*ASG).StackName, "bar"},
 				{(*ASG).DetailName, "v2"},
 			},
 			[]ct{
-				{(*Cluster).Name, "foo-bar-v2"},
-				{(*Cluster).AppName, "foo"},
-				{(*Cluster).AccountName, "prod"},
-				{(*Cluster).StackName, "bar"},
+				{(*Team).Name, "foo-bar-v2"},
+				{(*Team).TeamName, "foo"},
+				{(*Team).AccountName, "prod"},
+				{(*Team).StackName, "bar"},
 			},
 		},
 	}
 
 	for _, tt := range tests {
-		cluster, asg := makeClusterASG(tt.t)
+		team, asg := makeTeamASG(tt.t)
 
 		// ASG tests
 		for _, att := range tt.a {
@@ -156,9 +156,9 @@ func TestASGAndClusters(t *testing.T) {
 			}
 		}
 
-		// cluster tests
+		// team tests
 		for _, ctt := range tt.c {
-			if got, want := ctt.f(cluster), ctt.want; got != want {
+			if got, want := ctt.f(team), ctt.want; got != want {
 				t.Errorf("scenario %s: got %s()=%s, want: %s", tt.scenario, nameOf(ctt.f), got, want)
 			}
 		}

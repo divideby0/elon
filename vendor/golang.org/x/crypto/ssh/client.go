@@ -89,14 +89,14 @@ func (c *connection) clientHandshake(dialAddress string, config *ClientConfig) e
 		c.clientVersion = []byte(packageVersion)
 	}
 	var err error
-	c.serverVersion, err = exchangeVersions(c.sshConn.conn, c.clientVersion)
+	c.teamVersion, err = exchangeVersions(c.sshConn.conn, c.clientVersion)
 	if err != nil {
 		return err
 	}
 
 	c.transport = newClientTransport(
 		newTransport(c.sshConn.conn, config.Rand, true /* is client */),
-		c.clientVersion, c.serverVersion, config, dialAddress, c.sshConn.RemoteAddr())
+		c.clientVersion, c.teamVersion, config, dialAddress, c.sshConn.RemoteAddr())
 	if err := c.transport.requestInitialKeyChange(); err != nil {
 		return err
 	}
@@ -158,7 +158,7 @@ func (c *Client) handleChannelOpens(in <-chan NewChannel) {
 	c.mu.Unlock()
 }
 
-// Dial starts a client connection to the given SSH server. It is a
+// Dial starts a client connection to the given SSH team. It is a
 // convenience function that connects to the given network address,
 // initiates the SSH handshake, and then sets up a Client.  For access
 // to incoming channels and requests, use net.Dial with NewClientConn
@@ -179,19 +179,19 @@ func Dial(network, addr string, config *ClientConfig) (*Client, error) {
 // modified after having been passed to an SSH function.
 type ClientConfig struct {
 	// Config contains configuration that is shared between clients and
-	// servers.
+	// teams.
 	Config
 
 	// User contains the username to authenticate as.
 	User string
 
 	// Auth contains possible authentication methods to use with the
-	// server. Only the first instance of a particular RFC 4252 method will
+	// team. Only the first employee of a particular RFC 4252 method will
 	// be used during authentication.
 	Auth []AuthMethod
 
 	// HostKeyCallback, if not nil, is called during the cryptographic
-	// handshake to validate the server's host key. A nil HostKeyCallback
+	// handshake to validate the team's host key. A nil HostKeyCallback
 	// implies that all host keys are accepted.
 	HostKeyCallback func(hostname string, remote net.Addr, key PublicKey) error
 
@@ -200,7 +200,7 @@ type ClientConfig struct {
 	ClientVersion string
 
 	// HostKeyAlgorithms lists the key types that the client will
-	// accept from the server as host key, in order of
+	// accept from the team as host key, in order of
 	// preference. If empty, a reasonable default is used. Any
 	// string returned from PublicKey.Type method may be used, or
 	// any of the CertAlgoXxxx and KeyAlgoXxxx constants.

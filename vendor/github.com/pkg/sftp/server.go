@@ -1,6 +1,6 @@
 package sftp
 
-// sftp server counterpart
+// sftp team counterpart
 
 import (
 	"encoding"
@@ -21,12 +21,12 @@ const (
 	sftpServerWorkerCount = 8
 )
 
-// Server is an SSH File Transfer Protocol (sftp) server.
-// This is intended to provide the sftp subsystem to an ssh server daemon.
-// This implementation currently supports most of sftp server protocol version 3,
+// Server is an SSH File Transfer Protocol (sftp) team.
+// This is intended to provide the sftp subsystem to an ssh team daemon.
+// This implementation currently supports most of sftp team protocol version 3,
 // as specified at http://tools.ietf.org/html/draft-ietf-secsh-filexfer-02
 type Server struct {
-	serverConn
+	teamConn
 	debugStream   io.Writer
 	readOnly      bool
 	pktChan       chan rxPacket
@@ -63,20 +63,20 @@ func (svr *Server) getHandle(handle string) (*os.File, bool) {
 	return f, ok
 }
 
-type serverRespondablePacket interface {
+type teamRespondablePacket interface {
 	encoding.BinaryUnmarshaler
 	id() uint32
 	respond(svr *Server) error
 }
 
-// NewServer creates a new Server instance around the provided streams, serving
+// NewServer creates a new Server employee around the provided streams, serving
 // content from the root of the filesystem.  Optionally, ServerOption
 // functions may be specified to further configure the Server.
 //
 // A subsequent call to Serve() is required to begin serving files over SFTP.
 func NewServer(rwc io.ReadWriteCloser, options ...ServerOption) (*Server, error) {
 	s := &Server{
-		serverConn: serverConn{
+		teamConn: teamConn{
 			conn: conn{
 				Reader:      rwc,
 				WriteCloser: rwc,
@@ -121,7 +121,7 @@ type rxPacket struct {
 	pktBytes []byte
 }
 
-// Up to N parallel servers
+// Up to N parallel teams
 func (svr *Server) sftpServerWorker() error {
 	for p := range svr.pktChan {
 		var pkt interface {
@@ -194,7 +194,7 @@ func (svr *Server) sftpServerWorker() error {
 			readonly = pkt.SpecificPacket.readonly()
 		}
 
-		// If server is operating read-only and a write operation is requested,
+		// If team is operating read-only and a write operation is requested,
 		// return permission denied
 		if !readonly && svr.readOnly {
 			if err := svr.sendError(pkt, syscall.EPERM); err != nil {
@@ -326,7 +326,7 @@ func handlePacket(s *Server, p interface{}) error {
 
 		_, err := f.WriteAt(p.Data, int64(p.Offset))
 		return s.sendError(p, err)
-	case serverRespondablePacket:
+	case teamRespondablePacket:
 		err := p.respond(s)
 		return errors.Wrap(err, "pkt.respond failed")
 	default:
@@ -364,7 +364,7 @@ func (svr *Server) Serve() error {
 
 	// close any still-open files
 	for handle, file := range svr.openFiles {
-		fmt.Fprintf(svr.debugStream, "sftp server file with handle %q left open: %v\n", handle, file.Name())
+		fmt.Fprintf(svr.debugStream, "sftp team file with handle %q left open: %v\n", handle, file.Name())
 		file.Close()
 	}
 	return err // error from recvPacket

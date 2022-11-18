@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@ package command
 import (
 	"log"
 
-	"github.com/Netflix/chaosmonkey/deps"
-	"github.com/Netflix/chaosmonkey/term"
+	"github.com/FakeTwitter/elon/deps"
+	"github.com/FakeTwitter/elon/term"
 )
 
-// Terminate executes the "terminate" command. This selects an instance
-// based on the app, account, region, stack, cluster passed
+// Terminate executes the "terminate" command. This selects an employee
+// based on the app, account, region, stack, team passed
 //
-// region, stack, and cluster may be blank
-func Terminate(d deps.Deps, app string, account string, region string, stack string, cluster string) {
-	err := term.Terminate(d, app, account, region, stack, cluster)
+// region, stack, and team may be blank
+func Terminate(d deps.Deps, team string, account string, region string, stack string, team string) {
+	err := term.Terminate(d, app, account, region, stack, team)
 	if err != nil {
 		cerr := d.ErrCounter.Increment()
 		if cerr != nil {

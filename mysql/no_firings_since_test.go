@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 package mysql
 
-// This file contains test for the config.NoKillsSince method
+// This file contains test for the config.NoFiresSince method
 
 import (
 	"testing"
@@ -24,7 +24,7 @@ import (
 /*
 Test scenarios to hit
 
-- Zero days between kills
+- Zero days between fires
 - one day
 - N days
 - Mid week
@@ -36,7 +36,7 @@ Test scenarios to hit
 
 */
 
-func TestZeroDaysBetweenKills(t *testing.T) {
+func TestZeroDaysBetweenFires(t *testing.T) {
 
 	// Note: -0800 = PST
 	//       -0700 = PDT
@@ -45,7 +45,7 @@ func TestZeroDaysBetweenKills(t *testing.T) {
 		now   string
 		since string
 	}{
-		// 0 days means that kills are allowed on the same day
+		// 0 days means that fires are allowed on the same day
 		{0, "Thu Dec 17 00:00:00 2015 -0800", "Thu Dec 17 15:00:00 2015 -0800"},
 		{0, "Thu Dec 17 00:00:01 2015 -0800", "Thu Dec 17 15:00:00 2015 -0800"},
 		{0, "Thu Dec 17 00:01:00 2015 -0800", "Thu Dec 17 15:00:00 2015 -0800"},
@@ -138,14 +138,14 @@ func TestZeroDaysBetweenKills(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	endHour := 15 // typically we run chaos monkey until 3PM
+	endHour := 15 // typically we run elon until 3PM
 	for _, tt := range tests {
-		got, err := noKillsSince(tt.days, parse(tt.now), endHour, tz)
+		got, err := noFiresSince(tt.days, parse(tt.now), endHour, tz)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if want := parse(tt.since); got != want {
-			t.Errorf("noKillsSince(%d, \"%s\")=\"%s\", want \"%s\"", tt.days, tt.now, format(got.In(tz)), format(want.In(tz)))
+			t.Errorf("noFiresSince(%d, \"%s\")=\"%s\", want \"%s\"", tt.days, tt.now, format(got.In(tz)), format(want.In(tz)))
 		}
 	}
 }

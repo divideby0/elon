@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
 
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/cal"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/config/param"
-	"github.com/Netflix/chaosmonkey/deps"
-	"github.com/Netflix/chaosmonkey/grp"
-	"github.com/Netflix/chaosmonkey/migration"
-	"github.com/Netflix/chaosmonkey/schedstore"
-	"github.com/Netflix/chaosmonkey/schedule"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/cal"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/config/param"
+	"github.com/FakeTwitter/elon/deps"
+	"github.com/FakeTwitter/elon/grp"
+	"github.com/FakeTwitter/elon/migration"
+	"github.com/FakeTwitter/elon/schedstore"
+	"github.com/FakeTwitter/elon/schedule"
 	"github.com/rubenv/sql-migrate"
 	"log"
 )
@@ -46,7 +46,7 @@ func TxDeadlock(err error) bool {
 	switch err := errors.Cause(err).(type) {
 	case *mysql.MySQLError:
 		// ER_LOCK_DEADLOCK
-		// See: https://dev.mysql.com/doc/refman/5.6/en/error-messages-server.html
+		// See: https://dev.mysql.com/doc/refman/5.6/en/error-messages-team.html
 		return err.Number == 1213
 	default:
 		return false
@@ -56,7 +56,7 @@ func TxDeadlock(err error) bool {
 // ViolatesMinTime returns true if the error violates min time between
 // terminations
 func ViolatesMinTime(err error) bool {
-	_, ok := errors.Cause(err).(chaosmonkey.ErrViolatesMinTime)
+	_, ok := errors.Cause(err).(elon.ErrViolatesMinTime)
 	return ok
 }
 
@@ -108,7 +108,7 @@ func utcDate(date time.Time) time.Time {
 
 // Retrieve  retrieves the schedule for the given date
 func (m MySQL) Retrieve(date time.Time) (sched *schedule.Schedule, err error) {
-	rows, err := m.db.Query("SELECT time, app, account, region, stack, cluster FROM schedules WHERE date = DATE(?)", utcDate(date))
+	rows, err := m.db.Query("SELECT time, app, account, region, stack, team FROM schedules WHERE date = DATE(?)", utcDate(date))
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to retrieve schedule for %s", date)
 	}
@@ -123,14 +123,14 @@ func (m MySQL) Retrieve(date time.Time) (sched *schedule.Schedule, err error) {
 
 	for rows.Next() {
 		var tm time.Time
-		var app, account, region, stack, cluster string
+		var app, account, region, stack, team string
 
-		err = rows.Scan(&tm, &app, &account, &region, &stack, &cluster)
+		err = rows.Scan(&tm, &app, &account, &region, &stack, &team)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to scan row")
 		}
 
-		sched.Add(tm, grp.New(app, account, region, stack, cluster))
+		sched.Add(tm, grp.New(app, account, region, stack, team))
 	}
 
 	err = rows.Err()
@@ -182,15 +182,15 @@ func (m MySQL) PublishWithDelay(date time.Time, sched *schedule.Schedule, delay 
 	if delay > 0 {
 		time.Sleep(delay)
 	}
-	query := "INSERT INTO schedules (date, time, app, account, region, stack, cluster) VALUES (?, ?, ?, ?, ?, ?, ?)"
+	query := "INSERT INTO schedules (date, time, app, account, region, stack, team) VALUES (?, ?, ?, ?, ?, ?, ?)"
 	stmt, err := tx.Prepare(query)
 	if err != nil {
 		return errors.Wrapf(err, "failed to prepare sql statement: %s", query)
 	}
 
 	for _, entry := range sched.Entries() {
-		var app, account, region, stack, cluster string
-		app = entry.Group.App()
+		var app, account, region, stack, team string
+		team = entry.Group.Team()
 		account = entry.Group.Account()
 		if val, ok := entry.Group.Region(); ok {
 			region = val
@@ -198,11 +198,11 @@ func (m MySQL) PublishWithDelay(date time.Time, sched *schedule.Schedule, delay 
 		if val, ok := entry.Group.Stack(); ok {
 			stack = val
 		}
-		if val, ok := entry.Group.Cluster(); ok {
-			cluster = val
+		if val, ok := entry.Group.Team(); ok {
+			team = val
 		}
 
-		_, err = stmt.Exec(utcDate(date), entry.Time.In(time.UTC), app, account, region, stack, cluster)
+		_, err = stmt.Exec(utcDate(date), entry.Time.In(time.UTC), app, account, region, stack, team)
 		if err != nil {
 			return errors.Wrapf(err, "failed to execute prepared query")
 		}
@@ -260,14 +260,14 @@ func dsn(host string, port int, user string, password string, dbname string) str
 }
 
 // Check checks if a termination is permitted and, if so, records the
-// termination time on the server
-func (m MySQL) Check(term chaosmonkey.Termination, appCfg chaosmonkey.AppConfig, endHour int, loc *time.Location) error {
+// termination time on the team
+func (m MySQL) Check(term elon.Termination, appCfg elon.TeamConfig, endHour int, loc *time.Location) error {
 	return m.CheckWithDelay(term, appCfg, endHour, loc, 0)
 }
 
 // CheckWithDelay is the same as Check, but adds a delay between reading and
 // writing to the database (used for testing only)
-func (m MySQL) CheckWithDelay(term chaosmonkey.Termination, appCfg chaosmonkey.AppConfig, endHour int, loc *time.Location, delay time.Duration) error {
+func (m MySQL) CheckWithDelay(term elon.Termination, appCfg elon.TeamConfig, endHour int, loc *time.Location, delay time.Duration) error {
 	tx, err := m.db.Begin()
 	if err != nil {
 		return errors.Wrap(err, "failed to begin transaction")
@@ -282,7 +282,7 @@ func (m MySQL) CheckWithDelay(term chaosmonkey.Termination, appCfg chaosmonkey.A
 		}
 	}()
 
-	err = respectsMinTimeBetweenKills(tx, term.Time, term, appCfg, endHour, loc)
+	err = respectsMinTimeBetweenFires(tx, term.Time, term, appCfg, endHour, loc)
 	if err != nil {
 		return err
 	}
@@ -296,39 +296,39 @@ func (m MySQL) CheckWithDelay(term chaosmonkey.Termination, appCfg chaosmonkey.A
 
 }
 
-// respectsMinTimeBetweenKills checks if this termination will respect or
-// violate the min time between kills value. If this termination is too close
+// respectsMinTimeBetweenFires checks if this termination will respect or
+// violate the min time between fires value. If this termination is too close
 // to the most recent one, this will return an error.
 // If this termination would violate the min time, returns an ErrViolatesMinTime
-func respectsMinTimeBetweenKills(tx *sql.Tx, now time.Time, term chaosmonkey.Termination, appCfg chaosmonkey.AppConfig, endHour int, loc *time.Location) (err error) {
-	app := term.Instance.AppName()
-	account := term.Instance.AccountName()
-	threshold, err := noKillsSince(appCfg.MinTimeBetweenKillsInWorkDays, now, endHour, loc)
+func respectsMinTimeBetweenFires(tx *sql.Tx, now time.Time, term elon.Termination, appCfg elon.TeamConfig, endHour int, loc *time.Location) (err error) {
+	team := term.employee.TeamName()
+	account := term.employee.AccountName()
+	threshold, err := noFiresSince(appCfg.MinTimeBetweenFiresInWorkDays, now, endHour, loc)
 	if err != nil {
 		return err
 	}
-	query := "SELECT instance_id, killed_at FROM terminations WHERE app = ? AND account = ? AND killed_at >= ?"
+	query := "SELECT employee_id, fired_at FROM terminations WHERE team = ? AND account = ? AND fired_at >= ?"
 
 	var rows *sql.Rows
 
 	args := []interface{}{app, account, threshold.In(time.UTC)}
 
 	switch appCfg.Grouping {
-	case chaosmonkey.App:
+	case elon.Team:
 		// nothing to do
-	case chaosmonkey.Stack:
+	case elon.Stack:
 		query += " AND stack = ?"
-		args = append(args, term.Instance.StackName())
-	case chaosmonkey.Cluster:
-		query += " AND cluster = ?"
-		args = append(args, term.Instance.ClusterName())
+		args = append(args, term.employee.StackName())
+	case elon.Team:
+		query += " AND team = ?"
+		args = append(args, term.employee.TeamName())
 	default:
 		return errors.Errorf("unknown group: %v", appCfg.Grouping)
 	}
 
 	if appCfg.RegionsAreIndependent {
 		query += " AND region = ?"
-		args = append(args, term.Instance.RegionName())
+		args = append(args, term.employee.RegionName())
 	}
 
 	// For unleashed (real) terminations, we only care about previous
@@ -356,17 +356,17 @@ func respectsMinTimeBetweenKills(tx *sql.Tx, now time.Time, term chaosmonkey.Ter
 	}()
 
 	if rows.Next() {
-		var instanceID string
-		var killedAt time.Time
-		err = rows.Scan(&instanceID, &killedAt)
-		return chaosmonkey.ErrViolatesMinTime{InstanceID: instanceID, KilledAt: killedAt, Loc: loc}
+		var EmployeeId string
+		var firedAt time.Time
+		err = rows.Scan(&EmployeeId, &firedAt)
+		return elon.ErrViolatesMinTime{EmployeeId: EmployeeId, FiredAt: firedAt, Loc: loc}
 	}
 
 	return nil
 }
 
-// noKillsSince computes the date of the most recent kill
-// that conforms to the min time between kills specified
+// noFiresSince computes the date of the most recent fire
+// that conforms to the min time between fires specified
 // by days
 //
 // Note that the calculation is min time in work days, so it does not count weekends.
@@ -379,7 +379,7 @@ func respectsMinTimeBetweenKills(tx *sql.Tx, now time.Time, term chaosmonkey.Ter
 // The returned time will be in UTC
 //
 // If days=1, then we allow
-// kills each day, so the most recent kill will be at the
+// fires each day, so the most recent fire will be at the
 // end of the previous workday. For example:
 //
 //  days: 1
@@ -398,11 +398,11 @@ func respectsMinTimeBetweenKills(tx *sql.Tx, now time.Time, term chaosmonkey.Ter
 //  chrono.Now(): Wed, Dec. 16, 2015 2:30 PM PST
 //  Output: Wed, Dec. 16, 2015 5:00 PM PST
 //
-// noKillsSince returns the a datetime that is the last allowed time that a kill
+// noFiresSince returns the a datetime that is the last allowed time that a fire
 // is permitted to have happened.
-func noKillsSince(days int, now time.Time, endHour int, loc *time.Location) (time.Time, error) {
+func noFiresSince(days int, now time.Time, endHour int, loc *time.Location) (time.Time, error) {
 	if days < 0 {
-		return time.Time{}, errors.Errorf("noKillsSince passed illegal input: days=%d", days)
+		return time.Time{}, errors.Errorf("noFiresSince passed illegal input: days=%d", days)
 	}
 
 	oneDay := time.Hour * 24
@@ -428,12 +428,12 @@ func noKillsSince(days int, now time.Time, endHour int, loc *time.Location) (tim
 	return helper(days, now.In(loc)), nil
 }
 
-func recordTermination(tx *sql.Tx, term chaosmonkey.Termination, loc *time.Location) (err error) {
+func recordTermination(tx *sql.Tx, term elon.Termination, loc *time.Location) (err error) {
 
-	i := term.Instance
+	i := term.employee
 
-	_, err = tx.Exec("INSERT INTO terminations (app, account, stack, cluster, region, asg, instance_id, killed_at, leashed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-		i.AppName(), i.AccountName(), i.StackName(), i.ClusterName(), i.RegionName(), i.ASGName(), i.ID(), term.Time.In(time.UTC), term.Leashed)
+	_, err = tx.Exec("INSERT INTO terminations (app, account, stack, team, region, asg, employee_id, fired_at, leashed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		i.TeamName(), i.AccountName(), i.StackName(), i.TeamName(), i.RegionName(), i.ASGName(), i.ID(), term.Time.In(time.UTC), term.Leashed)
 
 	return err
 }

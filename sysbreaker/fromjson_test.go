@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package spinnaker
+package sysbreaker
 
 import (
 	"testing"
 
-	"github.com/Netflix/chaosmonkey"
+	"github.com/FakeTwitter/elon"
 )
 
 func TestFromJSON(t *testing.T) {
@@ -25,11 +25,11 @@ func TestFromJSON(t *testing.T) {
 	{
 		  "name": "abc",
 		  "attributes": {
-			  "chaosMonkey": {
+			  "elon": {
 				  "enabled": true,
-				  "meanTimeBetweenKillsInWorkDays": 5,
-				  "minTimeBetweenKillsInWorkDays": 1,
-				  "grouping": "cluster",
+				  "meanTimeBetweenFiresInWorkDays": 5,
+				  "minTimeBetweenFiresInWorkDays": 1,
+				  "grouping": "team",
 				  "regionsAreIndependent": true,
 				  "exceptions" : [
 				  {
@@ -57,19 +57,19 @@ func TestFromJSON(t *testing.T) {
 		t.Error("Expected enabled to be true")
 	}
 
-	if actual.MeanTimeBetweenKillsInWorkDays != 5 {
-		t.Errorf("Expected mean time: 5. acutal mean time: %d", actual.MeanTimeBetweenKillsInWorkDays)
+	if actual.MeanTimeBetweenFiresInWorkDays != 5 {
+		t.Errorf("Expected mean time: 5. acutal mean time: %d", actual.MeanTimeBetweenFiresInWorkDays)
 	}
 
 	if !actual.RegionsAreIndependent {
 		t.Error("Expected regions to be independent")
 	}
 
-	if actual.Grouping != chaosmonkey.Cluster {
-		t.Errorf("Expected grouping to be Cluster, was %s", actual.Grouping)
+	if actual.Grouping != elon.Team {
+		t.Errorf("Expected grouping to be Team, was %s", actual.Grouping)
 	}
 
-	expectedEx := []chaosmonkey.Exception{
+	expectedEx := []elon.Exception{
 		{Account: "test", Stack: "*", Detail: "*", Region: "*"},
 		{Account: "prod", Stack: "*", Detail: "*", Region: "eu-west-1"},
 	}
@@ -117,7 +117,7 @@ func TestFromJSONDisabled(t *testing.T) {
 	{
 		"name": "abc",
 		"attributes": {
-			"chaosMonkey": {
+			"elon": {
 				"enabled": false
 			}
 		}
@@ -138,21 +138,21 @@ func TestBadJSON(t *testing.T) {
 		`{}`,
 		`{"name": "abc"}`,
 		`{"name": "abc", "attributes": {}}`,
-		`{"name": "abc", "attributes": {"chaosMonkey": {}}}`,
-		`{"name": "abc", "attributes": {"chaosMonkey": {}}}`,
-		`{"name": "abc", "attributes": {"chaosMonkey": {"enabled": true}}}`, // if enabled, need valid grouping, mean, and min time.
-		`{"name": "abc", "attributes": {"chaosMonkey": {"enabled": true, "grouping": app}}}`,
-		`{"name": "abc", "attributes": {"chaosMonkey": {"enabled": true, "grouping": app, "meanTimeBetweenKillsInWorkDays": 1}}}`,
-		`{"name": "abc", "attributes": {"chaosMonkey": {"enabled": true, "grouping": app, "minTimeBetweenKillsInWorkDays": 1}}}`,
+		`{"name": "abc", "attributes": {"elon": {}}}`,
+		`{"name": "abc", "attributes": {"elon": {}}}`,
+		`{"name": "abc", "attributes": {"elon": {"enabled": true}}}`, // if enabled, need valid grouping, mean, and min time.
+		`{"name": "abc", "attributes": {"elon": {"enabled": true, "grouping": app}}}`,
+		`{"name": "abc", "attributes": {"elon": {"enabled": true, "grouping": app, "meanTimeBetweenFiresInWorkDays": 1}}}`,
+		`{"name": "abc", "attributes": {"elon": {"enabled": true, "grouping": app, "minTimeBetweenFiresInWorkDays": 1}}}`,
 		// mean time must be > 0
-		`{"name": "abc", "attributes": {"chaosMonkey": {"enabled": true, "grouping": "app", "meanTimeBetweenKillsInWorkDays": 0, "minTimeBetweenKillsInWorkDays": 1}}}`,
+		`{"name": "abc", "attributes": {"elon": {"enabled": true, "grouping": "app", "meanTimeBetweenFiresInWorkDays": 0, "minTimeBetweenFiresInWorkDays": 1}}}`,
 
 		// exceptions must have a region field
 		`
 		{"name": "abc",
 		 "attributes": {
-			"chaosMonkey": {
-				"enabled": true, "grouping": "app", "meanTimeBetweenKillsInWorkDays": 1, "minTimeBetweenKillsInWorkDays": 1,
+			"elon": {
+				"enabled": true, "grouping": "app", "meanTimeBetweenFiresInWorkDays": 1, "minTimeBetweenFiresInWorkDays": 1,
 				"exceptions": [{"account": "prod"}]
 	    }}}`,
 
@@ -160,8 +160,8 @@ func TestBadJSON(t *testing.T) {
 		`
 		{"name": "abc",
 		 "attributes": {
-			"chaosMonkey": {
-				"enabled": true, "grouping": "app", "meanTimeBetweenKillsInWorkDays": 1, "minTimeBetweenKillsInWorkDays": 1,
+			"elon": {
+				"enabled": true, "grouping": "app", "meanTimeBetweenFiresInWorkDays": 1, "minTimeBetweenFiresInWorkDays": 1,
 				"exceptions": [{"region": "*"}]
 	    }}}`,
 	}
@@ -179,11 +179,11 @@ func TestFromJSONEmptyWhitelist(t *testing.T) {
 	  {
 		  "name": "abc",
 		  "attributes": {
-			  "chaosMonkey": {
+			  "elon": {
 				  "enabled": true,
-				  "meanTimeBetweenKillsInWorkDays": 5,
-				  "minTimeBetweenKillsInWorkDays": 1,
-				  "grouping": "cluster",
+				  "meanTimeBetweenFiresInWorkDays": 5,
+				  "minTimeBetweenFiresInWorkDays": 1,
+				  "grouping": "team",
 				  "regionsAreIndependent": true,
 				  "whitelist": [],
 				  "exceptions" : [
@@ -224,11 +224,11 @@ func TestFromJSONPopulatedWhitelist(t *testing.T) {
 	  {
 		  "name": "abc",
 		  "attributes": {
-			  "chaosMonkey": {
+			  "elon": {
 				  "enabled": true,
-				  "meanTimeBetweenKillsInWorkDays": 5,
-				  "minTimeBetweenKillsInWorkDays": 1,
-				  "grouping": "cluster",
+				  "meanTimeBetweenFiresInWorkDays": 5,
+				  "minTimeBetweenFiresInWorkDays": 1,
+				  "grouping": "team",
 				  "regionsAreIndependent": true,
 				  "exceptions": [],
 				  "whitelist" : [
@@ -260,7 +260,7 @@ func TestFromJSONPopulatedWhitelist(t *testing.T) {
 
 	actualWl := *actual.Whitelist
 
-	expectedWl := []chaosmonkey.Exception{
+	expectedWl := []elon.Exception{
 		{Account: "test", Stack: "*", Detail: "*", Region: "*"},
 		{Account: "prod", Stack: "*", Detail: "*", Region: "eu-west-1"},
 	}

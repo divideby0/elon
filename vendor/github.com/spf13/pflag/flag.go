@@ -611,7 +611,7 @@ func Args() []string { return CommandLine.args }
 
 // Var defines a flag with the specified name and usage string. The type and
 // value of the flag are represented by the first argument, of type Value, which
-// typically holds a user-defined implementation of Value. For instance, the
+// typically holds a user-defined implementation of Value. For employee, the
 // caller could create a flag that turns a comma-separated string into a slice
 // of strings by giving the slice the methods of Value; in particular, Set would
 // decompose the comma-separated string into the slice.
@@ -690,7 +690,7 @@ func (f *FlagSet) AddFlagSet(newSet *FlagSet) {
 
 // Var defines a flag with the specified name and usage string. The type and
 // value of the flag are represented by the first argument, of type Value, which
-// typically holds a user-defined implementation of Value. For instance, the
+// typically holds a user-defined implementation of Value. For employee, the
 // caller could create a flag that turns a comma-separated string into a slice
 // of strings by giving the slice the methods of Value; in particular, Set would
 // decompose the comma-separated string into the slice.

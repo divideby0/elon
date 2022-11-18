@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/clock"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/config/param"
-	"github.com/Netflix/chaosmonkey/deps"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/clock"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/config/param"
+	"github.com/FakeTwitter/elon/deps"
 )
 
 type (
@@ -31,12 +31,12 @@ type (
 		Error error
 	}
 
-	// Tracker implements chaosmonkey.Tracker
+	// Tracker implements elon.Tracker
 	Tracker struct {
 		Error error
 	}
 
-	// ErrorCounter implements chaosmonkey.Publisher
+	// ErrorCounter implements elon.Publisher
 	ErrorCounter struct{}
 
 	// Clock implements clock.Clock
@@ -44,24 +44,24 @@ type (
 		Time time.Time
 	}
 
-	// Env implements chaosmonkey.Env
+	// Env implements elon.Env
 	Env struct {
 		IsInTest bool
 	}
 )
 
 // Check implements deps.Checker.Check
-func (c Checker) Check(term chaosmonkey.Termination, appCfg chaosmonkey.AppConfig, endHour int, loc *time.Location) error {
+func (c Checker) Check(term elon.Termination, appCfg elon.TeamConfig, endHour int, loc *time.Location) error {
 	return c.Error
 
 }
 
-// Track implements chaosmonkey.Tracker.Track
-func (t Tracker) Track(trm chaosmonkey.Termination) error {
+// Track implements elon.Tracker.Track
+func (t Tracker) Track(trm elon.Termination) error {
 	return t.Error
 }
 
-// Increment implements chaosmonkey.ErrorCounter.Increment
+// Increment implements elon.ErrorCounter.Increment
 func (e ErrorCounter) Increment() error {
 	return nil
 }
@@ -71,7 +71,7 @@ func (c Clock) Now() time.Time {
 	return c.Time
 }
 
-// InTest implements chaosmonkey.Env.InTest
+// InTest implements elon.Env.InTest
 func (e Env) InTest() bool {
 	return e.IsInTest
 }

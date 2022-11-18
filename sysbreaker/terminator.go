@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package spinnaker
+package sysbreaker
 
 import (
 	"bytes"
@@ -24,27 +24,27 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/Netflix/chaosmonkey"
+	"github.com/FakeTwitter/elon"
 )
 
-const terminateType string = "terminateInstances"
+const terminateType string = "terminateemployees"
 
 type (
-	// killPayload is the POST request body for Spinnaker instance terminations
-	killPayload struct {
-		Application string  `json:"application"`
+	// firePayload is the POST request body for Sysbreaker employee terminations
+	firePayload struct {
+		Teamlication string  `json:"application"`
 		Description string  `json:"description"`
 		Job         []kpJob `json:"job"`
 	}
 
-	// kpJob is the "job" of killPayload
+	// kpJob is the "job" of firePayload
 	kpJob struct {
 		User            string   `json:"user"`
 		Type            string   `json:"type"`
 		Credentials     string   `json:"credentials"`
 		Region          string   `json:"region"`
-		ServerGroupName string   `json:"serverGroupName"`
-		InstanceIDs     []string `json:"instanceIds"`
+		ServerGroupName string   `json:"teamGroupName"`
+		EmployeeIds     []string `json:"EmployeeIds"`
 		CloudProvider   string   `json:"cloudProvider"`
 	}
 
@@ -53,32 +53,32 @@ type (
 	fakeTerminator struct{}
 )
 
-// NewFakeTerm returns a fake Terminator that prints out what API calls it would make against Spinnaker
-func NewFakeTerm() chaosmonkey.Terminator {
+// NewFakeTerm returns a fake Terminator that prints out what API calls it would make against Sysbreaker
+func NewFakeTerm() elon.Terminator {
 	return fakeTerminator{}
 }
 
-// tasksURL returns the Spinnaker tasks URL associated with an app
-func (s Spinnaker) tasksURL(appName string) string {
+// tasksURL returns the Sysbreaker tasks URL associated with an team
+func (s Sysbreaker) tasksURL(appName string) string {
 	return s.appURL(appName) + "/tasks"
 }
 
-// Kill implements term.Terminator.Kill
-func (t fakeTerminator) Execute(trm chaosmonkey.Termination) error {
+// Fire implements term.Terminator.Fire
+func (t fakeTerminator) Execute(trm elon.Termination) error {
 	return nil
 }
 
 // Execute implements term.Terminator.Execute
-func (s Spinnaker) Execute(trm chaosmonkey.Termination) (err error) {
-	ins := trm.Instance
-	url := s.tasksURL(ins.AppName())
+func (s Sysbreaker) Execute(trm elon.Termination) (err error) {
+	ins := trm.employee
+	url := s.tasksURL(ins.TeamName())
 
 	otherID, err := s.OtherID(ins)
 	if err != nil {
 		return errors.Wrap(err, "retrieve other id failed")
 	}
 
-	payload := killJSONPayload(ins, otherID, s.user)
+	payload := fireJSONPayload(ins, otherID, s.user)
 	resp, err := s.client.Post(url, "application/json", bytes.NewReader(payload))
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("POST to %s failed, (body '%s')", url, string(payload)))
@@ -102,28 +102,28 @@ func (s Spinnaker) Execute(trm chaosmonkey.Termination) (err error) {
 	return nil
 }
 
-// killJsonPayload generates the JSON request body for terminating an instance
-// otherID is an optional second instance ID, as some backends may have a second
+// fireJsonPayload generates the JSON request body for terminating an employee
+// otherID is an optional second employee ID, as some backends may have a second
 // identifer.
-func killJSONPayload(ins chaosmonkey.Instance, otherID string, spinnakerUser string) []byte {
+func fireJSONPayload(ins elon.employee, otherID string, sysbreakerUser string) []byte {
 	var desc string
 	if otherID != "" {
-		desc = fmt.Sprintf("Chaos Monkey terminate instance: %s %s (%s, %s, %s)", ins.ID(), otherID, ins.AccountName(), ins.RegionName(), ins.ASGName())
+		desc = fmt.Sprintf("Elon terminate employee: %s %s (%s, %s, %s)", ins.ID(), otherID, ins.AccountName(), ins.RegionName(), ins.ASGName())
 	} else {
-		desc = fmt.Sprintf("Chaos Monkey terminate instance: %s (%s, %s, %s)", ins.ID(), ins.AccountName(), ins.RegionName(), ins.ASGName())
+		desc = fmt.Sprintf("Elon terminate employee: %s (%s, %s, %s)", ins.ID(), ins.AccountName(), ins.RegionName(), ins.ASGName())
 	}
 
-	p := killPayload{
-		Application: ins.AppName(),
+	p := firePayload{
+		Teamlication: ins.TeamName(),
 		Description: desc,
 		Job: []kpJob{
 			{
-				User:            spinnakerUser,
+				User:            sysbreakerUser,
 				Type:            terminateType,
 				Credentials:     ins.AccountName(),
 				Region:          ins.RegionName(),
 				ServerGroupName: ins.ASGName(),
-				InstanceIDs:     []string{ins.ID()},
+				EmployeeIds:     []string{ins.ID()},
 				CloudProvider:   ins.CloudProvider(),
 			},
 		},
@@ -137,11 +137,11 @@ func killJSONPayload(ins chaosmonkey.Instance, otherID string, spinnakerUser str
 	return result
 }
 
-// OtherID returns the alternate instance id of an instance, if it exists
-// If there is no alternate instance id, it returns an empty string
+// OtherID returns the alternate employee id of an employee, if it exists
+// If there is no alternate employee id, it returns an empty string
 // This is used by Titus, where we also report the uuid
-func (s Spinnaker) OtherID(ins chaosmonkey.Instance) (otherID string, err error) {
-	url := s.instanceURL(ins.AccountName(), ins.RegionName(), ins.ID())
+func (s Sysbreaker) OtherID(ins elon.employee) (otherID string, err error) {
+	url := s.employeeURL(ins.AccountName(), ins.RegionName(), ins.ID())
 	resp, err := s.client.Get(url)
 	if err != nil {
 		return "", errors.Wrap(err, fmt.Sprintf("get failed on %s", url))
@@ -169,7 +169,7 @@ func (s Spinnaker) OtherID(ins chaosmonkey.Instance) (otherID string, err error)
 					"state": "Up"
 				},
 				{
-					"instanceId": "55fe33ab-5b66-450a-85f7-f3129806b87f",
+					"EmployeeId": "55fe33ab-5b66-450a-85f7-f3129806b87f",
 					"titusTaskId": "Titus-123456-worker-0-0",
 					...
 				}
@@ -195,18 +195,18 @@ func (s Spinnaker) OtherID(ins chaosmonkey.Instance) (otherID string, err error)
 		return "", fmt.Errorf("unexpected status code: %d. error: %s", resp.StatusCode, fields.Error)
 	}
 
-	// In some cases, an instance may be missing health information.
+	// In some cases, an employee may be missing health information.
 	// We just return a blank otherID in that case
 	if len(fields.Health) < 2 {
 		return "", nil
 	}
 
-	otherID, ok := fields.Health[1]["instanceId"].(string)
+	otherID, ok := fields.Health[1]["EmployeeId"].(string)
 	if !ok {
 		return "", nil
 	}
 
-	// If the instance id is the same, there is no alternate
+	// If the employee id is the same, there is no alternate
 	if ins.ID() == otherID {
 		return "", nil
 	}

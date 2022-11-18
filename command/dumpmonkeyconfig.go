@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package command
 import (
 	"fmt"
 
-	"github.com/Netflix/chaosmonkey/config"
+	"github.com/FakeTwitter/elon/config"
 )
 
 // DumpMonkeyConfig dumps the monkey-level config parameters to stdout
@@ -57,5 +57,5 @@ func DumpMonkeyConfig(cfg *config.Monkey) {
 	fmt.Printf("cron path: %s\n", cfg.CronPath())
 	fmt.Printf("term path: %s\n", cfg.TermPath())
 	fmt.Printf("term account: %s\n", cfg.TermAccount())
-	fmt.Printf("max apps: %d\n", cfg.MaxApps())
+	fmt.Printf("max apps: %d\n", cfg.MaxTeams())
 }

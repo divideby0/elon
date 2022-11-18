@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@ package command
 
 import (
 	"fmt"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/config/param"
-	"github.com/Netflix/chaosmonkey/mock"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/config/param"
+	"github.com/FakeTwitter/elon/mock"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"testing"
@@ -50,10 +50,10 @@ func initInstallationConfig(script string, cron string, log string, term string)
 }
 
 func TestInstallationWithDefaultCron(t *testing.T) {
-	scriptPath := "/tmp/chaosmonkey-schedule.sh"
-	termPath := "/tmp/chaosmonkey-terminate.sh"
-	cronPath := "/tmp/chaosmonkey-schedule"
-	execPath := "/tmp/chaosmonkey"
+	scriptPath := "/tmp/elon-schedule.sh"
+	termPath := "/tmp/elon-terminate.sh"
+	cronPath := "/tmp/elon-schedule"
+	execPath := "/tmp/elon"
 	logPath := "/var/log"
 
 	defaultConfig, err := initInstallationConfig(scriptPath, cronPath, logPath, termPath)
@@ -73,7 +73,7 @@ func TestInstallationWithDefaultCron(t *testing.T) {
 	}
 
 	expectedScript := fmt.Sprintf(`#!/bin/bash
-%s %s "$@" >> %s/chaosmonkey-%s.log 2>&1
+%s %s "$@" >> %s/elon-%s.log 2>&1
 `, execPath, "schedule", logPath, "schedule")
 	err = assertHasSameContent(scriptPath, expectedScript)
 	if err != nil {
@@ -83,10 +83,10 @@ func TestInstallationWithDefaultCron(t *testing.T) {
 }
 
 func TestInstallationWithUserDefinedCron(t *testing.T) {
-	scriptPath := "/tmp/chaosmonkey-schedule.sh"
-	termPath := "/tmp/chaosmonkey-terminate.sh"
-	cronPath := "/tmp/chaosmonkey-schedule"
-	execPath := "/tmp/chaosmonkey"
+	scriptPath := "/tmp/elon-schedule.sh"
+	termPath := "/tmp/elon-terminate.sh"
+	cronPath := "/tmp/elon-schedule"
+	execPath := "/tmp/elon"
 	logPath := "/var/log"
 	userDefinedCron := "0 15 * * 1-5"
 
@@ -108,7 +108,7 @@ func TestInstallationWithUserDefinedCron(t *testing.T) {
 	}
 
 	expectedScript := fmt.Sprintf(`#!/bin/bash
-%s %s "$@" >> %s/chaosmonkey-%s.log 2>&1
+%s %s "$@" >> %s/elon-%s.log 2>&1
 `, execPath, "schedule", logPath, "schedule")
 	err = assertHasSameContent(scriptPath, expectedScript)
 	if err != nil {

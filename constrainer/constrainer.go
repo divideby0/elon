@@ -1,4 +1,4 @@
-// Copyright 2017 Netflix, Inc.
+// Copyright 2017 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 package constrainer
 
 import (
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/deps"
-	"github.com/Netflix/chaosmonkey/schedule"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/deps"
+	"github.com/FakeTwitter/elon/schedule"
 )
 
 // NullConstrainer is a no-op constrainer

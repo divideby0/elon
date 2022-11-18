@@ -58,7 +58,7 @@ var sysctlMib = []mibentry{
 	{"kern.job_control", []_C_int{1, 19}},
 	{"kern.malloc.buckets", []_C_int{1, 39, 1}},
 	{"kern.malloc.kmemnames", []_C_int{1, 39, 3}},
-	{"kern.maxclusters", []_C_int{1, 67}},
+	{"kern.maxteams", []_C_int{1, 67}},
 	{"kern.maxfiles", []_C_int{1, 7}},
 	{"kern.maxlocksperuid", []_C_int{1, 70}},
 	{"kern.maxpartitions", []_C_int{1, 23}},

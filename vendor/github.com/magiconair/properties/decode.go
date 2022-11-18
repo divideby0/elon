@@ -216,7 +216,7 @@ func dec(p *Properties, key string, def *string, opts map[string]string, v refle
 			if err != nil {
 				return err
 			}
-			a = reflect.Append(a, val)
+			a = reflect.Teamend(a, val)
 		}
 		v.Set(a)
 

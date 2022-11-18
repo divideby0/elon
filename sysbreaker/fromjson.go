@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,41 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package spinnaker
+package sysbreaker
 
 import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/Netflix/chaosmonkey"
+	"github.com/FakeTwitter/elon"
 
 	"github.com/pkg/errors"
 )
 
-// FromJSON takes a Spinnaker JSON representation of an app
-// and returns a Chaos Monkey config
+// FromJSON takes a Sysbreaker JSON representation of an team
+// and returns a Elon config
 // Example:
 //   {
 //       "name": "abc",
 //       "attributes": {
-//         "chaosMonkey": {
+//         "elon": {
 //         "enabled": true,
-//           "meanTimeBetweenKillsInWorkDays": 5,
-//           "minTimeBetweenKillsInWorkDays": 1,
-//           "grouping": "cluster",
+//           "meanTimeBetweenFiresInWorkDays": 5,
+//           "minTimeBetweenFiresInWorkDays": 1,
+//           "grouping": "team",
 //           "regionsAreIndependent": false,
 //         },
 //         "exceptions" : [
 //             {
 //                 "account": "test",
 //                 "stack": "*",
-//                 "cluster": "*",
+//                 "team": "*",
 //                 "region": "*"
 //             },
 //             {
 //                 "account": "prod",
 //                 "stack": "*",
-//                 "cluster": "*",
+//                 "team": "*",
 //                 "region": "eu-west-1"
 //             },
 //         ]
@@ -58,7 +58,7 @@ import (
 //   {
 //       "name": "abc",
 //       "attributes": {
-//         "chaosMonkey": {
+//         "elon": {
 //         "enabled": false
 //         }
 //       }
@@ -70,8 +70,8 @@ import (
 // 	  {
 //  	  "enabled": true,
 //  	  "grouping": "app",
-//  	  "meanTimeBetweenKillsInWorkDays": 4,
-//  	  "minTimeBetweenKillsInWorkDays": 1,
+//  	  "meanTimeBetweenFiresInWorkDays": 4,
+//  	  "minTimeBetweenFiresInWorkDays": 1,
 //  	  "regionsAreIndependent": true,
 //  	  "exceptions": [
 //  	  	{
@@ -91,7 +91,7 @@ import (
 //  	  ]
 // 	  }
 //
-func fromJSON(js []byte) (*chaosmonkey.AppConfig, error) {
+func fromJSON(js []byte) (*elon.TeamConfig, error) {
 	parsed := new(parsedJSON)
 	err := json.Unmarshal(js, parsed)
 
@@ -103,39 +103,39 @@ func fromJSON(js []byte) (*chaosmonkey.AppConfig, error) {
 		return nil, errors.New("'attributes' field missing")
 	}
 
-	if parsed.Attributes.ChaosMonkey == nil {
-		return nil, errors.New("'attributes.chaosMonkey' field missing")
+	if parsed.Attributes.Elon == nil {
+		return nil, errors.New("'attributes.elon' field missing")
 	}
 
-	cm := parsed.Attributes.ChaosMonkey
+	cm := parsed.Attributes.Elon
 
 	if cm.Enabled == nil {
-		return nil, errors.New("'attributes.chaosMonkey.enabled' field missing")
+		return nil, errors.New("'attributes.elon.enabled' field missing")
 	}
 
-	// Check if mean time between kills is missing.
+	// Check if mean time between fires is missing.
 	// If not enabled, it's ok if it's missing
-	if *cm.Enabled && cm.MeanTimeBetweenKillsInWorkDays == nil {
-		return nil, errors.New("attributes.chaosMonkey.meanTimeBetweenKillsInWorkDays missing")
+	if *cm.Enabled && cm.MeanTimeBetweenFiresInWorkDays == nil {
+		return nil, errors.New("attributes.elon.meanTimeBetweenFiresInWorkDays missing")
 	}
 
-	if *cm.Enabled && cm.MinTimeBetweenKillsInWorkDays == nil {
-		return nil, errors.New("attributes.chaosMonkey.minTimeBetweenKillsInWorkDays missing")
+	if *cm.Enabled && cm.MinTimeBetweenFiresInWorkDays == nil {
+		return nil, errors.New("attributes.elon.minTimeBetweenFiresInWorkDays missing")
 	}
 
-	if *cm.Enabled && (*cm.MeanTimeBetweenKillsInWorkDays <= 0) {
-		return nil, fmt.Errorf("invalid attributes.chaosMonkey.meanTimeBetweenKillsInWorkDays: %d", cm.MeanTimeBetweenKillsInWorkDays)
+	if *cm.Enabled && (*cm.MeanTimeBetweenFiresInWorkDays <= 0) {
+		return nil, fmt.Errorf("invalid attributes.elon.meanTimeBetweenFiresInWorkDays: %d", cm.MeanTimeBetweenFiresInWorkDays)
 	}
 
-	grouping := chaosmonkey.Cluster
+	grouping := elon.Team
 
 	switch cm.Grouping {
 	case "app":
-		grouping = chaosmonkey.App
+		grouping = elon.Team
 	case "stack":
-		grouping = chaosmonkey.Stack
-	case "cluster":
-		grouping = chaosmonkey.Cluster
+		grouping = elon.Stack
+	case "team":
+		grouping = elon.Team
 	default:
 		// If not enabled, the user may not have specified a grouping at all,
 		// in which case we stick with the default
@@ -147,12 +147,12 @@ func fromJSON(js []byte) (*chaosmonkey.AppConfig, error) {
 	var meanTime int
 	var minTime int
 
-	if cm.MeanTimeBetweenKillsInWorkDays != nil {
-		meanTime = *cm.MeanTimeBetweenKillsInWorkDays
+	if cm.MeanTimeBetweenFiresInWorkDays != nil {
+		meanTime = *cm.MeanTimeBetweenFiresInWorkDays
 	}
 
-	if cm.MinTimeBetweenKillsInWorkDays != nil {
-		minTime = *cm.MinTimeBetweenKillsInWorkDays
+	if cm.MinTimeBetweenFiresInWorkDays != nil {
+		minTime = *cm.MinTimeBetweenFiresInWorkDays
 	}
 
 	// Exceptions must have a non-blank region field
@@ -166,12 +166,12 @@ func fromJSON(js []byte) (*chaosmonkey.AppConfig, error) {
 		}
 	}
 
-	cfg := chaosmonkey.AppConfig{
+	cfg := elon.TeamConfig{
 		Enabled:                        *cm.Enabled,
 		RegionsAreIndependent:          cm.RegionsAreIndependent,
 		Grouping:                       grouping,
-		MeanTimeBetweenKillsInWorkDays: meanTime,
-		MinTimeBetweenKillsInWorkDays:  minTime,
+		MeanTimeBetweenFiresInWorkDays: meanTime,
+		MinTimeBetweenFiresInWorkDays:  minTime,
 		Exceptions:                     cm.Exceptions,
 		Whitelist:                      cm.Whitelist,
 	}
@@ -186,15 +186,15 @@ type parsedJSON struct {
 }
 
 type parsedAttr struct {
-	ChaosMonkey *parsedChaosMonkey `json:"chaosmonkey"`
+	Elon *parsedElon `json:"elon"`
 }
 
-type parsedChaosMonkey struct {
+type parsedElon struct {
 	Enabled                        *bool                    `json:"enabled"`
 	Grouping                       string                   `json:"grouping"`
-	MeanTimeBetweenKillsInWorkDays *int                     `json:"meanTimeBetweenKillsInWorkDays"`
-	MinTimeBetweenKillsInWorkDays  *int                     `json:"minTimeBetweenKillsInWorkDays"`
+	MeanTimeBetweenFiresInWorkDays *int                     `json:"meanTimeBetweenFiresInWorkDays"`
+	MinTimeBetweenFiresInWorkDays  *int                     `json:"minTimeBetweenFiresInWorkDays"`
 	RegionsAreIndependent          bool                     `json:"regionsAreIndependent"`
-	Exceptions                     []chaosmonkey.Exception  `json:"exceptions"`
-	Whitelist                      *[]chaosmonkey.Exception `json:"whitelist"`
+	Exceptions                     []elon.Exception  `json:"exceptions"`
+	Whitelist                      *[]elon.Exception `json:"whitelist"`
 }

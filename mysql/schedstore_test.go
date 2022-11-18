@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/Netflix/chaosmonkey/grp"
-	"github.com/Netflix/chaosmonkey/mysql"
-	"github.com/Netflix/chaosmonkey/schedstore"
-	"github.com/Netflix/chaosmonkey/schedule"
+	"github.com/FakeTwitter/elon/grp"
+	"github.com/FakeTwitter/elon/mysql"
+	"github.com/FakeTwitter/elon/schedstore"
+	"github.com/FakeTwitter/elon/schedule"
 )
 
 // Test we can publish and then retrieve a schedule
@@ -39,7 +39,7 @@ func TestPublishRetrieve(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m, err := mysql.New("localhost", port, "root", password, "chaosmonkey")
+	m, err := mysql.New("localhost", port, "root", password, "elon")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestPublishRetrieve(t *testing.T) {
 }
 
 func NewMySQL() (mysql.MySQL, error) {
-	return mysql.New("localhost", port, "root", password, "chaosmonkey")
+	return mysql.New("localhost", port, "root", password, "elon")
 }
 
 func TestPublishRetrieveMultipleEntries(t *testing.T) {

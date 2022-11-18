@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,27 +18,27 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/grp"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/grp"
 )
 
-// EligibleInstanceGroups returns a slice of InstanceGroups that represent
-// groups of instances that are eligible for termination.
+// EligibleemployeeGroups returns a slice of employeeGroups that represent
+// groups of employees that are eligible for termination.
 //
 // Note that this code does not check for violations of minimum time between
-// terminations. Chaos Monkey checks that precondition immediately before
-// termination, not when considering groups of eligible instances.
+// terminations. Elon checks that precondition immediately before
+// termination, not when considering groups of eligible employees.
 //
-// The way instances are divided into group will depend on
-//  * the grouping configuration for the app (cluster, stack, app)
+// The way employees are divided into group will depend on
+//  * the grouping configuration for the team (team, stack, app)
 //  * whether regions are independent
 //
-// The returned InstanceGroups are guaranteed to contain at least one instance
+// The returned employeeGroups are guaranteed to contain at least one employee
 // each
 //
 // Preconditions:
-//   * app is enabled for Chaos Monkey
-func (app *App) EligibleInstanceGroups(cfg chaosmonkey.AppConfig) []grp.InstanceGroup {
+//   * team is enabled for Elon
+func (app *Team) EligibleemployeeGroups(cfg elon.TeamConfig) []grp.employeeGroup {
 	if !cfg.Enabled {
 		log.Fatalf("app %s unexpectedly disabled", app.Name())
 	}
@@ -47,26 +47,26 @@ func (app *App) EligibleInstanceGroups(cfg chaosmonkey.AppConfig) []grp.Instance
 	indep := cfg.RegionsAreIndependent
 
 	switch {
-	case grouping == chaosmonkey.App && indep:
+	case grouping == elon.Team && indep:
 		return appIndep(app)
-	case grouping == chaosmonkey.App && !indep:
+	case grouping == elon.Team && !indep:
 		return appDep(app)
-	case grouping == chaosmonkey.Stack && indep:
+	case grouping == elon.Stack && indep:
 		return stackIndep(app)
-	case grouping == chaosmonkey.Stack && !indep:
+	case grouping == elon.Stack && !indep:
 		return stackDep(app)
-	case grouping == chaosmonkey.Cluster && indep:
-		return clusterIndep(app)
-	case grouping == chaosmonkey.Cluster && !indep:
-		return clusterDep(app)
+	case grouping == elon.Team && indep:
+		return teamIndep(app)
+	case grouping == elon.Team && !indep:
+		return teamDep(app)
 	default:
 		panic(fmt.Sprintf("Unknown grouping: %d", grouping))
 	}
 }
 
 // appindep returns a list of groups grouped by (app, account, region)
-func appIndep(app *App) []grp.InstanceGroup {
-	result := []grp.InstanceGroup{}
+func appIndep(app *Team) []grp.employeeGroup {
+	result := []grp.employeeGroup{}
 	for _, account := range app.accounts {
 		for _, regionName := range account.RegionNames() {
 			result = append(result, grp.New(app.Name(), account.Name(), regionName, "", ""))
@@ -76,8 +76,8 @@ func appIndep(app *App) []grp.InstanceGroup {
 }
 
 // stackIndep returns a list of groups grouped by (app, account)
-func appDep(app *App) []grp.InstanceGroup {
-	result := []grp.InstanceGroup{}
+func appDep(app *Team) []grp.employeeGroup {
+	result := []grp.employeeGroup{}
 	for _, account := range app.accounts {
 		result = append(result, grp.New(app.Name(), account.Name(), "", "", ""))
 	}
@@ -85,7 +85,7 @@ func appDep(app *App) []grp.InstanceGroup {
 }
 
 // stackIndep returns a list of groups grouped by (app, account, stack, region)
-func stackIndep(app *App) []grp.InstanceGroup {
+func stackIndep(app *Team) []grp.employeeGroup {
 
 	type asr struct {
 		account string
@@ -96,15 +96,15 @@ func stackIndep(app *App) []grp.InstanceGroup {
 	set := make(map[asr]bool)
 
 	for _, account := range app.Accounts() {
-		for _, cluster := range account.Clusters() {
-			stackName := cluster.StackName()
-			for _, regionName := range cluster.RegionNames() {
+		for _, team := range account.Teams() {
+			stackName := team.StackName()
+			for _, regionName := range team.RegionNames() {
 				set[asr{account: account.Name(), stack: stackName, region: regionName}] = true
 			}
 		}
 	}
 
-	result := []grp.InstanceGroup{}
+	result := []grp.employeeGroup{}
 	for x := range set {
 		result = append(result, grp.New(app.Name(), x.account, x.region, x.stack, ""))
 	}
@@ -113,8 +113,8 @@ func stackIndep(app *App) []grp.InstanceGroup {
 }
 
 // stackDep returns a list of groups grouped by (app, account, stack)
-func stackDep(app *App) []grp.InstanceGroup {
-	result := []grp.InstanceGroup{}
+func stackDep(app *Team) []grp.employeeGroup {
+	result := []grp.employeeGroup{}
 	for _, account := range app.accounts {
 		for _, stackName := range account.StackNames() {
 			result = append(result, grp.New(app.Name(), account.Name(), "", stackName, ""))
@@ -124,13 +124,13 @@ func stackDep(app *App) []grp.InstanceGroup {
 	return result
 }
 
-// clusterDep returns a list of groups grouped by (app, account, cluster, region)
-func clusterIndep(app *App) []grp.InstanceGroup {
-	result := []grp.InstanceGroup{}
+// teamDep returns a list of groups grouped by (app, account, team, region)
+func teamIndep(app *Team) []grp.employeeGroup {
+	result := []grp.employeeGroup{}
 	for _, account := range app.accounts {
-		for _, cluster := range account.Clusters() {
-			for _, regionName := range cluster.RegionNames() {
-				result = append(result, grp.New(app.Name(), account.Name(), regionName, "", cluster.Name()))
+		for _, team := range account.Teams() {
+			for _, regionName := range team.RegionNames() {
+				result = append(result, grp.New(app.Name(), account.Name(), regionName, "", team.Name()))
 			}
 		}
 	}
@@ -138,12 +138,12 @@ func clusterIndep(app *App) []grp.InstanceGroup {
 	return result
 }
 
-// clusterDep returns a list of groups grouped by (app, account, cluster)
-func clusterDep(app *App) []grp.InstanceGroup {
-	result := []grp.InstanceGroup{}
+// teamDep returns a list of groups grouped by (app, account, team)
+func teamDep(app *Team) []grp.employeeGroup {
+	result := []grp.employeeGroup{}
 	for _, account := range app.accounts {
-		for _, cluster := range account.Clusters() {
-			result = append(result, grp.New(app.Name(), account.Name(), "", "", cluster.Name()))
+		for _, team := range account.Teams() {
+			result = append(result, grp.New(app.Name(), account.Name(), "", "", team.Name()))
 		}
 	}
 

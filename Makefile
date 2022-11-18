@@ -3,13 +3,13 @@
 SHELL:=/bin/bash
 
 build: check
-	go build github.com/Netflix/chaosmonkey/cmd/chaosmonkey
+	go build github.com/FakeTwitter/elon/cmd/elon
 
 check: fmt lint errcheck
 
 gofmt: fmt
 
-fmt: 
+fmt:
 	diff -u <(echo -n) <(gofmt -d `find . -name '*.go' | grep -Ev '/vendor/|/migration'`)
 
 lint:
@@ -24,7 +24,7 @@ test:
 
 # Coverage testing
 cover:
-	echo 'mode: atomic' > coverage.out 
+	echo 'mode: atomic' > coverage.out
 	go list ./... | grep -Ev '/vendor/|/migration' | xargs -n1 -I{} sh -c 'go test -covermode=atomic -coverprofile=coverage.tmp {} && tail -n +2 coverage.tmp >> coverage.out' && rm coverage.tmp
 	go tool cover -html=coverage.out
 

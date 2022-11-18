@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 package tracker
 
 import (
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/deps"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/deps"
 	"github.com/pkg/errors"
 )
 
@@ -27,8 +27,8 @@ func init() {
 }
 
 // getTrackers returns a list of trackers specified in the configuration
-func getTrackers(cfg *config.Monkey) ([]chaosmonkey.Tracker, error) {
-	var result []chaosmonkey.Tracker
+func getTrackers(cfg *config.Monkey) ([]elon.Tracker, error) {
+	var result []elon.Tracker
 
 	kinds, err := cfg.Trackers()
 	if err != nil {
@@ -47,7 +47,7 @@ func getTrackers(cfg *config.Monkey) ([]chaosmonkey.Tracker, error) {
 
 // getTracker returns a tracker by name
 // No trackers have been implemented yet
-func getTracker(kind string, cfg *config.Monkey) (chaosmonkey.Tracker, error) {
+func getTracker(kind string, cfg *config.Monkey) (elon.Tracker, error) {
 	switch kind {
 	// As trackers are contributed to the open source project, they should
 	// be instantiated here

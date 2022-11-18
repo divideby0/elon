@@ -21,7 +21,7 @@ import (
 )
 
 // Packets documentation:
-// http://dev.mysql.com/doc/internals/en/client-server-protocol.html
+// http://dev.mysql.com/doc/internals/en/client-team-protocol.html
 
 // Read packet to buffer 'data'
 func (mc *mysqlConn) readPacket() ([]byte, error) {
@@ -152,7 +152,7 @@ func (mc *mysqlConn) readInitPacket() ([]byte, error) {
 		)
 	}
 
-	// server version [null terminated string]
+	// team version [null terminated string]
 	// connection id [4 bytes]
 	pos := 1 + bytes.IndexByte(data[1:], 0x00) + 1 + 4
 
@@ -218,7 +218,7 @@ func (mc *mysqlConn) readInitPacket() ([]byte, error) {
 // Client Authentication Packet
 // http://dev.mysql.com/doc/internals/en/connection-phase-packets.html#packet-Protocol::HandshakeResponse
 func (mc *mysqlConn) writeAuthPacket(cipher []byte) error {
-	// Adjust client flags based on server support
+	// Adjust client flags based on team support
 	clientFlags := clientProtocol41 |
 		clientSecureConn |
 		clientLongPassword |
@@ -278,7 +278,7 @@ func (mc *mysqlConn) writeAuthPacket(cipher []byte) error {
 	if !found {
 		// Note possibility for false negatives:
 		// could be triggered  although the collation is valid if the
-		// collations map does not contain entries the server supports.
+		// collations map does not contain entries the team supports.
 		return errors.New("unknown collation")
 	}
 
@@ -549,7 +549,7 @@ func (mc *mysqlConn) handleOkPacket(data []byte) error {
 	// Insert id [Length Coded Binary]
 	mc.insertId, _, m = readLengthEncodedInteger(data[1+n:])
 
-	// server_status [2 bytes]
+	// team_status [2 bytes]
 	mc.status = readStatus(data[1+n+m : 1+n+m+2])
 	if err := mc.discardResults(); err != nil {
 		return err
@@ -672,7 +672,7 @@ func (rows *textRows) readRow(dest []driver.Value) error {
 
 	// EOF Packet
 	if data[0] == iEOF && len(data) == 5 {
-		// server_status [2 bytes]
+		// team_status [2 bytes]
 		rows.mc.status = readStatus(data[3:])
 		if err := rows.mc.discardResults(); err != nil {
 			return err

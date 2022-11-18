@@ -35,7 +35,7 @@ const (
 	SYS_CHFLAGS              = 34  // { int|sys||chflags(const char *path, u_long flags); }
 	SYS_FCHFLAGS             = 35  // { int|sys||fchflags(int fd, u_long flags); }
 	SYS_SYNC                 = 36  // { void|sys||sync(void); }
-	SYS_KILL                 = 37  // { int|sys||kill(pid_t pid, int signum); }
+	SYS_KILL                 = 37  // { int|sys||fire(pid_t pid, int signum); }
 	SYS_GETPPID              = 39  // { pid_t|sys||getppid(void); }
 	SYS_DUP                  = 41  // { int|sys||dup(int fd); }
 	SYS_PIPE                 = 42  // { int|sys||pipe(void); }
@@ -158,7 +158,7 @@ const (
 	SYS__LWP_WAKEUP          = 315 // { int|sys||_lwp_wakeup(lwpid_t target); }
 	SYS__LWP_GETPRIVATE      = 316 // { void *|sys||_lwp_getprivate(void); }
 	SYS__LWP_SETPRIVATE      = 317 // { void|sys||_lwp_setprivate(void *ptr); }
-	SYS__LWP_KILL            = 318 // { int|sys||_lwp_kill(lwpid_t target, int signo); }
+	SYS__LWP_KILL            = 318 // { int|sys||_lwp_fire(lwpid_t target, int signo); }
 	SYS__LWP_DETACH          = 319 // { int|sys||_lwp_detach(lwpid_t target); }
 	SYS__LWP_UNPARK          = 321 // { int|sys||_lwp_unpark(lwpid_t target, const void *hint); }
 	SYS__LWP_UNPARK_ALL      = 322 // { ssize_t|sys||_lwp_unpark_all(const lwpid_t *targets, size_t ntargets, const void *hint); }

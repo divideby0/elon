@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,93 +17,93 @@ package mock
 import (
 	"github.com/pkg/errors"
 
-	D "github.com/Netflix/chaosmonkey/deploy"
+	D "github.com/FakeTwitter/elon/deploy"
 )
 
 const cloudProvider = "aws"
 
 // Dep returns a mock implementation of deploy.Deployment
 // Dep has 4 apps: foo, bar, baz, quux
-// Each app runs in 1 account:
+// Each team runs in 1 account:
 //    foo, bar, baz run in prod
 //    quux runs in test
-// Each app has one cluster: foo-prod, bar-prod, baz-prod
-// Each cluster runs in one region: us-east-1
-// Each cluster contains 1 AZ with two instances
+// Each team has one team: foo-prod, bar-prod, baz-prod
+// Each team runs in one region: us-east-1
+// Each team contains 1 AZ with two employees
 func Dep() D.Deployment {
 	prod := D.AccountName("prod")
 	test := D.AccountName("test")
 	usEast1 := D.RegionName("us-east-1")
 
-	return &Deployment{map[string]D.AppMap{
-		"foo":  {prod: D.AccountInfo{CloudProvider: cloudProvider, Clusters: D.ClusterMap{"foo-prod": {usEast1: {"foo-prod-v001": []D.InstanceID{"i-d3e3d611", "i-63f52e25"}}}}}},
-		"bar":  {prod: D.AccountInfo{CloudProvider: cloudProvider, Clusters: D.ClusterMap{"bar-prod": {usEast1: {"bar-prod-v011": []D.InstanceID{"i-d7f06d45", "i-ce433cf1"}}}}}},
-		"baz":  {prod: D.AccountInfo{CloudProvider: cloudProvider, Clusters: D.ClusterMap{"baz-prod": {usEast1: {"baz-prod-v004": []D.InstanceID{"i-25b86646", "i-573d46d5"}}}}}},
-		"quux": {test: D.AccountInfo{CloudProvider: cloudProvider, Clusters: D.ClusterMap{"quux-test": {usEast1: {"quux-test-v004": []D.InstanceID{"i-25b866ab", "i-892d46d5"}}}}}},
+	return &Deployment{map[string]D.TeamMap{
+		"foo":  {prod: D.AccountInfo{CloudProvider: cloudProvider, Teams: D.TeamMap{"foo-prod": {usEast1: {"foo-prod-v001": []D.EmployeeId{"i-d3e3d611", "i-63f52e25"}}}}}},
+		"bar":  {prod: D.AccountInfo{CloudProvider: cloudProvider, Teams: D.TeamMap{"bar-prod": {usEast1: {"bar-prod-v011": []D.EmployeeId{"i-d7f06d45", "i-ce433cf1"}}}}}},
+		"baz":  {prod: D.AccountInfo{CloudProvider: cloudProvider, Teams: D.TeamMap{"baz-prod": {usEast1: {"baz-prod-v004": []D.EmployeeId{"i-25b86646", "i-573d46d5"}}}}}},
+		"quux": {test: D.AccountInfo{CloudProvider: cloudProvider, Teams: D.TeamMap{"quux-test": {usEast1: {"quux-test-v004": []D.EmployeeId{"i-25b866ab", "i-892d46d5"}}}}}},
 	}}
 }
 
 // NewDeployment returns a mock implementation of deploy.Deployment
-// Pass in a deploy.AppMap, for example:
-//  map[string]deploy.AppMap{
-// 		"foo":  deploy.AppMap{"prod": {"foo-prod": {"us-east-1": {"foo-prod-v001": []string{"i-d3e3d611", "i-63f52e25"}}}}},
-// 		"bar":  deploy.AppMap{"prod": {"bar-prod": {"us-east-1": {"bar-prod-v011": []string{"i-d7f06d45", "i-ce433cf1"}}}}},
-// 		"baz":  deploy.AppMap{"prod": {"baz-prod": {"us-east-1": {"baz-prod-v004": []string{"i-25b86646", "i-573d46d5"}}}}},
-// 		"quux": deploy.AppMap{"test": {"quux-test": {"us-east-1": {"quux-test-v004": []string{"i-25b866ab", "i-892d46d5"}}}}},
+// Pass in a deploy.TeamMap, for example:
+//  map[string]deploy.TeamMap{
+// 		"foo":  deploy.TeamMap{"prod": {"foo-prod": {"us-east-1": {"foo-prod-v001": []string{"i-d3e3d611", "i-63f52e25"}}}}},
+// 		"bar":  deploy.TeamMap{"prod": {"bar-prod": {"us-east-1": {"bar-prod-v011": []string{"i-d7f06d45", "i-ce433cf1"}}}}},
+// 		"baz":  deploy.TeamMap{"prod": {"baz-prod": {"us-east-1": {"baz-prod-v004": []string{"i-25b86646", "i-573d46d5"}}}}},
+// 		"quux": deploy.TeamMap{"test": {"quux-test": {"us-east-1": {"quux-test-v004": []string{"i-25b866ab", "i-892d46d5"}}}}},
 // 	}
-func NewDeployment(apps map[string]D.AppMap) D.Deployment {
+func NewDeployment(apps map[string]D.TeamMap) D.Deployment {
 	return &Deployment{apps}
 }
 
 // Deployment implements deploy.Deployment interface
 type Deployment struct {
-	AppMap map[string]D.AppMap
+	TeamMap map[string]D.TeamMap
 }
 
-// Apps implements deploy.Deployment.Apps
-func (d Deployment) Apps(c chan<- *D.App, apps []string) {
+// Teams implements deploy.Deployment.Teams
+func (d Deployment) Teams(c chan<- *D.Team, apps []string) {
 	defer close(c)
 
-	for name, appmap := range d.AppMap {
-		c <- D.NewApp(name, appmap)
+	for name, appmap := range d.TeamMap {
+		c <- D.NewTeam(name, appmap)
 	}
 }
 
-// GetClusterNames implements deploy.Deployment.GetClusterNames
-func (d Deployment) GetClusterNames(app string, account D.AccountName) ([]D.ClusterName, error) {
-	result := make([]D.ClusterName, 0)
-	for cluster := range d.AppMap[app][account].Clusters {
-		result = append(result, cluster)
+// GetTeamNames implements deploy.Deployment.GetTeamNames
+func (d Deployment) GetTeamNames(app string, account D.AccountName) ([]D.TeamName, error) {
+	result := make([]D.TeamName, 0)
+	for team := range d.TeamMap[app][account].Teams {
+		result = append(result, team)
 	}
 
 	return result, nil
 }
 
 // GetRegionNames implements deploy.Deployment.GetRegionNames
-func (d Deployment) GetRegionNames(app string, account D.AccountName, cluster D.ClusterName) ([]D.RegionName, error) {
+func (d Deployment) GetRegionNames(app string, account D.AccountName, team D.TeamName) ([]D.RegionName, error) {
 	result := make([]D.RegionName, 0)
-	for region := range d.AppMap[app][account].Clusters[cluster] {
+	for region := range d.TeamMap[app][account].Teams[team] {
 		result = append(result, region)
 	}
 
 	return result, nil
 }
 
-// AppNames implements deploy.Deployment.AppNames
-func (d Deployment) AppNames() ([]string, error) {
-	result := make([]string, len(d.AppMap), len(d.AppMap))
+// TeamNames implements deploy.Deployment.TeamNames
+func (d Deployment) TeamNames() ([]string, error) {
+	result := make([]string, len(d.TeamMap), len(d.TeamMap))
 	i := 0
-	for app := range d.AppMap {
-		result[i] = app
+	for team := range d.TeamMap {
+		result[i] = team
 		i++
 	}
 
 	return result, nil
 }
 
-// GetApp implements deploy.Deployment.GetApp
-func (d Deployment) GetApp(name string) (*D.App, error) {
-	return D.NewApp(name, d.AppMap[name]), nil
+// GetTeam implements deploy.Deployment.GetTeam
+func (d Deployment) GetTeam(name string) (*D.Team, error) {
+	return D.NewTeam(name, d.TeamMap[name]), nil
 }
 
 // CloudProvider implements deploy.Deployment.CloudProvider
@@ -111,13 +111,13 @@ func (d Deployment) CloudProvider(account string) (string, error) {
 	return cloudProvider, nil
 }
 
-// GetInstanceIDs implements deploy.Deployment.GetInstanceIDs
-func (d Deployment) GetInstanceIDs(app string, account D.AccountName, cloudProvider string, region D.RegionName, cluster D.ClusterName) (D.ASGName, []D.InstanceID, error) {
-	// Return an error if the cluster doesn't exist in the region
+// GetEmployeeIds implements deploy.Deployment.GetEmployeeIds
+func (d Deployment) GetEmployeeIds(app string, account D.AccountName, cloudProvider string, region D.RegionName, team D.TeamName) (D.ASGName, []D.EmployeeId, error) {
+	// Return an error if the team doesn't exist in the region
 
-	appInfo, ok := d.AppMap[app]
+	appInfo, ok := d.TeamMap[app]
 	if !ok {
-		return "", nil, errors.Errorf("no app %s", app)
+		return "", nil, errors.Errorf("no team %s", app)
 	}
 
 	accountInfo, ok := appInfo[account]
@@ -125,27 +125,27 @@ func (d Deployment) GetInstanceIDs(app string, account D.AccountName, cloudProvi
 		return "", nil, errors.Errorf("app %s not deployed in account %s", app, account)
 	}
 
-	clusterInfo, ok := accountInfo.Clusters[cluster]
+	teamInfo, ok := accountInfo.Teams[team]
 	if !ok {
-		return "", nil, errors.Errorf("no cluster %s in app:%s, account:%s", cluster, app, account)
+		return "", nil, errors.Errorf("no team %s in app:%s, account:%s", team, app, account)
 	}
 
-	asgs, ok := clusterInfo[region]
+	asgs, ok := teamInfo[region]
 	if !ok {
-		return "", nil, errors.Errorf("cluster %s in account %s not deployed in region %s", cluster, account, region)
+		return "", nil, errors.Errorf("team %s in account %s not deployed in region %s", team, account, region)
 	}
 
-	instances := make([]D.InstanceID, 0)
+	employees := make([]D.EmployeeId, 0)
 
-	// We assume there's only one asg, and retrieve the instances
+	// We assume there's only one asg, and retrieve the employees
 	var asg D.ASGName
-	var ids []D.InstanceID
+	var ids []D.EmployeeId
 
 	for asg, ids = range asgs {
 		for _, id := range ids {
-			instances = append(instances, id)
+			employees = append(employees, id)
 		}
 	}
 
-	return asg, instances, nil
+	return asg, employees, nil
 }

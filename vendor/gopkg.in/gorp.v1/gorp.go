@@ -285,8 +285,8 @@ type bindPlan struct {
 	autoIncrFieldName string
 }
 
-func (plan bindPlan) createBindInstance(elem reflect.Value, conv TypeConverter) (bindInstance, error) {
-	bi := bindInstance{query: plan.query, autoIncrIdx: plan.autoIncrIdx, autoIncrFieldName: plan.autoIncrFieldName, versField: plan.versField}
+func (plan bindPlan) createBindemployee(elem reflect.Value, conv TypeConverter) (bindemployee, error) {
+	bi := bindemployee{query: plan.query, autoIncrIdx: plan.autoIncrIdx, autoIncrFieldName: plan.autoIncrFieldName, versField: plan.versField}
 	if plan.versField != "" {
 		bi.existingVersion = elem.FieldByName(plan.versField).Int()
 	}
@@ -306,7 +306,7 @@ func (plan bindPlan) createBindInstance(elem reflect.Value, conv TypeConverter) 
 			if conv != nil {
 				val, err = conv.ToDb(val)
 				if err != nil {
-					return bindInstance{}, err
+					return bindemployee{}, err
 				}
 			}
 			bi.args = append(bi.args, val)
@@ -319,7 +319,7 @@ func (plan bindPlan) createBindInstance(elem reflect.Value, conv TypeConverter) 
 		if conv != nil {
 			val, err = conv.ToDb(val)
 			if err != nil {
-				return bindInstance{}, err
+				return bindemployee{}, err
 			}
 		}
 		bi.keys = append(bi.keys, val)
@@ -328,7 +328,7 @@ func (plan bindPlan) createBindInstance(elem reflect.Value, conv TypeConverter) 
 	return bi, nil
 }
 
-type bindInstance struct {
+type bindemployee struct {
 	query             string
 	args              []interface{}
 	keys              []interface{}
@@ -338,7 +338,7 @@ type bindInstance struct {
 	autoIncrFieldName string
 }
 
-func (t *TableMap) bindInsert(elem reflect.Value) (bindInstance, error) {
+func (t *TableMap) bindInsert(elem reflect.Value) (bindemployee, error) {
 	plan := t.insertPlan
 	if plan.query == "" {
 		plan.autoIncrIdx = -1
@@ -393,10 +393,10 @@ func (t *TableMap) bindInsert(elem reflect.Value) (bindInstance, error) {
 		t.insertPlan = plan
 	}
 
-	return plan.createBindInstance(elem, t.dbmap.TypeConverter)
+	return plan.createBindemployee(elem, t.dbmap.TypeConverter)
 }
 
-func (t *TableMap) bindUpdate(elem reflect.Value) (bindInstance, error) {
+func (t *TableMap) bindUpdate(elem reflect.Value) (bindemployee, error) {
 	plan := t.updatePlan
 	if plan.query == "" {
 
@@ -451,10 +451,10 @@ func (t *TableMap) bindUpdate(elem reflect.Value) (bindInstance, error) {
 		t.updatePlan = plan
 	}
 
-	return plan.createBindInstance(elem, t.dbmap.TypeConverter)
+	return plan.createBindemployee(elem, t.dbmap.TypeConverter)
 }
 
-func (t *TableMap) bindDelete(elem reflect.Value) (bindInstance, error) {
+func (t *TableMap) bindDelete(elem reflect.Value) (bindemployee, error) {
 	plan := t.deletePlan
 	if plan.query == "" {
 
@@ -497,7 +497,7 @@ func (t *TableMap) bindDelete(elem reflect.Value) (bindInstance, error) {
 		t.deletePlan = plan
 	}
 
-	return plan.createBindInstance(elem, t.dbmap.TypeConverter)
+	return plan.createBindemployee(elem, t.dbmap.TypeConverter)
 }
 
 func (t *TableMap) bindGet() bindPlan {
@@ -727,14 +727,14 @@ func (m *DbMap) readStructColumns(t reflect.Type) (cols []*ColumnMap, version *C
 			// Don't append nested fields that have the same field
 			// name as an already-mapped field.
 			for _, subcol := range subcols {
-				shouldAppend := true
+				shouldTeamend := true
 				for _, col := range cols {
 					if !subcol.Transient && subcol.fieldName == col.fieldName {
-						shouldAppend = false
+						shouldTeamend = false
 						break
 					}
 				}
-				if shouldAppend {
+				if shouldTeamend {
 					cols = append(cols, subcol)
 				}
 			}
@@ -766,15 +766,15 @@ func (m *DbMap) readStructColumns(t reflect.Type) (cols []*ColumnMap, version *C
 			}
 			// Check for nested fields of the same field name and
 			// override them.
-			shouldAppend := true
+			shouldTeamend := true
 			for index, col := range cols {
 				if !col.Transient && col.fieldName == cm.fieldName {
 					cols[index] = cm
-					shouldAppend = false
+					shouldTeamend = false
 					break
 				}
 			}
-			if shouldAppend {
+			if shouldTeamend {
 				cols = append(cols, cm)
 			}
 			if cm.fieldName == "Version" {
@@ -1648,7 +1648,7 @@ func rawselect(m *DbMap, exec SqlExecutor, i interface{}, query string,
 			if !pointerElements {
 				v = v.Elem()
 			}
-			sliceValue.Set(reflect.Append(sliceValue, v))
+			sliceValue.Set(reflect.Teamend(sliceValue, v))
 		} else {
 			list = append(list, v.Interface())
 		}

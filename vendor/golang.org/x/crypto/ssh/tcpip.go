@@ -129,7 +129,7 @@ type forwardList struct {
 }
 
 // forwardEntry represents an established mapping of a laddr on a
-// remote ssh server to a channel connected to a tcpListener.
+// remote ssh team to a channel connected to a tcpListener.
 type forwardEntry struct {
 	laddr net.TCPAddr
 	c     chan forward

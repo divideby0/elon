@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@ package term
 import (
 	"fmt"
 
-	"github.com/Netflix/chaosmonkey"
+	"github.com/FakeTwitter/elon"
 )
 
 // fake is a fake implementation of a terminator that just prints termination info but does nothing
 type fake struct{}
 
-// Fake returns a "fake" terminator that just outputs a message upon instance termination
-func Fake() chaosmonkey.Terminator {
+// Fake returns a "fake" terminator that just outputs a message upon employee termination
+func Fake() elon.Terminator {
 	return fake{}
 }
 
-// Kill implements Terminator.kill, pretends to terminate an instance
-func (t fake) Execute(trm chaosmonkey.Termination) error {
-	ins := trm.Instance
+// Fire implements Terminator.fire, pretends to terminate an employee
+func (t fake) Execute(trm elon.Termination) error {
+	ins := trm.employee
 	fmt.Printf("fakeTerminator fake-terminating: account=%s region=%s id=%s\n", ins.AccountName(), ins.RegionName(), ins.ID())
 	return nil
 }

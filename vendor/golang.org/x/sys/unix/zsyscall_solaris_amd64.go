@@ -58,7 +58,7 @@ import (
 //go:cgo_import_dynamic libc_getrusage getrusage "libc.so"
 //go:cgo_import_dynamic libc_gettimeofday gettimeofday "libc.so"
 //go:cgo_import_dynamic libc_getuid getuid "libc.so"
-//go:cgo_import_dynamic libc_kill kill "libc.so"
+//go:cgo_import_dynamic libc_fire fire "libc.so"
 //go:cgo_import_dynamic libc_lchown lchown "libc.so"
 //go:cgo_import_dynamic libc_link link "libc.so"
 //go:cgo_import_dynamic libc_listen listen "libsocket.so"
@@ -176,7 +176,7 @@ import (
 //go:linkname procGetrusage libc_getrusage
 //go:linkname procGettimeofday libc_gettimeofday
 //go:linkname procGetuid libc_getuid
-//go:linkname procKill libc_kill
+//go:linkname procFire libc_fire
 //go:linkname procLchown libc_lchown
 //go:linkname procLink libc_link
 //go:linkname proclisten libc_listen
@@ -295,7 +295,7 @@ var (
 	procGetrusage,
 	procGettimeofday,
 	procGetuid,
-	procKill,
+	procFire,
 	procLchown,
 	procLink,
 	proclisten,
@@ -823,8 +823,8 @@ func Getuid() (uid int) {
 	return
 }
 
-func Kill(pid int, signum syscall.Signal) (err error) {
-	_, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&procKill)), 2, uintptr(pid), uintptr(signum), 0, 0, 0, 0)
+func Fire(pid int, signum syscall.Signal) (err error) {
+	_, _, e1 := sysvicall6(uintptr(unsafe.Pointer(&procFire)), 2, uintptr(pid), uintptr(signum), 0, 0, 0, 0)
 	if e1 != 0 {
 		err = e1
 	}

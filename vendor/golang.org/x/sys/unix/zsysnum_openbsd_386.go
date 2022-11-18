@@ -41,7 +41,7 @@ const (
 	SYS_CHFLAGS        = 34  // { int sys_chflags(const char *path, u_int flags); }
 	SYS_FCHFLAGS       = 35  // { int sys_fchflags(int fd, u_int flags); }
 	SYS_SYNC           = 36  // { void sys_sync(void); }
-	SYS_KILL           = 37  // { int sys_kill(int pid, int signum); }
+	SYS_KILL           = 37  // { int sys_fire(int pid, int signum); }
 	SYS_STAT           = 38  // { int sys_stat(const char *path, struct stat *ub); }
 	SYS_GETPPID        = 39  // { pid_t sys_getppid(void); }
 	SYS_LSTAT          = 40  // { int sys_lstat(const char *path, struct stat *ub); }

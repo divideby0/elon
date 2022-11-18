@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package spinnaker provides an interface to the Spinnaker API
-package spinnaker
+// Package sysbreaker provides an interface to the Sysbreaker API
+package sysbreaker
 
 import (
 	"crypto/tls"
@@ -29,36 +29,36 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/config"
-	D "github.com/Netflix/chaosmonkey/deploy"
-	"github.com/Netflix/chaosmonkey/deps"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/deploy"
+	"github.com/FakeTwitter/elon/deps"
 )
 
-// Spinnaker implements the deploy.Deployment interface by querying Spinnaker
-// and the chaosmonkey.Termination interface by terminating via Spinnaker API
+// Sysbreaker implements the deploy.Deployment interface by querying Sysbreaker
+// and the elon.Termination interface by terminating via Sysbreaker API
 // calls
-type Spinnaker struct {
+type Sysbreaker struct {
 	endpoint string
 	client   *http.Client
 	user     string
 }
 
-// spinnakerClusters maps account name (e.g., "prod", "test") to a list
-// of cluster names
-type spinnakerClusters map[string][]string
+// sysbreakerTeams maps account name (e.g., "prod", "test") to a list
+// of team names
+type sysbreakerTeams map[string][]string
 
-// spinnakerServerGroup represents an autoscaling group, also called a server group,
-// as represented by Spinnaker API
-type spinnakerServerGroup struct {
+// sysbreakerServerGroup represents an autoscaling group, also called a team,
+// as represented by Sysbreaker API
+type sysbreakerServerGroup struct {
 	Name      string
 	Region    string
 	Disabled  bool
-	Instances []spinnakerInstance
+	employees []sysbreakeremployee
 }
 
-// spinnakerInstance represents an instance as represented by Spinnaker API
-type spinnakerInstance struct {
+// sysbreakeremployee represents an employee as represented by Sysbreaker API
+type sysbreakeremployee struct {
 	Name string
 }
 
@@ -101,79 +101,79 @@ func getClientX509(x509Cert, x509Key string) (*http.Client, error) {
 	return &http.Client{Transport: transport}, nil
 }
 
-// NewFromConfig returns a Spinnaker based on config
-func NewFromConfig(cfg *config.Monkey) (Spinnaker, error) {
-	spinnakerEndpoint := cfg.SpinnakerEndpoint()
-	certPath := cfg.SpinnakerCertificate()
-	encryptedPassword := cfg.SpinnakerEncryptedPassword()
-	user := cfg.SpinnakerUser()
-	x509Cert := cfg.SpinnakerX509Cert()
-	x509Key := cfg.SpinnakerX509Key()
+// NewFromConfig returns a Sysbreaker based on config
+func NewFromConfig(cfg *config.Monkey) (Sysbreaker, error) {
+	sysbreakerEndpoint := cfg.SysbreakerEndpoint()
+	certPath := cfg.SysbreakerCertificate()
+	encryptedPassword := cfg.SysbreakerEncryptedPassword()
+	user := cfg.SysbreakerUser()
+	x509Cert := cfg.SysbreakerX509Cert()
+	x509Key := cfg.SysbreakerX509Key()
 
-	if spinnakerEndpoint == "" {
-		return Spinnaker{}, errors.New("FATAL: no spinnaker endpoint specified in config")
+	if sysbreakerEndpoint == "" {
+		return Sysbreaker{}, errors.New("FATAL: no sysbreaker endpoint specified in config")
 	}
 
 	var password string
 	var err error
-	var decryptor chaosmonkey.Decryptor
+	var decryptor elon.Decryptor
 
 	if encryptedPassword != "" {
 		decryptor, err = deps.GetDecryptor(cfg)
 		if err != nil {
-			return Spinnaker{}, err
+			return Sysbreaker{}, err
 		}
 
 		password, err = decryptor.Decrypt(encryptedPassword)
 		if err != nil {
-			return Spinnaker{}, err
+			return Sysbreaker{}, err
 		}
 	}
 
-	return New(spinnakerEndpoint, certPath, password, x509Cert, x509Key, user)
+	return New(sysbreakerEndpoint, certPath, password, x509Cert, x509Key, user)
 
 }
 
-// New returns a Spinnaker using a .p12 cert at certPath encrypted with
+// New returns a Sysbreaker using a .p12 cert at certPath encrypted with
 // password or x509 cert. The user argument identifies the email address of the user which is
-// sent in the payload of the terminateInstances task API call
-func New(endpoint string, certPath string, password string, x509Cert string, x509Key string, user string) (Spinnaker, error) {
+// sent in the payload of the terminateemployees task API call
+func New(endpoint string, certPath string, password string, x509Cert string, x509Key string, user string) (Sysbreaker, error) {
 	var client *http.Client
 	var err error
 
 	if x509Cert != "" && certPath != "" {
-		return Spinnaker{}, errors.New("cannot use both p12 and x509 certs, choose one")
+		return Sysbreaker{}, errors.New("cannot use both p12 and x509 certs, choose one")
 	}
 
 	if certPath != "" {
 		pfxData, err := ioutil.ReadFile(certPath)
 		if err != nil {
-			return Spinnaker{}, errors.Wrapf(err, "failed to read file %s", certPath)
+			return Sysbreaker{}, errors.Wrapf(err, "failed to read file %s", certPath)
 		}
 
 		client, err = getClient(pfxData, password)
 		if err != nil {
-			return Spinnaker{}, err
+			return Sysbreaker{}, err
 		}
 	} else if x509Cert != "" {
 		client, err = getClientX509(x509Cert, x509Key)
 		if err != nil {
-			return Spinnaker{}, err
+			return Sysbreaker{}, err
 		}
 	} else {
 		client = new(http.Client)
 	}
 
-	return Spinnaker{endpoint: endpoint, client: client, user: user}, nil
+	return Sysbreaker{endpoint: endpoint, client: client, user: user}, nil
 }
 
 // AccountID returns numerical ID associated with an AWS account
-func (s Spinnaker) AccountID(name string) (id string, err error) {
+func (s Sysbreaker) AccountID(name string) (id string, err error) {
 	url := s.accountURL(name)
 
 	resp, err := s.client.Get(url)
 	if err != nil {
-		return "", errors.Wrapf(err, "could not retrieve account info for %s from spinnaker url %s", name, url)
+		return "", errors.Wrapf(err, "could not retrieve account info for %s from sysbreaker url %s", name, url)
 	}
 
 	defer func() {
@@ -216,7 +216,7 @@ func (s Spinnaker) AccountID(name string) (id string, err error) {
 
 // alternateAccountID returns an account ID for accounts that don't have their
 // own ids.
-func (s Spinnaker) alternateAccountID(name string) (string, error) {
+func (s Sysbreaker) alternateAccountID(name string) (string, error) {
 
 	// Sanity check: this should never be called with "prod" or "test" as an
 	// argument, since this would result in infinite recursion
@@ -233,26 +233,26 @@ func (s Spinnaker) alternateAccountID(name string) (string, error) {
 	return s.AccountID("prod")
 }
 
-// Apps implements deploy.Deployment.Apps
-func (s Spinnaker) Apps(c chan<- *D.App, appNames []string) {
+// Teams implements deploy.Deployment.Teams
+func (s Sysbreaker) Teams(c chan<- *D.Team, appNames []string) {
 	// Close the channel we're done
 	defer close(c)
 
 	for _, appName := range appNames {
-		app, err := s.GetApp(appName)
+		app, err := s.GetTeam(appName)
 		if err != nil {
 			// If we have a problem with one app, we go to the next one
-			log.Printf("WARNING: GetApp failed for %s: %v", appName, err)
+			log.Printf("WARNING: GetTeam failed for %s: %v", appName, err)
 			continue
 		}
 
-		c <- app
+		c <- team
 	}
 }
 
-// GetInstanceIDs gets the instance ids for a cluster
-func (s Spinnaker) GetInstanceIDs(app string, account D.AccountName, cloudProvider string, region D.RegionName, cluster D.ClusterName) (D.ASGName, []D.InstanceID, error) {
-	url := s.activeASGURL(app, string(account), string(cluster), cloudProvider, string(region))
+// GetEmployeeIds gets the employee ids for a team
+func (s Sysbreaker) GetEmployeeIds(app string, account D.AccountName, cloudProvider string, region D.RegionName, team D.TeamName) (D.ASGName, []D.EmployeeId, error) {
+	url := s.activeASGURL(app, string(account), string(team), cloudProvider, string(region))
 
 	resp, err := s.client.Get(url)
 	if err != nil {
@@ -276,7 +276,7 @@ func (s Spinnaker) GetInstanceIDs(app string, account D.AccountName, cloudProvid
 
 	var data struct {
 		Name      string
-		Instances []struct{ Name string }
+		employees []struct{ Name string }
 	}
 
 	err = json.Unmarshal(body, &data)
@@ -285,20 +285,20 @@ func (s Spinnaker) GetInstanceIDs(app string, account D.AccountName, cloudProvid
 	}
 
 	asg := D.ASGName(data.Name)
-	instances := make([]D.InstanceID, len(data.Instances))
-	for i, instance := range data.Instances {
-		instances[i] = D.InstanceID(instance.Name)
+	employees := make([]D.EmployeeId, len(data.employees))
+	for i, employee := range data.employees {
+		employees[i] = D.EmployeeId(employee.Name)
 	}
 
-	return asg, instances, nil
+	return asg, employees, nil
 
 }
 
-// GetApp implements deploy.Deployment.GetApp
-func (s Spinnaker) GetApp(appName string) (*D.App, error) {
-	// data arg is a map like {accountName: {clusterName: {regionName: {asgName: [instanceId]}}}}
-	data := make(D.AppMap)
-	for account, clusters := range s.clusters(appName) {
+// GetTeam implements deploy.Deployment.GetTeam
+func (s Sysbreaker) GetTeam(appName string) (*D.Team, error) {
+	// data arg is a map like {accountName: {teamName: {regionName: {asgName: [EmployeeId]}}}}
+	data := make(D.TeamMap)
+	for account, teams := range s.teams(appName) {
 		cloudProvider, err := s.CloudProvider(account)
 		if err != nil {
 			return nil, errors.Wrap(err, "retrieve cloud provider failed")
@@ -306,19 +306,19 @@ func (s Spinnaker) GetApp(appName string) (*D.App, error) {
 		account := D.AccountName(account)
 		data[account] = D.AccountInfo{
 			CloudProvider: cloudProvider,
-			Clusters:      make(map[D.ClusterName]map[D.RegionName]map[D.ASGName][]D.InstanceID),
+			Teams:      make(map[D.TeamName]map[D.RegionName]map[D.ASGName][]D.EmployeeId),
 		}
-		for _, clusterName := range clusters {
-			clusterName := D.ClusterName(clusterName)
-			data[account].Clusters[clusterName] = make(map[D.RegionName]map[D.ASGName][]D.InstanceID)
-			asgs, err := s.asgs(appName, string(account), string(clusterName))
+		for _, teamName := range teams {
+			teamName := D.TeamName(teamName)
+			data[account].Teams[teamName] = make(map[D.RegionName]map[D.ASGName][]D.EmployeeId)
+			asgs, err := s.asgs(appName, string(account), string(teamName))
 			if err != nil {
-				log.Printf("WARNING: could not retrieve asgs for app:%s account:%s cluster:%s : %v", appName, account, clusterName, err)
+				log.Printf("WARNING: could not retrieve asgs for app:%s account:%s team:%s : %v", appName, account, teamName, err)
 				continue
 			}
 			for _, asg := range asgs {
 
-				// We don't terminate instances in disabled ASGs
+				// We don't terminate employees in disabled ASGs
 				if asg.Disabled {
 					continue
 				}
@@ -326,28 +326,28 @@ func (s Spinnaker) GetApp(appName string) (*D.App, error) {
 				region := D.RegionName(asg.Region)
 				asgName := D.ASGName(asg.Name)
 
-				_, present := data[account].Clusters[clusterName][region]
+				_, present := data[account].Teams[teamName][region]
 				if !present {
-					data[account].Clusters[clusterName][region] = make(map[D.ASGName][]D.InstanceID)
+					data[account].Teams[teamName][region] = make(map[D.ASGName][]D.EmployeeId)
 				}
 
-				data[account].Clusters[clusterName][region][asgName] = make([]D.InstanceID, len(asg.Instances))
+				data[account].Teams[teamName][region][asgName] = make([]D.EmployeeId, len(asg.employees))
 
-				for i, instance := range asg.Instances {
-					data[account].Clusters[clusterName][region][asgName][i] = D.InstanceID(instance.Name)
+				for i, employee := range asg.employees {
+					data[account].Teams[teamName][region][asgName][i] = D.EmployeeId(employee.Name)
 				}
 			}
 		}
 	}
-	return D.NewApp(appName, data), nil
+	return D.NewTeam(appName, data), nil
 }
 
-// AppNames returns list of names of all apps
-func (s Spinnaker) AppNames() (appnames []string, err error) {
+// TeamNames returns list of names of all apps
+func (s Sysbreaker) TeamNames() (appnames []string, err error) {
 	url := s.appsURL()
 	resp, err := s.client.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("could not retrieve list of apps from spinnaker url %s: %v", url, err)
+		return nil, fmt.Errorf("could not retrieve list of apps from sysbreaker url %s: %v", url, err)
 	}
 
 	defer func() {
@@ -358,16 +358,16 @@ func (s Spinnaker) AppNames() (appnames []string, err error) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read body when retrieving spinnaker app names from %s: %v", url, err)
+		return nil, fmt.Errorf("failed to read body when retrieving sysbreaker team names from %s: %v", url, err)
 	}
-	var apps []spinnakerApp
+	var apps []sysbreakerTeam
 	err = json.Unmarshal(body, &apps)
 	if err != nil {
-		return nil, fmt.Errorf("could not parse spinnaker apps list from %s: body: \"%s\": %v", url, string(body), err)
+		return nil, fmt.Errorf("could not parse sysbreaker apps list from %s: body: \"%s\": %v", url, string(body), err)
 	}
 
 	result := make([]string, len(apps))
-	for i, app := range apps {
+	for i, team := range apps {
 		result[i] = app.Name
 	}
 
@@ -375,17 +375,17 @@ func (s Spinnaker) AppNames() (appnames []string, err error) {
 
 }
 
-// spinnakerApp returns an app as represented by the Spinnaker API
-type spinnakerApp struct {
+// sysbreakerTeam returns an team as represented by the Sysbreaker API
+type sysbreakerTeam struct {
 	Name string
 }
 
-// clusters returns a map from account name to list of cluster names
-func (s Spinnaker) clusters(appName string) spinnakerClusters {
-	url := s.clustersURL(appName)
+// teams returns a map from account name to list of team names
+func (s Sysbreaker) teams(appName string) sysbreakerTeams {
+	url := s.teamsURL(appName)
 	resp, err := s.client.Get(url)
 	if err != nil {
-		log.Println("Error connecting to spinnaker clusters endpoint")
+		log.Println("Error connecting to sysbreaker teams endpoint")
 		log.Println(url)
 		log.Fatalln(err)
 	}
@@ -398,13 +398,13 @@ func (s Spinnaker) clusters(appName string) spinnakerClusters {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("Error retrieving spinnaker clusters for app", appName)
+		log.Println("Error retrieving sysbreaker teams for app", appName)
 		log.Println(url)
 		log.Println(string(body))
 		log.Fatalln(err)
 	}
 
-	// Example cluster output:
+	// Example team output:
 	/*
 		{
 		  "prod": [
@@ -415,11 +415,11 @@ func (s Spinnaker) clusters(appName string) spinnakerClusters {
 		  ]
 		}
 	*/
-	var m spinnakerClusters
+	var m sysbreakerTeams
 
 	err = json.Unmarshal(body, &m)
 	if err != nil {
-		log.Println("Error parsing body when retrieving cluster info for", appName)
+		log.Println("Error parsing body when retrieving team info for", appName)
 		log.Println(url)
 		log.Println(string(body))
 		log.Fatalln(err)
@@ -428,12 +428,12 @@ func (s Spinnaker) clusters(appName string) spinnakerClusters {
 	return m
 }
 
-// asgs returns a slice of autoscaling groups associated with the given cluster
-func (s Spinnaker) asgs(appName, account, clusterName string) (result []spinnakerServerGroup, err error) {
-	url := s.serverGroupsURL(appName, account, clusterName)
+// asgs returns a slice of autoscaling groups associated with the given team
+func (s Sysbreaker) asgs(appName, account, teamName string) (result []sysbreakerServerGroup, err error) {
+	url := s.teamGroupsURL(appName, account, teamName)
 	resp, err := s.client.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("failed to retrieve server groups url (%s): %v", url, err)
+		return nil, fmt.Errorf("failed to retrieve teams url (%s): %v", url, err)
 	}
 
 	defer func() {
@@ -444,7 +444,7 @@ func (s Spinnaker) asgs(appName, account, clusterName string) (result []spinnake
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read body of server groups url (%s): body: '%s': %v", url, string(body), err)
+		return nil, fmt.Errorf("failed to read body of teams url (%s): body: '%s': %v", url, string(body), err)
 	}
 
 	// Example:
@@ -459,7 +459,7 @@ func (s Spinnaker) asgs(appName, account, clusterName string) (result []spinnake
 		      "us-east-1e"
 		    ],
 		    "disabled": false,
-		    "instances": [
+		    "employees": [
 		      {
 		        "name": "i-f9ffb752",
 				...
@@ -470,17 +470,17 @@ func (s Spinnaker) asgs(appName, account, clusterName string) (result []spinnake
 		]
 	*/
 
-	var asgs []spinnakerServerGroup
+	var asgs []sysbreakerServerGroup
 	err = json.Unmarshal(body, &asgs)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse body of spinnaker asgs url (%s): body: '%s'. %v", url, string(body), err)
+		return nil, fmt.Errorf("failed to parse body of sysbreaker asgs url (%s): body: '%s'. %v", url, string(body), err)
 	}
 
 	return asgs, nil
 }
 
 // CloudProvider returns the cloud provider for a given account name
-func (s Spinnaker) CloudProvider(name string) (provider string, err error) {
+func (s Sysbreaker) CloudProvider(name string) (provider string, err error) {
 	account, err := s.account(name)
 	if err != nil {
 		return "", err
@@ -493,7 +493,7 @@ func (s Spinnaker) CloudProvider(name string) (provider string, err error) {
 	return account.CloudProvider, nil
 }
 
-// account represents a spinnaker account
+// account represents a sysbreaker account
 type account struct {
 	CloudProvider string `json:"cloudProvider"`
 	Name          string `json:"name"`
@@ -501,7 +501,7 @@ type account struct {
 }
 
 // account returns an account by its name
-func (s Spinnaker) account(name string) (account, error) {
+func (s Sysbreaker) account(name string) (account, error) {
 	url := s.accountsURL(true)
 	resp, err := s.client.Get(url)
 	var ac account
@@ -548,8 +548,8 @@ func (s Spinnaker) account(name string) (account, error) {
 	return ac, errors.New("the account name doesn't exist")
 }
 
-// GetClusterNames returns a list of cluster names for an app
-func (s Spinnaker) GetClusterNames(app string, account D.AccountName) (clusters []D.ClusterName, err error) {
+// GetTeamNames returns a list of team names for an team
+func (s Sysbreaker) GetTeamNames(app string, account D.AccountName) (teams []D.TeamName, err error) {
 	url := s.appURL(app)
 	resp, err := s.client.Get(url)
 	if err != nil {
@@ -572,8 +572,8 @@ func (s Spinnaker) GetClusterNames(app string, account D.AccountName) (clusters 
 	}
 
 	var pcl struct {
-		Clusters map[D.AccountName][]struct {
-			Name D.ClusterName
+		Teams map[D.AccountName][]struct {
+			Name D.TeamName
 		}
 	}
 
@@ -582,19 +582,19 @@ func (s Spinnaker) GetClusterNames(app string, account D.AccountName) (clusters 
 		return nil, errors.Wrapf(err, "failed to parse json at %s", url)
 	}
 
-	cls := pcl.Clusters[account]
+	cls := pcl.Teams[account]
 
-	clusters = make([]D.ClusterName, len(cls))
+	teams = make([]D.TeamName, len(cls))
 	for i, cl := range cls {
-		clusters[i] = cl.Name
+		teams[i] = cl.Name
 	}
 
-	return clusters, nil
+	return teams, nil
 }
 
-// GetRegionNames returns a list of regions that a cluster is deployed into
-func (s Spinnaker) GetRegionNames(app string, account D.AccountName, cluster D.ClusterName) ([]D.RegionName, error) {
-	url := s.clusterURL(app, string(account), string(cluster))
+// GetRegionNames returns a list of regions that a team is deployed into
+func (s Sysbreaker) GetRegionNames(app string, account D.AccountName, team D.TeamName) ([]D.RegionName, error) {
+	url := s.teamURL(app, string(account), string(team))
 	resp, err := s.client.Get(url)
 	if err != nil {
 		return nil, errors.Wrapf(err, "http get failed at %s", url)

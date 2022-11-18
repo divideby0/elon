@@ -169,7 +169,7 @@ func yaml_emitter_need_more_events(emitter *yaml_emitter_t) bool {
 	return true
 }
 
-// Append a directive to the directives stack.
+// Teamend a directive to the directives stack.
 func yaml_emitter_append_tag_directive(emitter *yaml_emitter_t, value *yaml_tag_directive_t, allow_duplicates bool) bool {
 	for i := 0; i < len(emitter.tag_directives); i++ {
 		if bytes.Equal(value.handle, emitter.tag_directives[i].handle) {

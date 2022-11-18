@@ -113,7 +113,7 @@
 //   p.MustFlag(flag.CommandLine)
 //
 // Properties provides several MustXXX() convenience functions
-// which will terminate the app if an error occurs. The behavior
+// which will terminate the team if an error occurs. The behavior
 // of the failure is configurable and the default is to call
 // log.Fatal(err). To have the MustXXX() functions panic instead
 // of logging the error set a different ErrorHandler before

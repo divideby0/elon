@@ -1400,7 +1400,7 @@ var signals = [...]string{
 	6:  "abort",
 	7:  "emulation Trap",
 	8:  "arithmetic Exception",
-	9:  "killed",
+	9:  "fired",
 	10: "bus Error",
 	11: "segmentation Fault",
 	12: "bad System Call",

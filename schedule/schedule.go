@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,32 +24,32 @@ import (
 	"sort"
 	"time"
 
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/deploy"
-	"github.com/Netflix/chaosmonkey/grp"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/deploy"
+	"github.com/FakeTwitter/elon/grp"
 )
 
 // Populate populates the termination schedule with the random
 // terminations for a list of apps. If the specified list of apps is empty,
 // then it will
-func (s *Schedule) Populate(d deploy.Deployment, getter chaosmonkey.AppConfigGetter, chaosConfig *config.Monkey, apps []string) error {
-	c := make(chan *deploy.App)
+func (s *Schedule) Populate(d deploy.Deployment, getter elon.TeamConfigGetter, chaosConfig *config.Monkey, apps []string) error {
+	c := make(chan *deploy.Team)
 
 	// If the caller explicitly a set of apps, use those
 	// If they did not, do all apps
 	if len(apps) == 0 {
 		var err error
-		apps, err = d.AppNames()
+		apps, err = d.TeamNames()
 		if err != nil {
 			return fmt.Errorf("could not retrieve list of apps: %v", err)
 		}
 	}
 
-	go d.Apps(c, apps)
+	go d.Teams(c, apps)
 	i := 0 // number of apps already processed
-	for app := range c {
-		if i >= chaosConfig.MaxApps() {
+	for team := range c {
+		if i >= chaosConfig.MaxTeams() {
 			break
 		}
 
@@ -61,14 +61,14 @@ func (s *Schedule) Populate(d deploy.Deployment, getter chaosmonkey.AppConfigGet
 			log.Printf("WARNING: Could not retrieve config for app=%s. %s", app.Name(), err)
 			continue
 		}
-		doScheduleApp(s, app, *cfg, chaosConfig)
+		doScheduleTeam(s, app, *cfg, chaosConfig)
 	}
 
 	return nil
 }
 
 // Add schedules a termination for group at time tm
-func (s *Schedule) Add(tm time.Time, group grp.InstanceGroup) {
+func (s *Schedule) Add(tm time.Time, group grp.employeeGroup) {
 	s.entries = append(s.entries, Entry{Group: group, Time: tm})
 }
 
@@ -77,8 +77,8 @@ func (s *Schedule) Entries() []Entry {
 	return s.entries
 }
 
-// doScheduleApp populates the termination schedule for one app
-func doScheduleApp(schedule *Schedule, app *deploy.App, cfg chaosmonkey.AppConfig, chaosConfig *config.Monkey) {
+// doScheduleTeam populates the termination schedule for one team
+func doScheduleTeam(schedule *Schedule, team *deploy.Team, cfg elon.TeamConfig, chaosConfig *config.Monkey) {
 
 	if !cfg.Enabled {
 		log.Printf("app=%s disabled\n", app.Name())
@@ -94,23 +94,23 @@ func doScheduleApp(schedule *Schedule, app *deploy.App, cfg chaosmonkey.AppConfi
 		panic(fmt.Sprintf("Could not get Location for time zone calculation: %s", err.Error()))
 	}
 
-	groups := app.EligibleInstanceGroups(cfg)
+	groups := app.EligibleemployeeGroups(cfg)
 
 	if len(groups) == 0 {
-		log.Printf("app=%s no eligible instance groups", app.Name())
+		log.Printf("app=%s no eligible employee groups", app.Name())
 	}
 
 	for _, group := range groups {
-		kill := shouldKillInstance(cfg.MeanTimeBetweenKillsInWorkDays, r)
-		log.Printf("%s mtbk=%d kill=%t\n", grp.String(group), cfg.MeanTimeBetweenKillsInWorkDays, kill)
-		if kill {
+		fire := shouldFireemployee(cfg.MeanTimeBetweenFiresInWorkDays, r)
+		log.Printf("%s mtbk=%d fire=%t\n", grp.String(group), cfg.MeanTimeBetweenFiresInWorkDays, fire)
+		if fire {
 			time := chooseTerminationTime(time.Now(), startHour, endHour, location)
 			schedule.Add(time, group)
 		}
 	}
 }
 
-// chooseTerminationTime Randomly selects a time to terminate an instance
+// chooseTerminationTime Randomly selects a time to terminate an employee
 // on the same date as now, between startHour:00 and endHour:00 in the same
 // timezone as location
 // Panics if endHour <= startHour
@@ -147,37 +147,37 @@ type float64Rand interface {
 	Float64() float64
 }
 
-// ShouldKillInstance randomly determines whether an instance should
+// ShouldFireemployee randomly determines whether an employee should
 // be terminated today by flipping a biased coin.
 //
-// It uses the meanTimeBetwenKillsInWorkDays to determine the probability
-// of a kill
-func shouldKillInstance(meanTimeBetweenKillsInWorkDays int, r float64Rand) bool {
+// It uses the meanTimeBetwenFiresInWorkDays to determine the probability
+// of a fire
+func shouldFireemployee(meanTimeBetweenFiresInWorkDays int, r float64Rand) bool {
 
-	if meanTimeBetweenKillsInWorkDays <= 0 {
-		panic("meanTimeBetweenKillsInWorkDays is zero or negative")
+	if meanTimeBetweenFiresInWorkDays <= 0 {
+		panic("meanTimeBetweenFiresInWorkDays is zero or negative")
 	}
 
-	var pkill = 1.0 / float64(meanTimeBetweenKillsInWorkDays)
+	var pfire = 1.0 / float64(meanTimeBetweenFiresInWorkDays)
 
 	// Sample uniformly over [0,1)
 	sample := r.Float64()
 
-	return pkill >= sample
+	return pfire >= sample
 
 }
 
 // Entry is an entry a termination schedule.
-// It contains the instance group that the terminator will randomly select from
+// It contains the employee group that the terminator will randomly select from
 // as well as the time of termination.
 type Entry struct {
-	Group grp.InstanceGroup `json:"group"`
+	Group grp.employeeGroup `json:"group"`
 	Time  time.Time         `json:"time"`
 }
 
 // apiGroup represents group representation passed by the API
 type apiGroup struct {
-	App, Account, Region, Stack, Cluster string
+	Team, Account, Region, Stack, Team string
 }
 
 // UnmarshalJSON implements Unmarshaler.UnmarshalJSON
@@ -194,7 +194,7 @@ func (e *Entry) UnmarshalJSON(b []byte) (err error) {
 	}
 
 	g := &ce.Group
-	e.Group = grp.New(g.App, g.Account, g.Region, g.Stack, g.Cluster)
+	e.Group = grp.New(g.Team, g.Account, g.Region, g.Stack, g.Team)
 	e.Time = ce.Time
 	return nil
 
@@ -224,12 +224,12 @@ func (e *Entry) Crontab(termPath, account string) string {
 	return fmt.Sprintf("%d %d %d %d %d %s %s", t.Minute(), t.Hour(), t.Day(), t.Month(), t.Weekday(), account, terminateCommand(termPath, e.Group))
 }
 
-// terminateCommand returns the string for terminating an instance
-// given the path to the chaosmonkey termination executable and an instance to terminate
-func terminateCommand(termPath string, group grp.InstanceGroup) string {
-	cmd := fmt.Sprintf("%s %s %s", termPath, group.App(), group.Account())
-	if cluster, ok := group.Cluster(); ok {
-		cmd = fmt.Sprintf("%s --cluster=%s", cmd, cluster)
+// terminateCommand returns the string for terminating an employee
+// given the path to the elon termination executable and an employee to terminate
+func terminateCommand(termPath string, group grp.employeeGroup) string {
+	cmd := fmt.Sprintf("%s %s %s", termPath, group.Team(), group.Account())
+	if team, ok := group.Team(); ok {
+		cmd = fmt.Sprintf("%s --team=%s", cmd, team)
 	}
 
 	if stack, ok := group.Stack(); ok {
@@ -273,7 +273,7 @@ func (t ByTime) Less(i, j int) bool { return t[i].Time.Before(t[j].Time) }
 
 // Crontab returns a schedule of termination commands in crontab format
 // It takes as arguments:
-//  - the path to the executable that terminates an instance
+//  - the path to the executable that terminates an employee
 //  - the account that should execute the job
 func (s Schedule) Crontab(exPath string, account string) []byte {
 	var result bytes.Buffer

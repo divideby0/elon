@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ package command
 
 import (
 	"fmt"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/mysql"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/mysql"
 	"io/ioutil"
 	"log"
 	"os"
@@ -27,7 +27,7 @@ const (
 	scheduleCommand  = "schedule"
 	terminateCommand = "terminate"
 	scriptContent    = `#!/bin/bash
-%s %s "$@" >> %s/chaosmonkey-%s.log 2>&1
+%s %s "$@" >> %s/elon-%s.log 2>&1
 `
 )
 
@@ -37,14 +37,14 @@ type CurrentExecutable interface {
 	ExecutablePath() (string, error)
 }
 
-// Install installs chaosmonkey and runs database migration
+// Install installs elon and runs database migration
 func Install(cfg *config.Monkey, exec CurrentExecutable, db mysql.MySQL) {
 	InstallCron(cfg, exec)
 	Migrate(db)
 	log.Println("installation done!")
 }
 
-// InstallCron installs chaosmonkey schedule generation cron
+// InstallCron installs elon schedule generation cron
 func InstallCron(cfg *config.Monkey, exec CurrentExecutable) {
 	executablePath, err := exec.ExecutablePath()
 	if err != nil {
@@ -60,7 +60,7 @@ func InstallCron(cfg *config.Monkey, exec CurrentExecutable) {
 		log.Fatalf("FATAL: %v", err)
 	}
 
-	log.Println("chaosmonkey cron is installed successfully")
+	log.Println("elon cron is installed successfully")
 }
 
 func setupCron(cfg *config.Monkey, executablePath string) error {

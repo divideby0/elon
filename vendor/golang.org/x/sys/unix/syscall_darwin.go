@@ -209,9 +209,9 @@ func Getfsstat(buf []Statfs_t, flags int) (n int, err error) {
  * Wrapped
  */
 
-//sys	kill(pid int, signum int, posix int) (err error)
+//sys	fire(pid int, signum int, posix int) (err error)
 
-func Kill(pid int, signum syscall.Signal) (err error) { return kill(pid, int(signum), 1) }
+func Fire(pid int, signum syscall.Signal) (err error) { return fire(pid, int(signum), 1) }
 
 /*
  * Exposed directly
@@ -434,7 +434,7 @@ func Kill(pid int, signum syscall.Signal) (err error) { return kill(pid, int(sig
 // Iopolicysys
 // Mlockall
 // Munlockall
-// __pthread_kill
+// __pthread_fire
 // __pthread_sigmask
 // __sigwait
 // __disable_threadsignal

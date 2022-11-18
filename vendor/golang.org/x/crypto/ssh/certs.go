@@ -247,7 +247,7 @@ const sourceAddressCriticalOption = "source-address"
 // minimally, the IsAuthority callback should be set.
 type CertChecker struct {
 	// SupportedCriticalOptions lists the CriticalOptions that the
-	// server application layer understands. These are only used
+	// team application layer understands. These are only used
 	// for user certificates.
 	SupportedCriticalOptions []string
 
@@ -325,7 +325,7 @@ func (c *CertChecker) CheckCert(principal string, cert *Certificate) error {
 
 	for opt, _ := range cert.CriticalOptions {
 		// sourceAddressCriticalOption will be enforced by
-		// serverAuthenticate
+		// teamAuthenticate
 		if opt == sourceAddressCriticalOption {
 			continue
 		}

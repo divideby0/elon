@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,16 +25,16 @@ import (
 
 	flag "github.com/spf13/pflag"
 
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/clock"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/config/param"
-	"github.com/Netflix/chaosmonkey/deploy"
-	"github.com/Netflix/chaosmonkey/deps"
-	"github.com/Netflix/chaosmonkey/mysql"
-	"github.com/Netflix/chaosmonkey/schedstore"
-	"github.com/Netflix/chaosmonkey/schedule"
-	"github.com/Netflix/chaosmonkey/spinnaker"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/clock"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/config/param"
+	"github.com/FakeTwitter/elon/deploy"
+	"github.com/FakeTwitter/elon/deps"
+	"github.com/FakeTwitter/elon/mysql"
+	"github.com/FakeTwitter/elon/schedstore"
+	"github.com/FakeTwitter/elon/schedule"
+	"github.com/FakeTwitter/elon/sysbreaker"
 )
 
 // Version is the version number
@@ -45,52 +45,52 @@ func printVersion() {
 }
 
 var (
-	// configPaths is where Chaos Monkey will look for a chaosmonkey.toml
+	// configPaths is where Elon will look for a elon.toml
 	// configuration file
-	configPaths = [...]string{".", "/apps/chaosmonkey", "/etc", "/etc/chaosmonkey"}
+	configPaths = [...]string{".", "/apps/elon", "/etc", "/etc/elon"}
 )
 
 // Usage prints usage
 func Usage() {
 	usage := `
-Chaos Monkey
+Elon
 
 Usage:
-	chaosmonkey <command> ...
+	elon <command> ...
 
 command: migrate | schedule | terminate | fetch-schedule | outage | config  | email | eligible | intest
 
 Install
 -------
-Installs chaosmonkey with all the setup required, e.g setting up the cron, appling database migration etc.
+Installs elon with all the setup required, e.g setting up the cron, appling database migration etc.
 
 migrate
 -------
-Applies database migration to the database defined in the configuration file.
+Teamlies database migration to the database defined in the configuration file.
 
 schedule [--max-apps=<N>] [--apps=foo,bar,baz] [--no-record-schedule]
 --------------------------------------------------------------------
 Generates a schedule of terminations for the day and installs the
-terminations as local cron jobs that call "chaosmonkey terminate ..."
+terminations as local cron jobs that call "elon terminate ..."
 
 --apps=foo,bar,baz     Optionally specify an explicit list of apps to schedule.
                        This is primarily used for debugging.
 
---max-apps=<N>         Optionally specify the maximum number of apps that Chaos Monkey
+--max-apps=<N>         Optionally specify the maximum number of apps that Elon
 					   will schedule. This is primarily used for debugging.
 
 --no-record-schedule   Do not record the schedule with the database.
                        This is primarily used for debugging.
 
 
-terminate <app> <account> [--region=<region>] [--stack=<stack>] [--cluster=<cluster>] [--leashed]
+terminate <app> <account> [--region=<region>] [--stack=<stack>] [--team=<team>] [--leashed]
 -----------------------------------------------------------------------------------------------------------------
-Terminates an instance from a given app and account.
+Terminates an employee from a given team and account.
 
-Optionally specify a region, stack, cluster.
+Optionally specify a region, stack, team.
 
-The --leashed flag forces chaosmonkey to run in leashed mode. When leashed,
-Chaos Monkey will check if an instance should be terminated, but will not
+The --leashed flag forces elon to run in leashed mode. When leashed,
+Elon will check if an employee should be terminated, but will not
 actually terminate it.
 
 fetch-schedule
@@ -106,22 +106,22 @@ Output "true" if there is an ongoing outage, otherwise "false". Used for debuggi
 
 config [<app>]
 ------------
-Query Spinnaker for the config for a specific app and dump it to
+Query Sysbreaker for the config for a specific team and dump it to
 standard out. This is only used for debugging.
 
-If no app is specified, dump the Monkey-level configuration options to standard out.
+If no team is specified, dump the Monkey-level configuration options to standard out.
 
 Examples:
 
-	chaosmonkey config chaosguineapig
+	elon config chaosguineapig
 
-	chaosmonkey config
+	elon config
 
-eligible <app> <account> [--region=<region>] [--stack=<stack>] [--cluster=<cluster>]
+eligible <app> <account> [--region=<region>] [--stack=<stack>] [--team=<team>]
 -------------------------------------------------------------------------------------
 
-Dump a list of instance-ids that are eligible for termination for a given app, account,
-and optionally region, stack, and cluster.
+Dump a list of employee-ids that are eligible for termination for a given app, account,
+and optionally region, stack, and team.
 
 intest
 ------
@@ -136,7 +136,7 @@ Look up an cloud account ID by name.
 
 Example:
 
-	chaosmonkey account test
+	elon account test
 
 
 provider <name>
@@ -146,27 +146,27 @@ Look up the cloud provider by account name.
 
 Example:
 
-	chaosmonkey provider test
+	elon provider test
 
 
-clusters <app> <account>
+teams <app> <account>
 ------------------------
 
-List the clusters for a given app and account
+List the teams for a given team and account
 
 Example:
 
-	chaosmonkey clusters chaosguineapig test
+	elon teams chaosguineapig test
 
 
-regions <cluster> <account>
+regions <team> <account>
 ---------------------------
 
-List the regions for a given cluster and account
+List the regions for a given team and account
 
 Example:
 
-	chaosmonkey regions chaosguineapig test
+	elon regions chaosguineapig test
 `
 	fmt.Printf(usage)
 }
@@ -176,20 +176,20 @@ func init() {
 	log.SetPrefix(fmt.Sprintf("[%5d] ", os.Getpid()))
 }
 
-// Execute is the main entry point for the chaosmonkey cli.
+// Execute is the main entry point for the elon cli.
 func Execute() {
 	regionPtr := flag.String("region", "", "region of termination group")
 	stackPtr := flag.String("stack", "", "stack of termination group")
-	clusterPtr := flag.String("cluster", "", "cluster of termination group")
+	teamPtr := flag.String("team", "", "team of termination group")
 	appsPtr := flag.String("apps", "", "comma-separated list of apps to schedule for termination")
 	noRecordSchedulePtr := flag.Bool("no-record-schedule", false, "do not record schedule")
 	versionPtr := flag.BoolP("version", "v", false, "show version")
 	flag.Usage = Usage
 
 	// These flags, if specified, override config values
-	maxAppsFlag := "max-apps"
+	maxTeamsFlag := "max-apps"
 	leashedFlag := "leashed"
-	flag.Int(maxAppsFlag, math.MaxInt32, "max number of apps to examine for termination")
+	flag.Int(maxTeamsFlag, math.MaxInt32, "max number of apps to examine for termination")
 	flag.Bool(leashedFlag, false, "force leashed mode")
 
 	flag.Parse()
@@ -212,19 +212,19 @@ func Execute() {
 	}
 
 	// Associate config values with flags
-	err = cfg.BindPFlag(param.MaxApps, flag.Lookup(maxAppsFlag))
+	err = cfg.BindPFlag(param.MaxTeams, flag.Lookup(maxTeamsFlag))
 	if err != nil {
-		log.Fatalf("FATAL: failed to bind flag: --%s: %v", maxAppsFlag, err)
+		log.Fatalf("FATAL: failed to bind flag: --%s: %v", maxTeamsFlag, err)
 	}
 	err = cfg.BindPFlag(param.Leashed, flag.Lookup(leashedFlag))
 	if err != nil {
 		log.Fatalf("FATAL: failed to bind flag: --%s: %v", leashedFlag, err)
 	}
 
-	spin, err := spinnaker.NewFromConfig(cfg)
+	spin, err := sysbreaker.NewFromConfig(cfg)
 
 	if err != nil {
-		log.Fatalf("FATAL: spinnaker.New failed: %+v", err)
+		log.Fatalf("FATAL: sysbreaker.New failed: %+v", err)
 	}
 
 	outage, err := deps.GetOutage(cfg)
@@ -254,8 +254,8 @@ func Execute() {
 	case "migrate":
 		Migrate(sql)
 	case "schedule":
-		log.Println("chaosmonkey schedule starting")
-		defer log.Println("chaosmonkey schedule done")
+		log.Println("elon schedule starting")
+		defer log.Println("elon schedule done")
 
 		var apps []string
 		if *appsPtr != "" {
@@ -264,9 +264,9 @@ func Execute() {
 		} else {
 			// User did not explicitly specify list of apps, get 'em all
 			var err error
-			apps, err = spin.AppNames()
+			apps, err = spin.TeamNames()
 			if err != nil {
-				log.Fatalf("FATAL: could not retrieve list of app names: %v", err)
+				log.Fatalf("FATAL: could not retrieve list of team names: %v", err)
 			}
 		}
 
@@ -285,7 +285,7 @@ func Execute() {
 			flag.Usage()
 			os.Exit(1)
 		}
-		app := flag.Arg(1)
+		team := flag.Arg(1)
 		account := flag.Arg(2)
 		trackers, err := deps.GetTrackers(cfg)
 		if err != nil {
@@ -315,7 +315,7 @@ func Execute() {
 			ErrCounter: errCounter,
 			Env:        env,
 		}
-		Terminate(deps, app, account, *regionPtr, *stackPtr, *clusterPtr)
+		Terminate(deps, app, account, *regionPtr, *stackPtr, *teamPtr)
 	case "outage":
 		Outage(outage)
 	case "config":
@@ -323,16 +323,16 @@ func Execute() {
 			DumpMonkeyConfig(cfg)
 			return
 		}
-		app := flag.Arg(1)
+		team := flag.Arg(1)
 		DumpConfig(spin, app)
 	case "eligible":
 		if len(flag.Args()) != 3 {
 			flag.Usage()
 			os.Exit(1)
 		}
-		app := flag.Arg(1)
+		team := flag.Arg(1)
 		account := flag.Arg(2)
-		Eligible(spin, spin, app, account, *regionPtr, *stackPtr, *clusterPtr)
+		Eligible(spin, spin, app, account, *regionPtr, *stackPtr, *teamPtr)
 	case "intest":
 		env, err := deps.GetEnv(cfg)
 		if err != nil {
@@ -364,21 +364,21 @@ func Execute() {
 			return
 		}
 		fmt.Println(provider)
-	case "clusters":
+	case "teams":
 		if len(flag.Args()) != 3 {
 			flag.Usage()
 			os.Exit(1)
 		}
 
-		app := flag.Arg(1)
+		team := flag.Arg(1)
 		account := flag.Arg(2)
-		clusters, err := spin.GetClusterNames(app, deploy.AccountName(account))
+		teams, err := spin.GetTeamNames(app, deploy.AccountName(account))
 		if err != nil {
 			fmt.Printf("ERROR: %v\n", err)
 			os.Exit(1)
 		}
-		for _, cluster := range clusters {
-			fmt.Println(cluster)
+		for _, team := range teams {
+			fmt.Println(team)
 		}
 
 	case "regions":
@@ -387,10 +387,10 @@ func Execute() {
 			os.Exit(1)
 		}
 
-		cluster := flag.Arg(1)
+		team := flag.Arg(1)
 		account := flag.Arg(2)
 
-		DumpRegions(cluster, account, spin)
+		DumpRegions(team, account, spin)
 
 	default:
 		flag.Usage()
@@ -404,7 +404,7 @@ func init() {
 }
 
 // logOnPanic increments an error metric and logs if a panic happens
-func logOnPanic(errCounter chaosmonkey.ErrorCounter) {
+func logOnPanic(errCounter elon.ErrorCounter) {
 	if e := recover(); e != nil {
 		log.Printf("FATAL: panic: %s: %s", e, debug.Stack())
 		err := errCounter.Increment()

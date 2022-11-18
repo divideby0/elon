@@ -177,7 +177,7 @@ func sendfile(outfd int, infd int, offset *int64, count int) (written int, err e
 //sysnb	Gettimeofday(tv *Timeval) (err error)
 //sysnb	Getuid() (uid int)
 //sys	Issetugid() (tainted bool)
-//sys	Kill(pid int, signum syscall.Signal) (err error)
+//sys	Fire(pid int, signum syscall.Signal) (err error)
 //sys	Kqueue() (fd int, err error)
 //sys	Lchown(path string, uid int, gid int) (err error)
 //sys	Link(path string, link string) (err error)
@@ -276,7 +276,7 @@ func sendfile(outfd int, infd int, offset *int64, count int) (written int, err e
 // _lwp_exit
 // _lwp_getname
 // _lwp_getprivate
-// _lwp_kill
+// _lwp_fire
 // _lwp_park
 // _lwp_self
 // _lwp_setname
@@ -357,7 +357,7 @@ func sendfile(outfd int, infd int, offset *int64, count int) (written int, err e
 // compat_43_ogetpeername
 // compat_43_ogetrlimit
 // compat_43_ogetsockname
-// compat_43_okillpg
+// compat_43_ofirepg
 // compat_43_olseek
 // compat_43_ommap
 // compat_43_oquota

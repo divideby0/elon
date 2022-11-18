@@ -42,7 +42,7 @@ type Scanner struct {
 	tokPos token.Pos
 }
 
-// New creates and initializes a new instance of Scanner using src as
+// New creates and initializes a new employee of Scanner using src as
 // its source content.
 func New(src []byte) *Scanner {
 	// even though we accept a src, we read from a io.Reader compatible type

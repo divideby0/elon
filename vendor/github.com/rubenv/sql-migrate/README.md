@@ -8,13 +8,13 @@ Using [modl](https://github.com/jmoiron/modl)? Check out [modl-migrate](https://
 
 ## Features
 
-* Usable as a CLI tool or as a library
-* Supports SQLite, PostgreSQL, MySQL, MSSQL and Oracle databases (through [gorp](https://github.com/go-gorp/gorp))
-* Can embed migrations into your application
-* Migrations are defined with SQL for full flexibility
-* Atomic migrations
-* Up/down migrations to allow rollback
-* Supports multiple database types in one project
+- Usable as a CLI tool or as a library
+- Supports SQLite, PostgreSQL, MySQL, MSSQL and Oracle databases (through [gorp](https://github.com/go-gorp/gorp))
+- Can embed migrations into your application
+- Migrations are defined with SQL for full flexibility
+- Atomic migrations
+- Up/down migrations to allow rollback
+- Supports multiple database types in one project
 
 ## Installation
 
@@ -25,7 +25,9 @@ go get github.com/rubenv/sql-migrate/...
 ```
 
 ## Usage
+
 ### As a standalone tool
+
 ```
 $ sql-migrate --help
 usage: sql-migrate [--version] [--help] <command> [<args>]
@@ -41,15 +43,15 @@ Each command requires a configuration file (which defaults to `dbconfig.yml`, bu
 
 ```yml
 development:
-    dialect: sqlite3
-    datasource: test.db
-    dir: migrations/sqlite3
+  dialect: sqlite3
+  datasource: test.db
+  dir: migrations/sqlite3
 
 production:
-    dialect: postgres
-    datasource: dbname=myapp sslmode=disable
-    dir: migrations/postgres
-    table: migrations
+  dialect: postgres
+  datasource: dbname=myapp sslmode=disable
+  dir: migrations/postgres
+  table: migrations
 ```
 
 The `table` setting is optional and will default to `gorp_migrations`.
@@ -89,6 +91,7 @@ $ sql-migrate status
 ```
 
 ### As a library
+
 Import sql-migrate into your application:
 
 ```go
@@ -134,7 +137,7 @@ n, err := migrate.Exec(db, "sqlite3", migrations, migrate.Up)
 if err != nil {
     // Handle errors!
 }
-fmt.Printf("Applied %d migrations!\n", n)
+fmt.Printf("Teamlied %d migrations!\n", n)
 ```
 
 Note that `n` can be greater than `0` even if there is an error: any migration that succeeded will remain applied even if a later one fails.
@@ -142,6 +145,7 @@ Note that `n` can be greater than `0` even if there is an error: any migration t
 Check [the GoDoc reference](https://godoc.org/github.com/rubenv/sql-migrate) for the full documentation.
 
 ## Writing migrations
+
 Migrations are defined in SQL files, which contain a set of SQL statements. Special comments are used to distinguish up and down migrations.
 
 ```sql
@@ -183,6 +187,7 @@ DROP TABLE people;
 The order in which migrations are applied is defined through the filename: sql-migrate will sort migrations based on their name. It's recommended to use an increasing version number or a timestamp as the first part of the filename.
 
 ## Embedding migrations with [bindata](https://github.com/jteeuwen/go-bindata)
+
 If you like your Go applications self-contained (that is: a single binary): use [bindata](https://github.com/jteeuwen/go-bindata) to embed the migration files.
 
 Just write your migration files as usual, as a set of SQL files in a folder.
@@ -210,6 +215,7 @@ Both `Asset` and `AssetDir` are functions provided by bindata.
 Then proceed as usual.
 
 ## Extending
+
 Adding a new migration source means implementing `MigrationSource`.
 
 ```go
@@ -220,7 +226,7 @@ type MigrationSource interface {
 
 The resulting slice of migrations will be executed in the given order, so it should usually be sorted by the `Id` field.
 
-## License 
+## License
 
     (The MIT License)
 

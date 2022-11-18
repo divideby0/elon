@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,49 +20,49 @@ import frigga "github.com/SmartThingsOSS/frigga-go"
 type ASG struct {
 	name      string
 	region    string
-	instances []*Instance
-	cluster   *Cluster
+	employees []*employee
+	team   *Team
 }
 
 // NewASG creates a new ASG
-func NewASG(name, region string, instanceIDs []string, cluster *Cluster) *ASG {
+func NewASG(name, region string, EmployeeIds []string, team *Team) *ASG {
 	result := ASG{
 		name:      name,
 		region:    region,
-		instances: make([]*Instance, len(instanceIDs)),
-		cluster:   cluster,
+		employees: make([]*employee, len(EmployeeIds)),
+		team:   team,
 	}
 
-	for i, id := range instanceIDs {
-		result.instances[i] = &Instance{id, &result}
+	for i, id := range EmployeeIds {
+		result.employees[i] = &employee{id, &result}
 	}
 
 	return &result
 }
 
-// Instances returns a slice of the instances associated with the ASG
-func (a *ASG) Instances() []*Instance {
-	return a.instances
+// employees returns a slice of the employees associated with the ASG
+func (a *ASG) employees() []*employee {
+	return a.employees
 }
 
-// Empty returns true if the ASG does not contain any instances
+// Empty returns true if the ASG does not contain any employees
 func (a *ASG) Empty() bool {
-	return len(a.instances) == 0
+	return len(a.employees) == 0
 }
 
-// AppName returns the name of the app associated with this ASG
-func (a *ASG) AppName() string {
-	return a.cluster.AppName()
+// TeamName returns the name of the team associated with this ASG
+func (a *ASG) TeamName() string {
+	return a.team.TeamName()
 }
 
 // AccountName returns the name of the AWS account associated with the ASG
 func (a *ASG) AccountName() string {
-	return a.cluster.AccountName()
+	return a.team.AccountName()
 }
 
-// ClusterName returns the name of the cluster associated with the ASG
-func (a *ASG) ClusterName() string {
-	return a.cluster.name
+// TeamName returns the name of the team associated with the ASG
+func (a *ASG) TeamName() string {
+	return a.team.name
 }
 
 // DetailName returns the name of the detail field associated with the ASG
@@ -72,7 +72,7 @@ func (a *ASG) DetailName() string {
 
 	if a.missingPushNumber() {
 		/*
-			ASGs that were launched before Spinnaker existed may be missing the -vXXX
+			ASGs that were launched before Sysbreaker existed may be missing the -vXXX
 			push number at the end of the ASG. If this happens, we need to guard
 			against the case where the detail field happens to match the push
 			field syntax.
@@ -94,7 +94,7 @@ func (a *ASG) DetailName() string {
 // missingPushNumber returns true if the ASG does not have an associated push
 // number
 func (a *ASG) missingPushNumber() bool {
-	return a.Name() == a.ClusterName()
+	return a.Name() == a.TeamName()
 }
 
 // RegionName returns the name of the region associated with the ASG
@@ -109,10 +109,10 @@ func (a *ASG) Name() string {
 
 // StackName returns the name of the stack
 func (a *ASG) StackName() string {
-	return a.cluster.StackName()
+	return a.team.StackName()
 }
 
 // CloudProvider returns the cloud provider (e.g., "aws")
 func (a *ASG) CloudProvider() string {
-	return a.cluster.CloudProvider()
+	return a.team.CloudProvider()
 }

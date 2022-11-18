@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,30 +16,30 @@
 package deps
 
 import (
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/clock"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/deploy"
-	"github.com/Netflix/chaosmonkey/schedule"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/clock"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/deploy"
+	"github.com/FakeTwitter/elon/schedule"
 )
 
 var (
 	// GetTrackers returns a list of trackers
 	// This variable must be set in the init() method of a module imported by
 	// the main module.
-	GetTrackers func(*config.Monkey) ([]chaosmonkey.Tracker, error)
+	GetTrackers func(*config.Monkey) ([]elon.Tracker, error)
 
 	// GetErrorCounter returns an error counter
-	GetErrorCounter func(*config.Monkey) (chaosmonkey.ErrorCounter, error)
+	GetErrorCounter func(*config.Monkey) (elon.ErrorCounter, error)
 
 	// GetDecryptor returns a decryptor
-	GetDecryptor func(*config.Monkey) (chaosmonkey.Decryptor, error)
+	GetDecryptor func(*config.Monkey) (elon.Decryptor, error)
 
 	// GetEnv returns info about the deployed environment
-	GetEnv func(*config.Monkey) (chaosmonkey.Env, error)
+	GetEnv func(*config.Monkey) (elon.Env, error)
 
 	// GetOutage returns an interface for checking if there is an outage
-	GetOutage func(*config.Monkey) (chaosmonkey.Outage, error)
+	GetOutage func(*config.Monkey) (elon.Outage, error)
 
 	// GetConstrainer returns an interface for constraining the schedule
 	GetConstrainer func(*config.Monkey) (schedule.Constrainer, error)
@@ -48,13 +48,13 @@ var (
 // Deps are a common set of external dependencies
 type Deps struct {
 	MonkeyCfg  *config.Monkey
-	Checker    chaosmonkey.Checker
-	ConfGetter chaosmonkey.AppConfigGetter
+	Checker    elon.Checker
+	ConfGetter elon.TeamConfigGetter
 	Cl         clock.Clock
 	Dep        deploy.Deployment
-	T          chaosmonkey.Terminator
-	Trackers   []chaosmonkey.Tracker
-	Ou         chaosmonkey.Outage
-	ErrCounter chaosmonkey.ErrorCounter
-	Env        chaosmonkey.Env
+	T          elon.Terminator
+	Trackers   []elon.Tracker
+	Ou         elon.Outage
+	ErrCounter elon.ErrorCounter
+	Env        elon.Env
 }

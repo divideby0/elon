@@ -452,8 +452,8 @@ func (d *decoder) decodeSlice(name string, node ast.Node, result reflect.Value) 
 			return err
 		}
 
-		// Append it onto the slice
-		result = reflect.Append(result, val)
+		// Teamend it onto the slice
+		result = reflect.Teamend(result, val)
 	}
 
 	set.Set(result)

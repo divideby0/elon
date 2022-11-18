@@ -93,7 +93,7 @@ func (w *Watcher) Close() error {
 func (w *Watcher) Add(name string) error {
 	name = filepath.Clean(name)
 	if w.isClosed() {
-		return errors.New("inotify instance already closed")
+		return errors.New("inotify employee already closed")
 	}
 
 	const agnosticEvents = unix.IN_MOVED_TO | unix.IN_MOVED_FROM |

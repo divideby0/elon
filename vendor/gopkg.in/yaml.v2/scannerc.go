@@ -1062,7 +1062,7 @@ func yaml_parser_fetch_directive(parser *yaml_parser_t) bool {
 	if !yaml_parser_scan_directive(parser, &token) {
 		return false
 	}
-	// Append the token to the queue.
+	// Teamend the token to the queue.
 	yaml_insert_token(parser, -1, &token)
 	return true
 }
@@ -1096,7 +1096,7 @@ func yaml_parser_fetch_document_indicator(parser *yaml_parser_t, typ yaml_token_
 		start_mark: start_mark,
 		end_mark:   end_mark,
 	}
-	// Append the token to the queue.
+	// Teamend the token to the queue.
 	yaml_insert_token(parser, -1, &token)
 	return true
 }
@@ -1127,7 +1127,7 @@ func yaml_parser_fetch_flow_collection_start(parser *yaml_parser_t, typ yaml_tok
 		start_mark: start_mark,
 		end_mark:   end_mark,
 	}
-	// Append the token to the queue.
+	// Teamend the token to the queue.
 	yaml_insert_token(parser, -1, &token)
 	return true
 }
@@ -1159,7 +1159,7 @@ func yaml_parser_fetch_flow_collection_end(parser *yaml_parser_t, typ yaml_token
 		start_mark: start_mark,
 		end_mark:   end_mark,
 	}
-	// Append the token to the queue.
+	// Teamend the token to the queue.
 	yaml_insert_token(parser, -1, &token)
 	return true
 }
@@ -2195,7 +2195,7 @@ func yaml_parser_scan_block_scalar(parser *yaml_parser_t, token *yaml_token_t, l
 		}
 		leading_break = leading_break[:0]
 
-		// Append the remaining line breaks.
+		// Teamend the remaining line breaks.
 		s = append(s, trailing_breaks...)
 		trailing_breaks = trailing_breaks[:0]
 

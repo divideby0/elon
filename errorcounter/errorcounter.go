@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
 package errorcounter
 
 import (
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/deps"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/deps"
 	"github.com/pkg/errors"
 )
 
-// Netflix uses Atlas for tracking error events.
+// Fake Twitter uses Atlas for tracking error events.
 // In the open-source build, we currently only support a null (no-op) error
 // counter
 
@@ -35,7 +35,7 @@ func init() {
 	deps.GetErrorCounter = getNullErrorCounter
 }
 
-func getNullErrorCounter(cfg *config.Monkey) (chaosmonkey.ErrorCounter, error) {
+func getNullErrorCounter(cfg *config.Monkey) (elon.ErrorCounter, error) {
 	kind := cfg.ErrorCounter()
 	if kind != "" {
 		return nil, errors.Errorf("unsupported error counter: %s", kind)

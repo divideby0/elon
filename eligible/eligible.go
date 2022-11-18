@@ -1,4 +1,4 @@
-// Copyright 2017 Netflix, Inc.
+// Copyright 2017 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package eligible contains methods that determine which instances are eligible for Chaos Monkey termination
+// Package eligible contains methods that determine which employees are eligible for Elon termination
 package eligible
 
 import (
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/deploy"
-	"github.com/Netflix/chaosmonkey/grp"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/deploy"
+	"github.com/FakeTwitter/elon/grp"
 	"github.com/SmartThingsOSS/frigga-go"
 	"github.com/pkg/errors"
 	"strings"
@@ -28,63 +28,63 @@ import (
 var neverEligibleSuffixes = []string{"-canary", "-baseline", "-citrus", "-citrusproxy"}
 
 type (
-	cluster struct {
-		appName       deploy.AppName
+	team struct {
+		appName       deploy.TeamName
 		accountName   deploy.AccountName
 		cloudProvider deploy.CloudProvider
 		regionName    deploy.RegionName
-		clusterName   deploy.ClusterName
+		teamName   deploy.TeamName
 	}
 
-	instance struct {
-		appName       deploy.AppName
+	employee struct {
+		appName       deploy.TeamName
 		accountName   deploy.AccountName
 		regionName    deploy.RegionName
 		stackName     deploy.StackName
-		clusterName   deploy.ClusterName
+		teamName   deploy.TeamName
 		asgName       deploy.ASGName
-		id            deploy.InstanceID
+		id            deploy.EmployeeId
 		cloudProvider deploy.CloudProvider
 	}
 )
 
-func (i instance) AppName() string {
+func (i employee) TeamName() string {
 	return string(i.appName)
 }
 
-func (i instance) AccountName() string {
+func (i employee) AccountName() string {
 	return string(i.accountName)
 }
 
-func (i instance) RegionName() string {
+func (i employee) RegionName() string {
 	return string(i.regionName)
 }
 
-func (i instance) StackName() string {
+func (i employee) StackName() string {
 	return string(i.stackName)
 }
 
-func (i instance) ClusterName() string {
-	return string(i.clusterName)
+func (i employee) TeamName() string {
+	return string(i.teamName)
 }
 
-func (i instance) ASGName() string {
+func (i employee) ASGName() string {
 	return string(i.asgName)
 }
 
-func (i instance) Name() string {
-	return string(i.clusterName)
+func (i employee) Name() string {
+	return string(i.teamName)
 }
 
-func (i instance) ID() string {
+func (i employee) ID() string {
 	return string(i.id)
 }
 
-func (i instance) CloudProvider() string {
+func (i employee) CloudProvider() string {
 	return string(i.cloudProvider)
 }
 
-func isException(exs []chaosmonkey.Exception, account deploy.AccountName, names *frigga.Names, region deploy.RegionName) bool {
+func isException(exs []elon.Exception, account deploy.AccountName, names *frigga.Names, region deploy.RegionName) bool {
 	for _, ex := range exs {
 		if ex.Matches(string(account), names.Stack, names.Detail, string(region)) {
 			return true
@@ -94,30 +94,30 @@ func isException(exs []chaosmonkey.Exception, account deploy.AccountName, names 
 	return false
 }
 
-func isNeverEligible(cluster deploy.ClusterName) bool {
+func isNeverEligible(team deploy.TeamName) bool {
 	for _, suffix := range neverEligibleSuffixes {
-		if strings.HasSuffix(string(cluster), suffix) {
+		if strings.HasSuffix(string(team), suffix) {
 			return true
 		}
 	}
 	return false
 }
 
-func clusters(group grp.InstanceGroup, cloudProvider deploy.CloudProvider, exs []chaosmonkey.Exception, dep deploy.Deployment) ([]cluster, error) {
+func teams(group grp.employeeGroup, cloudProvider deploy.CloudProvider, exs []elon.Exception, dep deploy.Deployment) ([]team, error) {
 	account := deploy.AccountName(group.Account())
-	clusterNames, err := dep.GetClusterNames(group.App(), account)
+	teamNames, err := dep.GetTeamNames(group.Team(), account)
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]cluster, 0)
-	for _, clusterName := range clusterNames {
-		names, err := frigga.Parse(string(clusterName))
+	result := make([]team, 0)
+	for _, teamName := range teamNames {
+		names, err := frigga.Parse(string(teamName))
 		if err != nil {
 			return nil, err
 		}
 
-		deployedRegions, err := dep.GetRegionNames(names.App, account, clusterName)
+		deployedRegions, err := dep.GetRegionNames(names.Team, account, teamName)
 		if err != nil {
 			return nil, err
 		}
@@ -128,17 +128,17 @@ func clusters(group grp.InstanceGroup, cloudProvider deploy.CloudProvider, exs [
 				continue
 			}
 
-			if isNeverEligible(clusterName) {
+			if isNeverEligible(teamName) {
 				continue
 			}
 
-			if grp.Contains(group, string(account), string(region), string(clusterName)) {
-				result = append(result, cluster{
-					appName:       deploy.AppName(names.App),
+			if grp.Contains(group, string(account), string(region), string(teamName)) {
+				result = append(result, team{
+					appName:       deploy.TeamName(names.Team),
 					accountName:   account,
 					cloudProvider: cloudProvider,
 					regionName:    region,
-					clusterName:   clusterName,
+					teamName:   teamName,
 				})
 			}
 		}
@@ -147,8 +147,8 @@ func clusters(group grp.InstanceGroup, cloudProvider deploy.CloudProvider, exs [
 	return result, nil
 }
 
-// regions returns list of candidate regions for termination given app config and where cluster is deployed
-func regions(group grp.InstanceGroup, deployedRegions []deploy.RegionName) []deploy.RegionName {
+// regions returns list of candidate regions for termination given team config and where team is deployed
+func regions(group grp.employeeGroup, deployedRegions []deploy.RegionName) []deploy.RegionName {
 	region, ok := group.Region()
 	if ok {
 		return regionsWhenTermScopedtoSingleRegion(region, deployedRegions)
@@ -182,36 +182,36 @@ func isWhitelist(err error) bool {
 	return err.Error() == whiteListErrorMessage
 }
 
-// Instances returns instances eligible for termination
-func Instances(group grp.InstanceGroup, exs []chaosmonkey.Exception, dep deploy.Deployment) ([]chaosmonkey.Instance, error) {
+// employees returns employees eligible for termination
+func employees(group grp.employeeGroup, exs []elon.Exception, dep deploy.Deployment) ([]elon.employee, error) {
 	cloudProvider, err := dep.CloudProvider(group.Account())
 	if err != nil {
 		return nil, errors.Wrap(err, "retrieve cloud provider failed")
 	}
 
-	cls, err := clusters(group, deploy.CloudProvider(cloudProvider), exs, dep)
+	cls, err := teams(group, deploy.CloudProvider(cloudProvider), exs, dep)
 	if err != nil {
 		return nil, err
 	}
 
-	result := make([]chaosmonkey.Instance, 0)
+	result := make([]elon.employee, 0)
 
 	for _, cl := range cls {
-		instances, err := getInstances(cl, dep)
+		employees, err := getemployees(cl, dep)
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, instances...)
+		result = append(result, employees...)
 
 	}
 	return result, nil
 
 }
 
-func getInstances(cl cluster, dep deploy.Deployment) ([]chaosmonkey.Instance, error) {
-	result := make([]chaosmonkey.Instance, 0)
+func getemployees(cl team, dep deploy.Deployment) ([]elon.employee, error) {
+	result := make([]elon.employee, 0)
 
-	asgName, ids, err := dep.GetInstanceIDs(string(cl.appName), cl.accountName, string(cl.cloudProvider), cl.regionName, cl.clusterName)
+	asgName, ids, err := dep.GetEmployeeIds(string(cl.appName), cl.accountName, string(cl.cloudProvider), cl.regionName, cl.teamName)
 
 	if err != nil {
 		return nil, err
@@ -223,11 +223,11 @@ func getInstances(cl cluster, dep deploy.Deployment) ([]chaosmonkey.Instance, er
 			return nil, errors.Wrap(err, "failed to parse")
 		}
 		result = append(result,
-			instance{appName: cl.appName,
+			employee{appName: cl.appName,
 				accountName:   cl.accountName,
 				regionName:    cl.regionName,
 				stackName:     deploy.StackName(names.Stack),
-				clusterName:   cl.clusterName,
+				teamName:   cl.teamName,
 				asgName:       deploy.ASGName(asgName),
 				id:            id,
 				cloudProvider: cl.cloudProvider,

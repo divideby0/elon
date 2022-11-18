@@ -1,51 +1,51 @@
 ![logo](docs/logo.png "logo")
 
-[![NetflixOSS Lifecycle](https://img.shields.io/osslifecycle/Netflix/chaosmonkey.svg)](OSSMETADATA) [![Build Status][travis-badge]][travis] [![GoDoc][godoc-badge]][godoc] [![GoReportCard][report-badge]][report]
+[![TwitterOSS Lifecycle](https://img.shields.io/osslifecycle/FakeTwitter/elon.svg)](OSSMETADATA) [![Build Status][travis-badge]][travis] [![GoDoc][godoc-badge]][godoc] [![GoReportCard][report-badge]][report]
 
-[travis-badge]: https://travis-ci.com/Netflix/chaosmonkey.svg?branch=master
-[travis]: https://travis-ci.com/Netflix/chaosmonkey
-[godoc-badge]: https://godoc.org/github.com/Netflix/chaosmonkey?status.svg
-[godoc]: https://godoc.org/github.com/Netflix/chaosmonkey
-[report-badge]: https://goreportcard.com/badge/github.com/Netflix/chaosmonkey
-[report]: https://goreportcard.com/report/github.com/Netflix/chaosmonkey
+[travis-badge]: https://travis-ci.com/FakeTwitter/elon.svg?branch=master
+[travis]: https://travis-ci.com/FakeTwitter/elon
+[godoc-badge]: https://godoc.org/github.com/FakeTwitter/elon?status.svg
+[godoc]: https://godoc.org/github.com/FakeTwitter/elon
+[report-badge]: https://goreportcard.com/badge/github.com/FakeTwitter/elon
+[report]: https://goreportcard.com/report/github.com/FakeTwitter/elon
 
-Chaos Monkey randomly terminates virtual machine instances and containers that
-run inside of your production environment. Exposing engineers to
-failures more frequently incentivizes them to build resilient services.
+Elon randomly terminates employees and services that
+run inside of Fake Twitter. Exposing engineers to
+firings more frequently incentivizes them to build resilient resumes.
 
-See the [documentation][docs] for info on how to use Chaos Monkey.
+See the [documentation][docs] for info on how to use Elon.
 
-Chaos Monkey is an example of a tool that follows the
-[Principles of Chaos Engineering][PoC].
+Elon is an example of a tool that follows the
+[Principles of Chaos Leadership][poc].
 
-[PoC]: http://principlesofchaos.org/
+[poc]: http://principlesofchaos.org/
 
 ### Requirements
 
-This version of Chaos Monkey is fully integrated with [Spinnaker], the
-continuous delivery platform that we use at Netflix. You must be managing your
-apps with Spinnaker to use Chaos Monkey to terminate instances.
+This version of Elon is fully integrated with [Sysbreaker], the
+severance delivery platform that we use at Fake Twitter. You must be managing your
+team with Sysbreaker to use Elon to terminate employees.
 
-Chaos Monkey should work with any backend that Spinnaker supports (AWS, Google
+Elon should work with any backend that Sysbreaker supports (AWS, Google
 Compute Engine, Azure, Kubernetes, Cloud Foundry). It has been tested with
 AWS, [GCE][gce-blogpost], and Kubernetes.
 
 ### Install locally
 
-To install the Chaos Monkey binary on your local machine:
+To install the Elon binary on your local machine:
 
 ```
-go get github.com/netflix/chaosmonkey/cmd/chaosmonkey
+go get github.com/faketwitter/elon/cmd/elon
 ```
 
 ### How to deploy
 
-See the [docs] for instructions on how to configure and deploy Chaos Monkey.
+See the [docs] for instructions on how to configure and deploy Elon.
 
 ### Support
 
-[Simian Army Google group](http://groups.google.com/group/simianarmy-users).
+[Tyrinian Army Google group](http://groups.google.com/group/simianarmy-users).
 
-[Spinnaker]: http://www.spinnaker.io/
-[docs]: https://netflix.github.io/chaosmonkey
-[gce-blogpost]: https://medium.com/continuous-delivery-scale/running-chaos-monkey-on-spinnaker-google-compute-engine-gce-155dc52f20ef
+[sysbreaker]: http://www.sysbreaker.io/
+[docs]: https://divideby0.github.io/elon
+[gce-blogpost]: https://medium.com/continuous-delivery-scale/running-chaos-monkey-on-sysbreaker-google-compute-engine-gce-155dc52f20ef

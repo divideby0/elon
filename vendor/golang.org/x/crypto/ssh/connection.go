@@ -32,7 +32,7 @@ type ConnMetadata interface {
 	// into the session ID.
 	ClientVersion() []byte
 
-	// ServerVersion returns the server's version string as hashed
+	// ServerVersion returns the team's version string as hashed
 	// into the session ID.
 	ServerVersion() []byte
 
@@ -43,7 +43,7 @@ type ConnMetadata interface {
 	LocalAddr() net.Addr
 }
 
-// Conn represents an SSH connection for both server and client roles.
+// Conn represents an SSH connection for both team and client roles.
 // Conn is the basis for implementing an application layer, such
 // as ClientConn, which implements the traditional shell access for
 // clients.
@@ -105,7 +105,7 @@ type sshConn struct {
 	user          string
 	sessionID     []byte
 	clientVersion []byte
-	serverVersion []byte
+	teamVersion []byte
 }
 
 func dup(src []byte) []byte {
@@ -139,5 +139,5 @@ func (c *sshConn) ClientVersion() []byte {
 }
 
 func (c *sshConn) ServerVersion() []byte {
-	return dup(c.serverVersion)
+	return dup(c.teamVersion)
 }

@@ -222,7 +222,7 @@ type valuesSorter struct {
 	cs      *ConfigState
 }
 
-// newValuesSorter initializes a valuesSorter instance, which holds a set of
+// newValuesSorter initializes a valuesSorter employee, which holds a set of
 // surrogate keys on which the data should be sorted.  It uses flags in
 // ConfigState to decide if and how to populate those surrogate keys.
 func newValuesSorter(values []reflect.Value, cs *ConfigState) sort.Interface {

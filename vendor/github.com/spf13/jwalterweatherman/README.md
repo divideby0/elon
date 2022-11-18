@@ -1,5 +1,4 @@
-jWalterWeatherman
-=================
+# jWalterWeatherman
 
 Seamless printing to the terminal (stdout) and logging to a io.Writer
 (file) that’s as easy to use as fmt.Println.
@@ -10,10 +9,9 @@ Graphic by [JonnyEtc](http://jonnyetc.deviantart.com/art/And-That-s-Why-You-Alwa
 JWW is primarily a wrapper around the excellent standard log library. It
 provides a few advantages over using the standard log library alone.
 
-1. Ready to go out of the box. 
+1. Ready to go out of the box.
 2. One library for both printing to the terminal and logging (to files).
 3. Really easy to log to either a temp file or a file you specify.
-
 
 I really wanted a very straightforward library that could seamlessly do
 the following things.
@@ -23,25 +21,26 @@ the following things.
 2. Allow the user to easily control what levels are printed to stdout
 3. Allow the user to easily control what levels are logged
 4. Provide an easy mechanism (like fmt.Println) to print info to the user
-   which can be easily logged as well 
+   which can be easily logged as well
 5. Due to 2 & 3 provide easy verbose mode for output and logs
 6. Not have any unnecessary initialization cruft. Just use it.
 
 # Usage
 
 ## Step 1. Use it
+
 Put calls throughout your source based on type of feedback.
 No initialization or setup needs to happen. Just start calling things.
 
 Available Loggers are:
 
- * TRACE
- * DEBUG
- * INFO
- * WARN
- * ERROR
- * CRITICAL
- * FATAL
+- TRACE
+- DEBUG
+- INFO
+- WARN
+- ERROR
+- CRITICAL
+- FATAL
 
 These each are loggers based on the log standard library and follow the
 standard usage. Eg..
@@ -66,7 +65,7 @@ standard usage. Eg..
         // This error isn’t going to materially change the behavior of the
         // application, but it’s something that may not be what the user
         // expects. Under the default thresholds, Warn will be logged, but
-        // not printed to the terminal. 
+        // not printed to the terminal.
 
         jww.WARN.Println(err2)
     }
@@ -90,9 +89,9 @@ Remember they only have to mean something to your project.
 
 Under the default thresholds :
 
- * Debug, Trace & Info goto /dev/null
- * Warn and above is logged (when a log file/io.Writer is provided)
- * Error and above is printed to the terminal (stdout)
+- Debug, Trace & Info goto /dev/null
+- Warn and above is logged (when a log file/io.Writer is provided)
+- Error and above is printed to the terminal (stdout)
 
 ### Changing the thresholds
 
@@ -102,7 +101,6 @@ execute after the change was made.
 This is very useful if your application has a verbose mode. Of course you
 can decide what verbose means to you or even have multiple levels of
 verbosity.
-
 
 ```go
     import (
@@ -122,7 +120,7 @@ level before making any other calls if you want to see what it's up to.
 
 JWW conveniently creates a temporary file and sets the log Handle to
 a io.Writer created for it. You should call this early in your application
-initialization routine as it will only log calls made after it is executed. 
+initialization routine as it will only log calls made after it is executed.
 When this option is used, the library will fmt.Println where to find the
 log file.
 
@@ -131,7 +129,7 @@ log file.
         jww "github.com/spf13/jwalterweatherman"
     )
 
-    jww.UseTempLogFile("YourAppName") 
+    jww.UseTempLogFile("YourTeamName")
 
 ```
 
@@ -140,16 +138,14 @@ log file.
 JWW can log to any file you provide a path to (provided it’s writable).
 Will only append to this file.
 
-
 ```go
     import (
         jww "github.com/spf13/jwalterweatherman"
     )
 
-    jww.SetLogFile("/path/to/logfile") 
+    jww.SetLogFile("/path/to/logfile")
 
 ```
-
 
 # More information
 

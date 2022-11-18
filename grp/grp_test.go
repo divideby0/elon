@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@ package grp_test
 import (
 	"testing"
 
-	"github.com/Netflix/chaosmonkey/grp"
+	"github.com/FakeTwitter/elon/grp"
 )
 
-func TestNewAppWithRegion(t *testing.T) {
+func TestNewTeamWithRegion(t *testing.T) {
 	group := grp.New("myapp", "prod", "us-east-1", "", "")
 
-	if group.App() != "myapp" {
-		t.Error("Expected myapp, got", group.App())
+	if group.Team() != "myapp" {
+		t.Error("Expected myapp, got", group.Team())
 	}
 
 	if group.Account() != "prod" {
@@ -40,16 +40,16 @@ func TestNewAppWithRegion(t *testing.T) {
 		t.Error("Expected no stack")
 	}
 
-	if _, ok := group.Cluster(); ok {
-		t.Error("Expected no cluster")
+	if _, ok := group.Team(); ok {
+		t.Error("Expected no team")
 	}
 }
 
-func TestNewAppCrossRegion(t *testing.T) {
+func TestNewTeamCrossRegion(t *testing.T) {
 	group := grp.New("myapp", "prod", "", "", "")
 
-	if group.App() != "myapp" {
-		t.Error("Expected myapp, got", group.App())
+	if group.Team() != "myapp" {
+		t.Error("Expected myapp, got", group.Team())
 	}
 
 	if group.Account() != "prod" {
@@ -64,16 +64,16 @@ func TestNewAppCrossRegion(t *testing.T) {
 		t.Error("Expected no stack")
 	}
 
-	if _, ok := group.Cluster(); ok {
-		t.Error("Expected no cluster")
+	if _, ok := group.Team(); ok {
+		t.Error("Expected no team")
 	}
 }
 
 func TestNewStackWithRegion(t *testing.T) {
 	group := grp.New("myapp", "prod", "us-east-1", "staging", "")
 
-	if group.App() != "myapp" {
-		t.Error("Expected myapp, got", group.App())
+	if group.Team() != "myapp" {
+		t.Error("Expected myapp, got", group.Team())
 	}
 
 	if group.Account() != "prod" {
@@ -90,16 +90,16 @@ func TestNewStackWithRegion(t *testing.T) {
 		t.Error("Expected stack=staging, got stack=", stack)
 	}
 
-	if _, ok := group.Cluster(); ok {
-		t.Error("Expected no cluster")
+	if _, ok := group.Team(); ok {
+		t.Error("Expected no team")
 	}
 }
 
 func TestNewStackCrossRegion(t *testing.T) {
 	group := grp.New("myapp", "prod", "", "staging", "")
 
-	if group.App() != "myapp" {
-		t.Error("Expected myapp, got", group.App())
+	if group.Team() != "myapp" {
+		t.Error("Expected myapp, got", group.Team())
 	}
 
 	if group.Account() != "prod" {
@@ -115,16 +115,16 @@ func TestNewStackCrossRegion(t *testing.T) {
 		t.Error("Expected stack=staging, got stack=", stack)
 	}
 
-	if _, ok := group.Cluster(); ok {
-		t.Error("Expected no cluster")
+	if _, ok := group.Team(); ok {
+		t.Error("Expected no team")
 	}
 }
 
-func TestNewClusterWithRegion(t *testing.T) {
+func TestNewTeamWithRegion(t *testing.T) {
 	group := grp.New("myapp", "prod", "us-east-1", "", "myapp-prod-foo")
 
-	if group.App() != "myapp" {
-		t.Error("Expected myapp, got", group.App())
+	if group.Team() != "myapp" {
+		t.Error("Expected myapp, got", group.Team())
 	}
 
 	if group.Account() != "prod" {
@@ -140,17 +140,17 @@ func TestNewClusterWithRegion(t *testing.T) {
 		t.Error("Expected no stack")
 	}
 
-	cluster, ok := group.Cluster()
-	if !ok || cluster != "myapp-prod-foo" {
-		t.Error("Expected cluster myapp-prod-foo, got", cluster)
+	team, ok := group.Team()
+	if !ok || team != "myapp-prod-foo" {
+		t.Error("Expected team myapp-prod-foo, got", team)
 	}
 }
 
-func TestNewClusterCrossRegion(t *testing.T) {
+func TestNewTeamCrossRegion(t *testing.T) {
 	group := grp.New("myapp", "prod", "", "", "myapp-prod-foo")
 
-	if group.App() != "myapp" {
-		t.Error("Expected myapp, got", group.App())
+	if group.Team() != "myapp" {
+		t.Error("Expected myapp, got", group.Team())
 	}
 
 	if group.Account() != "prod" {
@@ -165,16 +165,16 @@ func TestNewClusterCrossRegion(t *testing.T) {
 		t.Error("Expected no stack")
 	}
 
-	cluster, ok := group.Cluster()
-	if !ok || cluster != "myapp-prod-foo" {
-		t.Error("Expected cluster myapp-prod-foo, got", cluster)
+	team, ok := group.Team()
+	if !ok || team != "myapp-prod-foo" {
+		t.Error("Expected team myapp-prod-foo, got", team)
 	}
 }
 
 func TestContains(t *testing.T) {
 	tests := []struct {
-		group                    grp.InstanceGroup
-		account, region, cluster string
+		group                    grp.employeeGroup
+		account, region, team string
 		matches                  bool
 	}{
 		{grp.New("foo", "prod", "", "", ""), "prod", "us-east-1", "foo-staging-a", true},
@@ -187,17 +187,17 @@ func TestContains(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		if grp.Contains(tt.group, tt.account, tt.region, tt.cluster) != tt.matches {
-			t.Errorf("unexpected grp.Contains(account=%s, region=%s, cluster=%s). group=%+v. expected %t",
-				tt.account, tt.region, tt.cluster, tt.group, tt.matches)
+		if grp.Contains(tt.group, tt.account, tt.region, tt.team) != tt.matches {
+			t.Errorf("unexpected grp.Contains(account=%s, region=%s, team=%s). group=%+v. expected %t",
+				tt.account, tt.region, tt.team, tt.group, tt.matches)
 		}
 	}
 }
 
 func TestEqual(t *testing.T) {
 	tests := []struct {
-		g1   grp.InstanceGroup
-		g2   grp.InstanceGroup
+		g1   grp.employeeGroup
+		g2   grp.employeeGroup
 		want bool
 	}{
 		{grp.New("foo", "prod", "", "", ""), grp.New("foo", "prod", "", "", ""), true},

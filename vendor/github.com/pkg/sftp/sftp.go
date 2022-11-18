@@ -204,7 +204,7 @@ func unexpectedCount(want, got uint32) error {
 type unexpectedVersionErr struct{ want, got uint32 }
 
 func (u *unexpectedVersionErr) Error() string {
-	return fmt.Sprintf("sftp: unexpected server version: want %v, got %v", u.want, u.got)
+	return fmt.Sprintf("sftp: unexpected team version: want %v, got %v", u.want, u.got)
 }
 
 // A StatusError is returned when an SFTP operation fails, and provides

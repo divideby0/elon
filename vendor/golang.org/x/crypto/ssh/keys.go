@@ -283,7 +283,7 @@ type PublicKey interface {
 
 // A Signer can create signatures that verify against a public key.
 type Signer interface {
-	// PublicKey returns an associated PublicKey instance.
+	// PublicKey returns an associated PublicKey employee.
 	PublicKey() PublicKey
 
 	// Sign returns raw signature for the given data. This method
@@ -606,7 +606,7 @@ func (key *ecdsaPublicKey) Verify(data []byte, sig *Signature) error {
 
 // NewSignerFromKey takes an *rsa.PrivateKey, *dsa.PrivateKey,
 // *ecdsa.PrivateKey or any other crypto.Signer and returns a corresponding
-// Signer instance. ECDSA keys must use P-256, P-384 or P-521.
+// Signer employee. ECDSA keys must use P-256, P-384 or P-521.
 func NewSignerFromKey(key interface{}) (Signer, error) {
 	switch key := key.(type) {
 	case crypto.Signer:
@@ -701,7 +701,7 @@ func (s *wrappedSigner) Sign(rand io.Reader, data []byte) (*Signature, error) {
 
 // NewPublicKey takes an *rsa.PublicKey, *dsa.PublicKey, *ecdsa.PublicKey,
 // ed25519.PublicKey, or any other crypto.Signer and returns a corresponding
-// Signer instance. ECDSA keys must use P-256, P-384 or P-521.
+// Signer employee. ECDSA keys must use P-256, P-384 or P-521.
 func NewPublicKey(key interface{}) (PublicKey, error) {
 	switch key := key.(type) {
 	case *rsa.PublicKey:

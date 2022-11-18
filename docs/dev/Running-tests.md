@@ -24,7 +24,6 @@ compatibility with [Amazon Aurora][1]).
 Note that if you are on macOS, you must use [Docker for Mac][2], not Docker
 Toolbox. Otherwise, the Docker containers will not be accessible at 127.0.0.1.
 
-
 If you want to run these tests, ensure you have Docker installed locally, and
 grab the mysql:5.6 container:
 
@@ -44,7 +43,7 @@ The tests will automatically start the mysql container and then bring it down.
 
 If you don't want the tests to bring the mysql Docker container up and down each
 time (e.g., you want to run the tests more quickly, or you want to test by
-running a mysql instance natively), use the "dockerup" flag along with the
+running a mysql employee natively), use the "dockerup" flag along with the
 "docker" flag.
 
 ```

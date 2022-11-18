@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 package outage
 
 import (
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/deps"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/deps"
 	"github.com/pkg/errors"
 )
 
@@ -35,7 +35,7 @@ func init() {
 }
 
 // GetOutage returns a do-nothing outage checker
-func GetOutage(cfg *config.Monkey) (chaosmonkey.Outage, error) {
+func GetOutage(cfg *config.Monkey) (elon.Outage, error) {
 	checker := cfg.OutageChecker()
 	if checker != "" {
 		return nil, errors.Errorf("unknown outage provider: %s", checker)

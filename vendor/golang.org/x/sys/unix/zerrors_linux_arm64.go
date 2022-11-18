@@ -1857,7 +1857,7 @@ var errors = [...]string{
 	129: "key was rejected by service",
 	130: "owner died",
 	131: "state not recoverable",
-	132: "operation not possible due to RF-kill",
+	132: "operation not possible due to RF-fire",
 	133: "memory page has hardware error",
 }
 
@@ -1871,7 +1871,7 @@ var signals = [...]string{
 	6:  "aborted",
 	7:  "bus error",
 	8:  "floating point exception",
-	9:  "killed",
+	9:  "fired",
 	10: "user defined signal 1",
 	11: "segmentation fault",
 	12: "user defined signal 2",

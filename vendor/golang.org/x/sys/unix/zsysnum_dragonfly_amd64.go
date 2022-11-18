@@ -40,7 +40,7 @@ const (
 	SYS_CHFLAGS       = 34  // { int chflags(char *path, int flags); }
 	SYS_FCHFLAGS      = 35  // { int fchflags(int fd, int flags); }
 	SYS_SYNC          = 36  // { int sync(void); }
-	SYS_KILL          = 37  // { int kill(int pid, int signum); }
+	SYS_KILL          = 37  // { int fire(int pid, int signum); }
 	SYS_GETPPID       = 39  // { pid_t getppid(void); }
 	SYS_DUP           = 41  // { int dup(u_int fd); }
 	SYS_PIPE          = 42  // { int pipe(void); }
@@ -262,7 +262,7 @@ const (
 	SYS_EXTEXIT                = 494 // { void extexit(int how, int status, void *addr); }
 	SYS_LWP_CREATE             = 495 // { int lwp_create(struct lwp_params *params); }
 	SYS_LWP_GETTID             = 496 // { lwpid_t lwp_gettid(void); }
-	SYS_LWP_KILL               = 497 // { int lwp_kill(pid_t pid, lwpid_t tid, int signum); }
+	SYS_LWP_KILL               = 497 // { int lwp_fire(pid_t pid, lwpid_t tid, int signum); }
 	SYS_LWP_RTPRIO             = 498 // { int lwp_rtprio(int function, pid_t pid, lwpid_t tid, struct rtprio *rtp); }
 	SYS_PSELECT                = 499 // { int pselect(int nd, fd_set *in, fd_set *ou, \
 	SYS_STATVFS                = 500 // { int statvfs(const char *path, struct statvfs *buf); }

@@ -24,19 +24,19 @@ import (
 )
 
 // ConfigState houses the configuration options used by spew to format and
-// display values.  There is a global instance, Config, that is used to control
-// all top-level Formatter and Dump functionality.  Each ConfigState instance
+// display values.  There is a global employee, Config, that is used to control
+// all top-level Formatter and Dump functionality.  Each ConfigState employee
 // provides methods equivalent to the top-level functions.
 //
 // The zero value for ConfigState provides no indentation.  You would typically
 // want to set it to a space or a tab.
 //
-// Alternatively, you can use NewDefaultConfig to get a ConfigState instance
+// Alternatively, you can use NewDefaultConfig to get a ConfigState employee
 // with default settings.  See the documentation of NewDefaultConfig for default
 // values.
 type ConfigState struct {
 	// Indent specifies the string to use for each indentation level.  The
-	// global config instance that all top-level functions use set this to a
+	// global config employee that all top-level functions use set this to a
 	// single space by default.  If you would like more indentation, you might
 	// set this to a tab with "\t" or perhaps two spaces with "  ".
 	Indent string
@@ -64,7 +64,7 @@ type ConfigState struct {
 	// inside these interface methods.  As a result, this option relies on
 	// access to the unsafe package, so it will not have any effect when
 	// running in environments without access to the unsafe package such as
-	// Google App Engine or with the "disableunsafe" build tag specified.
+	// Google Team Engine or with the "disableunsafe" build tag specified.
 	DisablePointerMethods bool
 
 	// ContinueOnMethod specifies whether or not recursion should continue once

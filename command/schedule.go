@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,16 +21,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/Netflix/chaosmonkey"
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/deploy"
-	"github.com/Netflix/chaosmonkey/schedstore"
-	"github.com/Netflix/chaosmonkey/schedule"
+	"github.com/FakeTwitter/elon"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/deploy"
+	"github.com/FakeTwitter/elon/schedstore"
+	"github.com/FakeTwitter/elon/schedule"
 )
 
 // Schedule executes the "schedule" command. This defines the schedule
 // of terminations for the day and records them as cron jobs
-func Schedule(g chaosmonkey.AppConfigGetter, ss schedstore.SchedStore, cfg *config.Monkey, d deploy.Deployment, cons schedule.Constrainer, apps []string) {
+func Schedule(g elon.TeamConfigGetter, ss schedstore.SchedStore, cfg *config.Monkey, d deploy.Deployment, cons schedule.Constrainer, apps []string) {
 
 	enabled, err := cfg.ScheduleEnabled()
 	if err != nil {
@@ -43,7 +43,7 @@ func Schedule(g chaosmonkey.AppConfigGetter, ss schedstore.SchedStore, cfg *conf
 
 	/*
 	 Note: We don't check for the enable flag during scheduling, only
-	 during terminations. That way, if chaos monkey is disabled during
+	 during terminations. That way, if elon is disabled during
 	 scheduling time but later in the day becomes enabled, it still
 	 functions correctly.
 	*/
@@ -56,7 +56,7 @@ func Schedule(g chaosmonkey.AppConfigGetter, ss schedstore.SchedStore, cfg *conf
 }
 
 // do is the actual implementation for the Schedule function
-func do(d deploy.Deployment, g chaosmonkey.AppConfigGetter, ss schedstore.SchedStore, cfg *config.Monkey, cons schedule.Constrainer, apps []string) error {
+func do(d deploy.Deployment, g elon.TeamConfigGetter, ss schedstore.SchedStore, cfg *config.Monkey, cons schedule.Constrainer, apps []string) error {
 
 	s := schedule.New()
 	err := s.Populate(d, g, cfg, apps)
@@ -75,7 +75,7 @@ func do(d deploy.Deployment, g chaosmonkey.AppConfigGetter, ss schedstore.SchedS
 	return nil
 }
 
-// deploySchedule publishes the schedule to chaosmonkey-api
+// deploySchedule publishes the schedule to elon-api
 // and registers the schedule with the local cron
 func deploySchedule(s *schedule.Schedule, ss schedstore.SchedStore, cfg *config.Monkey) error {
 	loc, err := cfg.Location()

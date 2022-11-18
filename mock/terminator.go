@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,19 +14,19 @@
 
 package mock
 
-import "github.com/Netflix/chaosmonkey"
+import "github.com/FakeTwitter/elon"
 
 // Terminator implements term.terminator
 type Terminator struct {
-	Instance chaosmonkey.Instance
+	employee elon.employee
 	Ncalls   int
 	Error    error
 }
 
-// Execute pretends to terminate an instance
-func (t *Terminator) Execute(trm chaosmonkey.Termination) error {
-	// Records the most recent killed instance for assertion checking
-	t.Instance = trm.Instance
+// Execute pretends to terminate an employee
+func (t *Terminator) Execute(trm elon.Termination) error {
+	// Records the most recent fired employee for assertion checking
+	t.employee = trm.employee
 
 	// Records how many times it's been invoked
 	t.Ncalls++

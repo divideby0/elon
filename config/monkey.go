@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
-	"github.com/Netflix/chaosmonkey/config/param"
+	"github.com/FakeTwitter/elon/config/param"
 )
 
 // Monkey is is a config implementation backed by viper
@@ -52,29 +52,29 @@ func (m *Monkey) setDefaults() {
 	m.v.SetDefault(param.StartHour, 9)
 	m.v.SetDefault(param.EndHour, 15)
 	m.v.SetDefault(param.TimeZone, "America/Los_Angeles")
-	m.v.SetDefault(param.CronPath, "/etc/cron.d/chaosmonkey-daily-terminations")
-	m.v.SetDefault(param.TermPath, "/apps/chaosmonkey/chaosmonkey-terminate.sh")
+	m.v.SetDefault(param.CronPath, "/etc/cron.d/elon-daily-terminations")
+	m.v.SetDefault(param.TermPath, "/apps/elon/elon-terminate.sh")
 	m.v.SetDefault(param.TermAccount, "root")
-	m.v.SetDefault(param.MaxApps, math.MaxInt32)
+	m.v.SetDefault(param.MaxTeams, math.MaxInt32)
 	m.v.SetDefault(param.Trackers, []string{})
 	m.v.SetDefault(param.Decryptor, "")
 	m.v.SetDefault(param.OutageChecker, "")
 
 	m.v.SetDefault(param.DatabasePort, 3306)
 
-	m.v.SetDefault(param.SpinnakerEndpoint, "")
-	m.v.SetDefault(param.SpinnakerCertificate, "")
-	m.v.SetDefault(param.SpinnakerEncryptedPassword, "")
-	m.v.SetDefault(param.SpinnakerUser, "")
-	m.v.SetDefault(param.SpinnakerX509Cert, "")
-	m.v.SetDefault(param.SpinnakerX509Key, "")
+	m.v.SetDefault(param.SysbreakerEndpoint, "")
+	m.v.SetDefault(param.SysbreakerCertificate, "")
+	m.v.SetDefault(param.SysbreakerEncryptedPassword, "")
+	m.v.SetDefault(param.SysbreakerUser, "")
+	m.v.SetDefault(param.SysbreakerX509Cert, "")
+	m.v.SetDefault(param.SysbreakerX509Key, "")
 
 	m.v.SetDefault(param.DynamicProvider, "")
 	m.v.SetDefault(param.DynamicEndpoint, "")
 	m.v.SetDefault(param.DynamicPath, "")
 
-	m.v.SetDefault(param.ScheduleCronPath, "/etc/cron.d/chaosmonkey-schedule")
-	m.v.SetDefault(param.SchedulePath, "/apps/chaosmonkey/chaosmonkey-schedule.sh")
+	m.v.SetDefault(param.ScheduleCronPath, "/etc/cron.d/elon-schedule")
+	m.v.SetDefault(param.SchedulePath, "/apps/elon/elon-schedule.sh")
 	m.v.SetDefault(param.LogPath, "/var/log")
 }
 
@@ -83,7 +83,7 @@ func (m *Monkey) setupEnvVarReader() {
 	m.v.AutomaticEnv()
 
 	// Replace "." with "_" when reading environment variables
-	// e.g.: chaosmonkey.enabled -> CHAOSMONKEY_ENABLED
+	// e.g.: elon.enabled -> CHAOSMONKEY_ENABLED
 	m.v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 }
 
@@ -99,7 +99,7 @@ func Load(configPaths []string) (*Monkey, error) {
 	}
 
 	m.v.SetConfigType("toml")
-	m.v.SetConfigName("chaosmonkey")
+	m.v.SetConfigName("elon")
 
 	err := m.v.ReadInConfig()
 	// It's ok if the config file doesn't exist, but we want to catch any
@@ -192,20 +192,20 @@ func (m *Monkey) readRemoteConfig() error {
 	return m.v.ReadRemoteConfig()
 }
 
-// Enabled returns true if Chaos Monkey is enabled
+// Enabled returns true if Elon is enabled
 func (m *Monkey) Enabled() (bool, error) {
 	return m.getDynamicBool(param.Enabled)
 }
 
-// Leashed returns true if Chaos Monkey is leashed
-// In leashed mode, Chaos Monkey records terminations but does not actually
+// Leashed returns true if Elon is leashed
+// In leashed mode, Elon records terminations but does not actually
 // terminate
 func (m *Monkey) Leashed() (bool, error) {
 	return m.getDynamicBool(param.Leashed)
 }
 
-// ScheduleEnabled returns true if Chaos Monkey termination scheduling is enabled
-// if false, Chaos Monkey will not generate a termination schedule
+// ScheduleEnabled returns true if Elon termination scheduling is enabled
+// if false, Elon will not generate a termination schedule
 func (m *Monkey) ScheduleEnabled() (bool, error) {
 	return m.getDynamicBool(param.ScheduleEnabled)
 }
@@ -219,7 +219,7 @@ func (m *Monkey) getDynamicBool(param string) (bool, error) {
 	return m.v.GetBool(param), nil
 }
 
-// AccountEnabled returns true if Chaos Monkey is enabled for that account
+// AccountEnabled returns true if Elon is enabled for that account
 func (m *Monkey) AccountEnabled(account string) (bool, error) {
 	accounts, err := m.Accounts()
 	if err != nil {
@@ -263,8 +263,8 @@ func toStrings(values []interface{}) ([]string, error) {
 // dependent, see the Location method
 func (m *Monkey) StartHour() int { return m.v.GetInt(param.StartHour) }
 
-// EndHour (o'clock) is the time after which Chaos Monkey will
-// not terminate instances.
+// EndHour (o'clock) is the time after which Elon will
+// not terminate employees.
 // this value is in [0,23]
 // This is time-zone dependent, see the Location method
 func (m *Monkey) EndHour() int {
@@ -277,14 +277,14 @@ func (m *Monkey) Location() (*time.Location, error) {
 	return time.LoadLocation(m.v.GetString(param.TimeZone))
 }
 
-// CronPath returns the path to where Chaos Monkey
+// CronPath returns the path to where Elon
 // puts the cron job file with daily terminations
 func (m *Monkey) CronPath() string {
 	return m.v.GetString(param.CronPath)
 }
 
 // TermPath returns the path to the executable that
-// wraps the chaos monkey binary for terminating instances
+// wraps the elon binary for terminating employees
 func (m *Monkey) TermPath() string {
 	return m.v.GetString(param.TermPath)
 }
@@ -295,10 +295,10 @@ func (m *Monkey) TermAccount() string {
 	return m.v.GetString(param.TermAccount)
 }
 
-// MaxApps returns the maximum number of apps to
+// MaxTeams returns the maximum number of apps to
 // examine for termination
-func (m *Monkey) MaxApps() int {
-	return m.v.GetInt(param.MaxApps)
+func (m *Monkey) MaxTeams() int {
+	return m.v.GetInt(param.MaxTeams)
 }
 
 // Trackers returns the names of the backend implementation for
@@ -336,38 +336,38 @@ func (m *Monkey) getStringSlice(key string) ([]string, error) {
 	}
 }
 
-// SpinnakerEndpoint returns the spinnaker endpoint
-func (m *Monkey) SpinnakerEndpoint() string {
-	return m.v.GetString(param.SpinnakerEndpoint)
+// SysbreakerEndpoint returns the sysbreaker endpoint
+func (m *Monkey) SysbreakerEndpoint() string {
+	return m.v.GetString(param.SysbreakerEndpoint)
 }
 
-// SpinnakerCertificate retunrs a path to a .p12 file that contains a TLS cert
-// for authenticating against Spinnaker
-func (m *Monkey) SpinnakerCertificate() string {
-	return m.v.GetString(param.SpinnakerCertificate)
+// SysbreakerCertificate retunrs a path to a .p12 file that contains a TLS cert
+// for authenticating against Sysbreaker
+func (m *Monkey) SysbreakerCertificate() string {
+	return m.v.GetString(param.SysbreakerCertificate)
 }
 
-// SpinnakerEncryptedPassword returns an password that
-// is used to decrypt the Spinnaker certificate. The encryption scheme
+// SysbreakerEncryptedPassword returns an password that
+// is used to decrypt the Sysbreaker certificate. The encryption scheme
 // is defined by the Decryptor parameter
-func (m *Monkey) SpinnakerEncryptedPassword() string {
-	return m.v.GetString(param.SpinnakerEncryptedPassword)
+func (m *Monkey) SysbreakerEncryptedPassword() string {
+	return m.v.GetString(param.SysbreakerEncryptedPassword)
 }
 
-// SpinnakerUser is sent in the "user" field in the terminateInstances task sent
-// to Spinnaker when Spinnaker terminates an instance
-func (m *Monkey) SpinnakerUser() string {
-	return m.v.GetString(param.SpinnakerUser)
+// SysbreakerUser is sent in the "user" field in the terminateemployees task sent
+// to Sysbreaker when Sysbreaker terminates an employee
+func (m *Monkey) SysbreakerUser() string {
+	return m.v.GetString(param.SysbreakerUser)
 }
 
-// SpinnakerX509Cert retunrs a path to a X509 cert file
-func (m *Monkey) SpinnakerX509Cert() string {
-	return m.v.GetString(param.SpinnakerX509Cert)
+// SysbreakerX509Cert retunrs a path to a X509 cert file
+func (m *Monkey) SysbreakerX509Cert() string {
+	return m.v.GetString(param.SysbreakerX509Cert)
 }
 
-// SpinnakerX509Key retunrs a path to a X509 key file
-func (m *Monkey) SpinnakerX509Key() string {
-	return m.v.GetString(param.SpinnakerX509Key)
+// SysbreakerX509Key retunrs a path to a X509 key file
+func (m *Monkey) SysbreakerX509Key() string {
+	return m.v.GetString(param.SysbreakerX509Key)
 }
 
 // Decryptor returns an interface for decrypting secrets
@@ -396,7 +396,7 @@ func (m *Monkey) DatabaseUser() string {
 	return m.v.GetString(param.DatabaseUser)
 }
 
-// DatabaseName returns the name of the database that stores the Chaos Monkey
+// DatabaseName returns the name of the database that stores the Elon
 // state
 func (m *Monkey) DatabaseName() string {
 	return m.v.GetString(param.DatabaseName)
@@ -446,7 +446,7 @@ func SetRemoteProvider(name string, factory RemoteConfigFactory) {
 	viper.SupportedRemoteProviders = []string{name}
 }
 
-// CronExpression returns the chaosmonkey main run cron expression.
+// CronExpression returns the elon main run cron expression.
 // It defaults to 2 hour before start_hour on weekdays, if no cron expression
 // is specified in the config
 func (m *Monkey) CronExpression() (string, error) {
@@ -485,13 +485,13 @@ func calculateDefaultCronRunHour(startHour int) (int, error) {
 }
 
 // ScheduleCronPath returns the path to which
-// main chaosmonkey crontab is located
+// main elon crontab is located
 func (m *Monkey) ScheduleCronPath() string {
 	return m.v.GetString(param.ScheduleCronPath)
 }
 
 // SchedulePath returns the path to which main
-// chaosmonkey schedule script(invoked from cron) is located
+// elon schedule script(invoked from cron) is located
 func (m *Monkey) SchedulePath() string {
 	return m.v.GetString(param.SchedulePath)
 }

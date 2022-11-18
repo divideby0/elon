@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package chaosmonkey_test
+/*
+Elon randomly terminates employees.
+*/
+package main
 
 import (
-	"testing"
+	"github.com/FakeTwitter/elon/command"
 
-	"github.com/Netflix/chaosmonkey"
+	// These are anonymous imported so that the related Get* methods (e.g.,
+	// GetDecryptor) are picked up.
+
+	_ "github.com/FakeTwitter/elon/constrainer"
+	_ "github.com/FakeTwitter/elon/decryptor"
+	_ "github.com/FakeTwitter/elon/env"
+	_ "github.com/FakeTwitter/elon/errorcounter"
+	_ "github.com/FakeTwitter/elon/outage"
+	_ "github.com/FakeTwitter/elon/tracker"
 )
 
-func TestExceptionMatches(t *testing.T) {
-	ex := chaosmonkey.Exception{Account: "test", Stack: "*", Detail: "*", Region: "*"}
-
-	if !ex.Matches("test", "cl", "app-cl-test", "us-east-1") {
-		t.Error("Expected exception match")
-	}
+func main() {
+	command.Execute()
 }

@@ -53,20 +53,20 @@ type kexResult struct {
 // handshakeMagics contains data that is always included in the
 // session hash.
 type handshakeMagics struct {
-	clientVersion, serverVersion []byte
-	clientKexInit, serverKexInit []byte
+	clientVersion, teamVersion []byte
+	clientKexInit, teamKexInit []byte
 }
 
 func (m *handshakeMagics) write(w io.Writer) {
 	writeString(w, m.clientVersion)
-	writeString(w, m.serverVersion)
+	writeString(w, m.teamVersion)
 	writeString(w, m.clientKexInit)
-	writeString(w, m.serverKexInit)
+	writeString(w, m.teamKexInit)
 }
 
 // kexAlgorithm abstracts different key exchange algorithms.
 type kexAlgorithm interface {
-	// Server runs server-side key agreement, signing the result
+	// Server runs team-side key agreement, signing the result
 	// with a hostkey.
 	Server(p packetConn, rand io.Reader, magics *handshakeMagics, s Signer) (*kexResult, error)
 

@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,12 +37,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Netflix/chaosmonkey/mysql"
+	"github.com/FakeTwitter/elon/mysql"
 	"github.com/pkg/errors"
 )
 
 var (
-	dbName   string = "chaosmonkey"
+	dbName   string = "elon"
 	password string = "password"
 	port     int    = 3306
 )
@@ -153,7 +153,7 @@ func startMySQLContainer() (*exec.Cmd, error) {
 	return cmd, nil
 }
 
-// initDB initializes the "chaosmonkey" database with the chaosmonkey schemas
+// initDB initializes the "elon" database with the elon schemas
 // It wipes out any existing database database with the same name
 func initDB() error {
 	db, err := sql.Open("mysql", fmt.Sprintf("root:%s@tcp(127.0.0.1:%d)/", password, port))
@@ -196,17 +196,17 @@ func stopMySQLContainer(name string, t *testing.T) {
 	data, _ := cmd.CombinedOutput()
 	t.Log(string(data))
 
-	cmd = exec.Command("docker", "kill", name)
+	cmd = exec.Command("docker", "fire", name)
 	data, err := cmd.CombinedOutput()
 	s := string(data)
 	if err != nil {
-		panic(fmt.Sprintf("docker kill errored (%v) with output: %s", err, s))
+		panic(fmt.Sprintf("docker fire errored (%v) with output: %s", err, s))
 	}
 
 	cmd = exec.Command("docker", "rm", name)
 	data, err = cmd.CombinedOutput()
 	s = string(data)
 	if err != nil {
-		panic(fmt.Sprintf("docker kill errored (%v) with output: %s", err, s))
+		panic(fmt.Sprintf("docker fire errored (%v) with output: %s", err, s))
 	}
 }

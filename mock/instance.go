@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,47 +14,47 @@
 
 package mock
 
-// Instance implements instance.Instance
-type Instance struct {
-	App, Account, Stack, Cluster, Region, ASG, InstanceID string
+// employee implements employee.employee
+type employee struct {
+	Team, Account, Stack, Team, Region, ASG, EmployeeId string
 }
 
-// AppName implements instance.AppName
-func (i Instance) AppName() string {
-	return i.App
+// TeamName implements employee.TeamName
+func (i employee) TeamName() string {
+	return i.Team
 }
 
-// AccountName implements instance.AccountName
-func (i Instance) AccountName() string {
+// AccountName implements employee.AccountName
+func (i employee) AccountName() string {
 	return i.Account
 }
 
-// RegionName implements instance.RegionName
-func (i Instance) RegionName() string {
+// RegionName implements employee.RegionName
+func (i employee) RegionName() string {
 	return i.Region
 }
 
-// StackName implements instance.StackName
-func (i Instance) StackName() string {
+// StackName implements employee.StackName
+func (i employee) StackName() string {
 	return i.Stack
 }
 
-// ClusterName implements instance.ClusterName
-func (i Instance) ClusterName() string {
-	return i.Cluster
+// TeamName implements employee.TeamName
+func (i employee) TeamName() string {
+	return i.Team
 }
 
-// ASGName implements instance.ASGName
-func (i Instance) ASGName() string {
+// ASGName implements employee.ASGName
+func (i employee) ASGName() string {
 	return i.ASG
 }
 
-// ID implements instance.ID
-func (i Instance) ID() string {
-	return i.InstanceID
+// ID implements employee.ID
+func (i employee) ID() string {
+	return i.EmployeeId
 }
 
-// CloudProvider implements instance.IsContainer
-func (i Instance) CloudProvider() string {
+// CloudProvider implements employee.IsContainer
+func (i employee) CloudProvider() string {
 	return "aws"
 }

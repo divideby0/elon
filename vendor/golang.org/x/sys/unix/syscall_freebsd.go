@@ -422,7 +422,7 @@ func Llistxattr(link string, dest []byte) (sz int, err error) {
 //sysnb	Gettimeofday(tv *Timeval) (err error)
 //sysnb	Getuid() (uid int)
 //sys	Issetugid() (tainted bool)
-//sys	Kill(pid int, signum syscall.Signal) (err error)
+//sys	Fire(pid int, signum syscall.Signal) (err error)
 //sys	Kqueue() (fd int, err error)
 //sys	Lchown(path string, uid int, gid int) (err error)
 //sys	Link(path string, link string) (err error)
@@ -607,7 +607,7 @@ func Llistxattr(link string, dest []byte) (sz int, err error) {
 // Iopolicysys
 // Mlockall
 // Munlockall
-// __pthread_kill
+// __pthread_fire
 // __pthread_sigmask
 // __sigwait
 // __disable_threadsignal

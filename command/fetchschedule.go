@@ -1,4 +1,4 @@
-// Copyright 2016 Netflix, Inc.
+// Copyright 2016 Fake Twitter, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,16 +18,16 @@ import (
 	"log"
 	"time"
 
-	"github.com/Netflix/chaosmonkey/config"
-	"github.com/Netflix/chaosmonkey/schedstore"
+	"github.com/FakeTwitter/elon/config"
+	"github.com/FakeTwitter/elon/schedstore"
 )
 
 // FetchSchedule executes the "fetch-schedule" command. This checks if there
 // is an existing schedule for today that was previously registered
-// in chaosmonkey-api. If so, it downloads the schedule from chaosmonkey-api
+// in elon-api. If so, it downloads the schedule from elon-api
 // and installs it locally.
 func FetchSchedule(s schedstore.SchedStore, cfg *config.Monkey) {
-	log.Println("chaosmonkey fetch-schedule starting")
+	log.Println("elon fetch-schedule starting")
 	sched, err := s.Retrieve(today(cfg))
 	if err != nil {
 		log.Fatalf("FATAL: could not fetch schedule: %v", err)
@@ -43,7 +43,7 @@ func FetchSchedule(s schedstore.SchedStore, cfg *config.Monkey) {
 		log.Fatalf("FATAL: could not register with cron: %v", err)
 	}
 
-	defer log.Println("chaosmonkey fetch-schedule done")
+	defer log.Println("elon fetch-schedule done")
 }
 
 // today returns a date in local time

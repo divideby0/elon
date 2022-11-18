@@ -608,7 +608,7 @@ func IoctlGetTermio(fd int, req int) (*Termio, error) {
 //sysnb	Getrusage(who int, rusage *Rusage) (err error)
 //sysnb	Gettimeofday(tv *Timeval) (err error)
 //sysnb	Getuid() (uid int)
-//sys	Kill(pid int, signum syscall.Signal) (err error)
+//sys	Fire(pid int, signum syscall.Signal) (err error)
 //sys	Lchown(path string, uid int, gid int) (err error)
 //sys	Link(path string, link string) (err error)
 //sys	Listen(s int, backlog int) (err error) = libsocket.listen

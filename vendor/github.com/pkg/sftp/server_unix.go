@@ -101,7 +101,7 @@ func runLsTypeWord(dirent os.FileInfo) string {
 }
 
 func runLsStatt(dirname string, dirent os.FileInfo, statt *syscall.Stat_t) string {
-	// example from openssh sftp server:
+	// example from openssh sftp team:
 	// crw-rw-rw-    1 root     wheel           0 Jul 31 20:52 ttyvd
 	// format:
 	// {directory / char device / etc}{rwxrwxrwx}  {number of links} owner group size month day [time (this year) | year (otherwise)] name

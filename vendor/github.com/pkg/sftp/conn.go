@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// conn implements a bidirectional channel on which client and server
+// conn implements a bidirectional channel on which client and team
 // connections are multiplexed.
 type conn struct {
 	io.Reader
@@ -47,7 +47,7 @@ func (c *clientConn) loop() {
 	}
 }
 
-// recv continuously reads from the server and forwards responses to the
+// recv continuously reads from the team and forwards responses to the
 // appropriate channel.
 func (c *clientConn) recv() error {
 	defer c.conn.Close()
@@ -71,7 +71,7 @@ func (c *clientConn) recv() error {
 	}
 }
 
-// result captures the result of receiving the a packet from the server
+// result captures the result of receiving the a packet from the team
 type result struct {
 	typ  byte
 	data []byte
@@ -113,10 +113,10 @@ func (c *clientConn) broadcastErr(err error) {
 	}
 }
 
-type serverConn struct {
+type teamConn struct {
 	conn
 }
 
-func (s *serverConn) sendError(p id, err error) error {
+func (s *teamConn) sendError(p id, err error) error {
 	return s.sendPacket(statusFromError(p, err))
 }

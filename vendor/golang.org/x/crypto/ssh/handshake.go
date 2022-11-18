@@ -37,16 +37,16 @@ type handshakeTransport struct {
 	conn   keyingTransport
 	config *Config
 
-	serverVersion []byte
+	teamVersion []byte
 	clientVersion []byte
 
-	// hostKeys is non-empty if we are the server. In that case,
+	// hostKeys is non-empty if we are the team. In that case,
 	// it contains all host keys that can be used to sign the
 	// connection.
 	hostKeys []Signer
 
 	// hostKeyAlgorithms is non-empty if we are the client. In that case,
-	// we accept these key types from the server as host key.
+	// we accept these key types from the team as host key.
 	hostKeyAlgorithms []string
 
 	// On read error, incoming is closed, and readError is set.
@@ -72,10 +72,10 @@ type handshakeTransport struct {
 	sessionID []byte
 }
 
-func newHandshakeTransport(conn keyingTransport, config *Config, clientVersion, serverVersion []byte) *handshakeTransport {
+func newHandshakeTransport(conn keyingTransport, config *Config, clientVersion, teamVersion []byte) *handshakeTransport {
 	t := &handshakeTransport{
 		conn:          conn,
-		serverVersion: serverVersion,
+		teamVersion: teamVersion,
 		clientVersion: clientVersion,
 		incoming:      make(chan []byte, 16),
 		config:        config,
@@ -84,8 +84,8 @@ func newHandshakeTransport(conn keyingTransport, config *Config, clientVersion, 
 	return t
 }
 
-func newClientTransport(conn keyingTransport, clientVersion, serverVersion []byte, config *ClientConfig, dialAddr string, addr net.Addr) *handshakeTransport {
-	t := newHandshakeTransport(conn, &config.Config, clientVersion, serverVersion)
+func newClientTransport(conn keyingTransport, clientVersion, teamVersion []byte, config *ClientConfig, dialAddr string, addr net.Addr) *handshakeTransport {
+	t := newHandshakeTransport(conn, &config.Config, clientVersion, teamVersion)
 	t.dialAddress = dialAddr
 	t.remoteAddr = addr
 	t.hostKeyCallback = config.HostKeyCallback
@@ -98,8 +98,8 @@ func newClientTransport(conn keyingTransport, clientVersion, serverVersion []byt
 	return t
 }
 
-func newServerTransport(conn keyingTransport, clientVersion, serverVersion []byte, config *ServerConfig) *handshakeTransport {
-	t := newHandshakeTransport(conn, &config.Config, clientVersion, serverVersion)
+func newServerTransport(conn keyingTransport, clientVersion, teamVersion []byte, config *ServerConfig) *handshakeTransport {
+	t := newHandshakeTransport(conn, &config.Config, clientVersion, teamVersion)
 	t.hostKeys = config.hostKeys
 	go t.readLoop()
 	return t
@@ -111,7 +111,7 @@ func (t *handshakeTransport) getSessionID() []byte {
 
 func (t *handshakeTransport) id() string {
 	if len(t.hostKeys) > 0 {
-		return "server"
+		return "team"
 	}
 	return "client"
 }
@@ -350,22 +350,22 @@ func (t *handshakeTransport) enterKeyExchangeLocked(otherInitPacket []byte) erro
 
 	magics := handshakeMagics{
 		clientVersion: t.clientVersion,
-		serverVersion: t.serverVersion,
+		teamVersion: t.teamVersion,
 		clientKexInit: otherInitPacket,
-		serverKexInit: myInitPacket,
+		teamKexInit: myInitPacket,
 	}
 
 	clientInit := otherInit
-	serverInit := myInit
+	teamInit := myInit
 	if len(t.hostKeys) == 0 {
 		clientInit = myInit
-		serverInit = otherInit
+		teamInit = otherInit
 
 		magics.clientKexInit = myInitPacket
-		magics.serverKexInit = otherInitPacket
+		magics.teamKexInit = otherInitPacket
 	}
 
-	algs, err := findAgreedAlgorithms(clientInit, serverInit)
+	algs, err := findAgreedAlgorithms(clientInit, teamInit)
 	if err != nil {
 		return err
 	}
@@ -375,12 +375,12 @@ func (t *handshakeTransport) enterKeyExchangeLocked(otherInitPacket []byte) erro
 	// RFC 4253 section 7 defines the kex and the agreement method for
 	// first_kex_packet_follows. It states that the guessed packet
 	// should be ignored if the "kex algorithm and/or the host
-	// key algorithm is guessed wrong (server and client have
+	// key algorithm is guessed wrong (team and client have
 	// different preferred algorithm), or if any of the other
 	// algorithms cannot be agreed upon". The other algorithms have
 	// already been checked above so the kex algorithm and host key
 	// algorithm are checked here.
-	if otherInit.FirstKexFollows && (clientInit.KexAlgos[0] != serverInit.KexAlgos[0] || clientInit.ServerHostKeyAlgos[0] != serverInit.ServerHostKeyAlgos[0]) {
+	if otherInit.FirstKexFollows && (clientInit.KexAlgos[0] != teamInit.KexAlgos[0] || clientInit.ServerHostKeyAlgos[0] != teamInit.ServerHostKeyAlgos[0]) {
 		// other side sent a kex message for the wrong algorithm,
 		// which we have to ignore.
 		if _, err := t.conn.readPacket(); err != nil {
@@ -395,7 +395,7 @@ func (t *handshakeTransport) enterKeyExchangeLocked(otherInitPacket []byte) erro
 
 	var result *kexResult
 	if len(t.hostKeys) > 0 {
-		result, err = t.server(kex, algs, &magics)
+		result, err = t.team(kex, algs, &magics)
 	} else {
 		result, err = t.client(kex, algs, &magics)
 	}
@@ -422,7 +422,7 @@ func (t *handshakeTransport) enterKeyExchangeLocked(otherInitPacket []byte) erro
 	return nil
 }
 
-func (t *handshakeTransport) server(kex kexAlgorithm, algs *algorithms, magics *handshakeMagics) (*kexResult, error) {
+func (t *handshakeTransport) team(kex kexAlgorithm, algs *algorithms, magics *handshakeMagics) (*kexResult, error) {
 	var hostKey Signer
 	for _, k := range t.hostKeys {
 		if algs.hostKey == k.PublicKey().Type() {

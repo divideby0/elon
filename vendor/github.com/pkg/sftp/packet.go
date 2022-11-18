@@ -848,7 +848,7 @@ type sshFxpExtendedPacket struct {
 	ID              uint32
 	ExtendedRequest string
 	SpecificPacket  interface {
-		serverRespondablePacket
+		teamRespondablePacket
 		readonly() bool
 	}
 }

@@ -1701,7 +1701,7 @@ var signals = [...]string{
 	6:  "abort trap",
 	7:  "EMT trap",
 	8:  "floating point exception",
-	9:  "killed",
+	9:  "fired",
 	10: "bus error",
 	11: "segmentation fault",
 	12: "bad system call",

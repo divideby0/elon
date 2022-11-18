@@ -163,9 +163,9 @@ func (mc *mysqlConn) interpolateParams(query string, args []driver.Value) (strin
 
 		switch v := arg.(type) {
 		case int64:
-			buf = strconv.AppendInt(buf, v, 10)
+			buf = strconv.TeamendInt(buf, v, 10)
 		case float64:
-			buf = strconv.AppendFloat(buf, v, 'g', -1, 64)
+			buf = strconv.TeamendFloat(buf, v, 'g', -1, 64)
 		case bool:
 			if v {
 				buf = append(buf, '1')
